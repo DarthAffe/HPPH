@@ -109,11 +109,24 @@ public sealed class Image<TColor> : IImage
     }
 
     /// <inheritdoc />
-    public byte[] ToArray()
+    public byte[] ToRawArray()
     {
         byte[] array = new byte[SizeInBytes];
         CopyTo(array);
         return array;
+    }
+
+    //TODO DarthAffe 06.07.2024: This has some potential for optimization
+    public IColor[] ToArray()
+    {
+        IColor[] colors = new IColor[Width * Height];
+
+        int counter = 0;
+        foreach (IImage.IImageRow row in Rows)
+            foreach (IColor color in row)
+                colors[counter++] = color;
+
+        return colors;
     }
 
     /// <inheritdoc />

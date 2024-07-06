@@ -73,7 +73,9 @@ public interface IImage : IEnumerable<IColor>
     /// Allocates a new array and copies this <see cref="IImage"/> into it.
     /// </summary>
     /// <returns>The new array containing the data of this <see cref="IImage"/>.</returns>
-    byte[] ToArray();
+    byte[] ToRawArray();
+
+    IColor[] ToArray();
 
     /// <summary>
     /// Represents a list of rows of an image.
