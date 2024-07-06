@@ -28,7 +28,7 @@ internal struct ColorCube<T>
     #region Methods
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Span<T> Slice(Span<T> fullColorList) => fullColorList.Slice(_offset, _length);
+    internal readonly Span<T> Slice(Span<T> fullColorList) => fullColorList.Slice(_offset, _length);
 
     internal void Split(Span<T> fullColorList, out ColorCube<T> a, out ColorCube<T> b)
     {

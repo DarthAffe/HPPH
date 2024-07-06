@@ -1,5 +1,6 @@
 ﻿namespace HPPH;
 
+// ReSharper disable once RedundantUnsafeContext
 public static unsafe partial class PixelHelper
 {
     #region Methods

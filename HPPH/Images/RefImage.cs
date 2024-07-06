@@ -145,7 +145,7 @@ public readonly ref struct RefImage<TColor>
         private int _position;
 
         /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
-        public TColor Current
+        public readonly TColor Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _pixels[_position];
@@ -194,7 +194,7 @@ public readonly ref struct RefImage<TColor>
 
         #region Indexer
 
-        public readonly ReadOnlyRefEnumerable<TColor> this[int row]
+        public ReadOnlyRefEnumerable<TColor> this[int row]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -212,6 +212,7 @@ public readonly ref struct RefImage<TColor>
 
         #region Constructors
 
+        // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
         public ImageRows(ReadOnlySpan<TColor> pixels, int x, int y, int width, int height, int stride)
         {
             this._pixels = pixels;
@@ -240,7 +241,7 @@ public readonly ref struct RefImage<TColor>
             private int _position;
 
             /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
-            public ReadOnlyRefEnumerable<TColor> Current
+            public readonly ReadOnlyRefEnumerable<TColor> Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _rows[_position];
@@ -306,6 +307,7 @@ public readonly ref struct RefImage<TColor>
 
         #region Constructors
 
+        // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
         public ImageColumns(ReadOnlySpan<TColor> pixels, int x, int y, int width, int height, int stride)
         {
             this._pixels = pixels;
@@ -334,7 +336,7 @@ public readonly ref struct RefImage<TColor>
             private int _position;
 
             /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
-            public ReadOnlyRefEnumerable<TColor> Current
+            public readonly ReadOnlyRefEnumerable<TColor> Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _columns[_position];

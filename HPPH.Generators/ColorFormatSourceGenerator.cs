@@ -44,7 +44,7 @@ public class ColorSourceGenerator : IIncrementalGenerator
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("ColorGeneratorAttribute.g.cs", SourceText.From(COLOR_GENERATOR_ATTRIBUTE_SOURCE, Encoding.UTF8)));
 
         IncrementalValueProvider<ImmutableArray<ColorFormatData>> classes = context.SyntaxProvider
-                                                                                   .ForAttributeWithMetadataName("HPPH.ColorGeneratorAttribute", static (_, __) => true, Transform)
+                                                                                   .ForAttributeWithMetadataName("HPPH.ColorGeneratorAttribute", static (_, _) => true, Transform)
                                                                                    .Where(type => type.HasValue)
                                                                                    .Select((data, _) => data!.Value)
                                                                                    .Collect();

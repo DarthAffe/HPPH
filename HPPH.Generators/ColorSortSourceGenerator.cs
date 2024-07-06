@@ -37,7 +37,7 @@ public class ColorSortSourceGenerator : IIncrementalGenerator
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("ColorSortGeneratorAttribute.g.cs", SourceText.From(SORT_GENERATOR_ATTRIBUTE_SOURCE, Encoding.UTF8)));
 
         IncrementalValueProvider<ImmutableArray<ColorSortData>> classes = context.SyntaxProvider
-                                                                                   .ForAttributeWithMetadataName("HPPH.ColorSortGeneratorAttribute", static (_, __) => true, Transform)
+                                                                                   .ForAttributeWithMetadataName("HPPH.ColorSortGeneratorAttribute", static (_, _) => true, Transform)
                                                                                    .Where(type => type.HasValue)
                                                                                    .Select((data, _) => data!.Value)
                                                                                    .Collect();
