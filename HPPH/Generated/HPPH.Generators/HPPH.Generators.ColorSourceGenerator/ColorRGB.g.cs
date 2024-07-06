@@ -3,6 +3,7 @@
 // ReSharper disable ReplaceWithPrimaryConstructorParameter
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace HPPH;
@@ -17,6 +18,7 @@ namespace HPPH;
 /// <param name="g">The Green-component of the color.</param>
 /// <param name="b">The Blue-component of the color.</param>
 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
+[SkipLocalsInit]
 [StructLayout(LayoutKind.Sequential)]
 public readonly partial struct ColorRGB(byte r, byte g, byte b): IColor
 {

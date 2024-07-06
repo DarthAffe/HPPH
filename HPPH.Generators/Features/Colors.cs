@@ -30,6 +30,7 @@ internal class Colors : IGeneratorFeature
                 // ReSharper disable ReplaceWithPrimaryConstructorParameter
                 
                 using System.Diagnostics;
+                using System.Runtime.CompilerServices;
                 using System.Runtime.InteropServices;
                 
                 namespace HPPH;
@@ -44,6 +45,7 @@ internal class Colors : IGeneratorFeature
                 /// <param name="{{colorFormat.SecondEntry}}">The {{colorFormat.SecondEntryName}}-component of the color.</param>
                 /// <param name="{{colorFormat.ThirdEntry}}">The {{colorFormat.ThirdEntryName}}-component of the color.</param>
                 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
+                [SkipLocalsInit]
                 [StructLayout(LayoutKind.Sequential)]
                 public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}): IColor
                 {
@@ -89,6 +91,7 @@ internal class Colors : IGeneratorFeature
                 // ReSharper disable ReplaceWithPrimaryConstructorParameter
                 
                 using System.Diagnostics;
+                using System.Runtime.CompilerServices;
                 using System.Runtime.InteropServices;
                 
                 namespace HPPH;
@@ -104,6 +107,7 @@ internal class Colors : IGeneratorFeature
                 /// <param name="{{colorFormat.ThirdEntry}}">The {{colorFormat.ThirdEntryName}}-component of the color.</param>
                 /// <param name="{{colorFormat.FourthEntry}}">The {{colorFormat.FourthEntryName}}-component of the color.</param>
                 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
+                [SkipLocalsInit]
                 [StructLayout(LayoutKind.Sequential)]
                 public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}, byte {{colorFormat.FourthEntry}}) : IColor
                 {

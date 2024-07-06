@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 namespace HPPH;
 
 /// <inheritdoc />
+[SkipLocalsInit]
 public sealed class Image<TColor> : IImage
     where TColor : struct, IColor
 {
