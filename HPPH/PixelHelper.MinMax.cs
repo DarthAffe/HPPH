@@ -62,7 +62,7 @@ public static unsafe partial class PixelHelper
         };
     }
 
-    internal static Generic3ByteMinMax MinMax(ReadOnlySpan<Generic3ByteData> data)
+    private static Generic3ByteMinMax MinMax(ReadOnlySpan<Generic3ByteData> data)
     {
         byte minB1 = byte.MaxValue, minB2 = byte.MaxValue, minB3 = byte.MaxValue;
         byte maxB1 = byte.MinValue, maxB2 = byte.MinValue, maxB3 = byte.MinValue;
@@ -132,7 +132,7 @@ public static unsafe partial class PixelHelper
         return new Generic3ByteMinMax(minB1, maxB1, minB2, maxB2, minB3, maxB3);
     }
 
-    internal static Generic4ByteMinMax MinMax(ReadOnlySpan<Generic4ByteData> data)
+    private static Generic4ByteMinMax MinMax(ReadOnlySpan<Generic4ByteData> data)
     {
         byte minB1 = byte.MaxValue, minB2 = byte.MaxValue, minB3 = byte.MaxValue, minB4 = byte.MaxValue;
         byte maxB1 = byte.MinValue, maxB2 = byte.MinValue, maxB3 = byte.MinValue, maxB4 = byte.MinValue;

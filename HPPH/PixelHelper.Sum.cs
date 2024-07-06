@@ -64,7 +64,7 @@ public static unsafe partial class PixelHelper
         };
     }
 
-    internal static Generic4LongData Sum(ReadOnlySpan<Generic3ByteData> data)
+    private static Generic4LongData Sum(ReadOnlySpan<Generic3ByteData> data)
     {
         long b1Sum = 0, b2Sum = 0, b3Sum = 0;
 
@@ -180,7 +180,7 @@ public static unsafe partial class PixelHelper
         return new Generic4LongData(b1Sum, b2Sum, b3Sum, data.Length * 255);
     }
 
-    internal static Generic4LongData Sum(ReadOnlySpan<Generic4ByteData> data)
+    private static Generic4LongData Sum(ReadOnlySpan<Generic4ByteData> data)
     {
         long b1Sum, b2Sum, b3Sum, b4Sum;
         int i = 0;

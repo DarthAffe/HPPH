@@ -56,7 +56,7 @@ public static partial class PixelHelper
         };
     }
 
-    internal static Generic3ByteData Average(ReadOnlySpan<Generic3ByteData> data)
+    private static Generic3ByteData Average(ReadOnlySpan<Generic3ByteData> data)
     {
         if (data == null) throw new ArgumentNullException(nameof(data));
         if (data.Length == 0) return default;
@@ -70,7 +70,7 @@ public static partial class PixelHelper
                                     (byte)(sum.L3 / count));
     }
 
-    internal static Generic4ByteData Average(ReadOnlySpan<Generic4ByteData> data)
+    private static Generic4ByteData Average(ReadOnlySpan<Generic4ByteData> data)
     {
         if (data == null) throw new ArgumentNullException(nameof(data));
         if (data.Length == 0) return default;
