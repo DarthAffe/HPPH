@@ -9,10 +9,10 @@ public static partial class ReferencePixelHelper
         float count = image.Width * image.Height;
 
         ISum sum = Sum(image);
-        return new ColorRGBA((sum.R / count).GetByteValueFromPercentage(),
-                             (sum.G / count).GetByteValueFromPercentage(),
-                             (sum.B / count).GetByteValueFromPercentage(),
-                             (sum.A / count).GetByteValueFromPercentage());
+        return new ColorRGBA((byte)(sum.R / count),
+                             (byte)(sum.G / count),
+                             (byte)(sum.B / count),
+                             (byte)(sum.A / count));
     }
 
     public static T Average<T>(RefImage<T> image)
@@ -21,10 +21,10 @@ public static partial class ReferencePixelHelper
         float count = image.Width * image.Height;
 
         ISum sum = Sum(image);
-        return (T)T.Create((sum.R / count).GetByteValueFromPercentage(),
-                           (sum.G / count).GetByteValueFromPercentage(),
-                           (sum.B / count).GetByteValueFromPercentage(),
-                           (sum.A / count).GetByteValueFromPercentage());
+        return (T)T.Create((byte)(sum.R / count),
+                           (byte)(sum.G / count),
+                           (byte)(sum.B / count),
+                           (byte)(sum.A / count));
     }
 
     public static T Average<T>(ReadOnlySpan<T> colors)
@@ -33,10 +33,10 @@ public static partial class ReferencePixelHelper
         float count = colors.Length;
 
         ISum sum = Sum(colors);
-        return (T)T.Create((sum.R / count).GetByteValueFromPercentage(),
-                           (sum.G / count).GetByteValueFromPercentage(),
-                           (sum.B / count).GetByteValueFromPercentage(),
-                           (sum.A / count).GetByteValueFromPercentage());
+        return (T)T.Create((byte)(sum.R / count),
+                           (byte)(sum.G / count),
+                           (byte)(sum.B / count),
+                           (byte)(sum.A / count));
     }
 
     #endregion
