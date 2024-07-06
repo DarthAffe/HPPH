@@ -85,6 +85,6 @@ public class ColorSourceGenerator : IIncrementalGenerator
             foreach ((string name, string source) in feature.GenerateFor(colorFormats))
                 context.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
     }
-    
+
     #endregion
 }
