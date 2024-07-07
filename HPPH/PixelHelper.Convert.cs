@@ -7,6 +7,18 @@ public static unsafe partial class PixelHelper
 {
     #region Methods
 
+    public static Span<TTarget> Convert<TSource, TTarget>(ReadOnlySpan<TSource> data)
+        where TSource : struct, IColor
+        where TTarget : struct, IColor
+    {
+        if (data == null) throw new ArgumentNullException(nameof(data));
+
+        Span<TSource> dataCopy = new TSource[data.Length];
+        data.CopyTo(dataCopy);
+
+        return Convert<TSource, TTarget>(dataCopy);
+    }
+
     public static Span<TTarget> Convert<TSource, TTarget>(Span<TSource> data)
         where TSource : struct, IColor
         where TTarget : struct, IColor
@@ -106,7 +118,7 @@ public static unsafe partial class PixelHelper
         }
     }
 
-    // DarthAffe 07.07.2024: No fallback-implementation here. Shuffle Requires only Seee3 which should be supported nearly anywhere and if not the fallback of Vector128.Shuffle is perfectly fine.
+    // DarthAffe 07.07.2024: No fallback-implementation here. Shuffle Requires only Ssse3 which should be supported nearly anywhere and if not the fallback of Vector128.Shuffle is perfectly fine.
     private static void ConvertEqualBpp(Span<byte> data, ReadOnlySpan<byte> mask, int bpp)
     {
         int elementsPerVector = Vector128<byte>.Count / bpp;
