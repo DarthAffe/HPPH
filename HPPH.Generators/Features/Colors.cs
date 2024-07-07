@@ -18,7 +18,7 @@ internal class Colors : IGeneratorFeature
 
     public IEnumerable<(string name, string source)> GenerateFor(ImmutableArray<ColorFormatData> colorFormats)
     {
-        yield return ("IColorFormat.Instances.cs", GenerateColorFormats(colorFormats));
+        yield return ("IColorFormat.Instances", GenerateColorFormats(colorFormats));
     }
 
     private static string GenerateColorStructCode(ColorFormatData colorFormat)
@@ -164,6 +164,8 @@ internal class Colors : IGeneratorFeature
                      public int BytesPerPixel => {{colorFormat.Bpp}};
                      
                      public string Name => "{{colorFormat.Format}}";
+                 
+                     ReadOnlySpan<byte> IColorFormat.ByteMapping => [{{colorFormat.ByteMapping}}];
                  
                      #endregion
                  

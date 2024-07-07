@@ -10,6 +10,8 @@ public sealed partial class ColorFormatRGBA : IColorFormat
     
     public string Name => "RGBA";
 
+    ReadOnlySpan<byte> IColorFormat.ByteMapping => [0, 1, 2, 3];
+
     #endregion
 
     #region Constructors

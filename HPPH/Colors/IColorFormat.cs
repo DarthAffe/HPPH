@@ -12,4 +12,6 @@ public partial interface IColorFormat
     int BytesPerPixel { get; }
 
     string Name { get; }
+
+    internal ReadOnlySpan<byte> ByteMapping { get; }
 }
