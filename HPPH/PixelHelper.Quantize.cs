@@ -7,7 +7,7 @@ public static partial class PixelHelper
 {
     #region Methods
 
-    public static IColor[] CreateColorPalette(IImage image, int paletteSize)
+    public static IColor[] CreateColorPalette(this IImage image, int paletteSize)
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -25,7 +25,7 @@ public static partial class PixelHelper
         }
     }
 
-    public static T[] CreateColorPalette<T>(RefImage<T> image, int paletteSize)
+    public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize)
         where T : unmanaged, IColor
     {
         int dataLength = image.Width * image.Height;
@@ -42,7 +42,7 @@ public static partial class PixelHelper
         }
     }
 
-    public static T[] CreateColorPalette<T>(ReadOnlySpan<T> colors, int paletteSize)
+    public static T[] CreateColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
         where T : unmanaged, IColor
     {
         T[] buffer = ArrayPool<T>.Shared.Rent(colors.Length);
@@ -59,7 +59,7 @@ public static partial class PixelHelper
         }
     }
 
-    public static T[] CreateColorPalette<T>(Span<T> colors, int paletteSize)
+    public static T[] CreateColorPalette<T>(this Span<T> colors, int paletteSize)
         where T : unmanaged, IColor
     {
         int splits = BitOperations.Log2((uint)paletteSize);

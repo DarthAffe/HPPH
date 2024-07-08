@@ -10,7 +10,7 @@ public static unsafe partial class PixelHelper
 {
     #region Methods
 
-    public static ISum Sum(IImage image)
+    public static ISum Sum(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -28,7 +28,7 @@ public static unsafe partial class PixelHelper
         }
     }
 
-    public static ISum Sum<T>(RefImage<T> image)
+    public static ISum Sum<T>(this RefImage<T> image)
         where T : struct, IColor
     {
         int dataLength = image.Width * image.Height;
@@ -45,7 +45,7 @@ public static unsafe partial class PixelHelper
         }
     }
 
-    public static ISum Sum<T>(ReadOnlySpan<T> colors)
+    public static ISum Sum<T>(this ReadOnlySpan<T> colors)
         where T : struct, IColor
         => T.ColorFormat.Sum(MemoryMarshal.AsBytes(colors));
 

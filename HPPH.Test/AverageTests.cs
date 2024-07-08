@@ -26,7 +26,7 @@ public class AverageTests
             ReadOnlySpan<ColorRGB> span = data;
 
             ColorRGB reference = ReferencePixelHelper.Average(span);
-            ColorRGB test = PixelHelper.Average(span);
+            ColorRGB test = span.Average();
 
             Assert.AreEqual(reference.R, test.R, "R differs");
             Assert.AreEqual(reference.G, test.G, "G differs");
@@ -54,7 +54,7 @@ public class AverageTests
             ReadOnlySpan<ColorRGBA> span = data;
 
             ColorRGBA reference = ReferencePixelHelper.Average(span);
-            ColorRGBA test = PixelHelper.Average(span);
+            ColorRGBA test = span.Average();
 
             Assert.AreEqual(reference.R, test.R, "R differs");
             Assert.AreEqual(reference.G, test.G, "G differs");

@@ -18,7 +18,7 @@ public class ConvertTests
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorBGR> result = PixelHelper.Convert<ColorRGB, ColorBGR>(sourceData);
+                Span<ColorBGR> result = sourceData.Convert<ColorRGB, ColorBGR>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -48,7 +48,7 @@ public class ConvertTests
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorARGB> result = PixelHelper.Convert<ColorRGBA, ColorARGB>(sourceData);
+                Span<ColorARGB> result = sourceData.Convert<ColorRGBA, ColorARGB>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -78,7 +78,7 @@ public class ConvertTests
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorBGRA> result = PixelHelper.Convert<ColorRGBA, ColorBGRA>(sourceData);
+                Span<ColorBGRA> result = sourceData.Convert<ColorRGBA, ColorBGRA>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -108,7 +108,7 @@ public class ConvertTests
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorRGB> result = PixelHelper.Convert<ColorRGBA, ColorRGB>(sourceData);
+                Span<ColorRGB> result = sourceData.Convert<ColorRGBA, ColorRGB>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -138,7 +138,7 @@ public class ConvertTests
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorBGR> result = PixelHelper.Convert<ColorRGBA, ColorBGR>(sourceData);
+                Span<ColorBGR> result = sourceData.Convert<ColorRGBA, ColorBGR>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -168,7 +168,7 @@ public class ConvertTests
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorRGBA> result = PixelHelper.Convert<ColorRGB, ColorRGBA>(sourceData);
+                Span<ColorRGBA> result = sourceData.Convert<ColorRGB, ColorRGBA>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -198,7 +198,7 @@ public class ConvertTests
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorARGB> result = PixelHelper.Convert<ColorRGB, ColorARGB>(sourceData);
+                Span<ColorARGB> result = sourceData.Convert<ColorRGB, ColorARGB>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -228,7 +228,7 @@ public class ConvertTests
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorBGRA> result = PixelHelper.Convert<ColorRGB, ColorBGRA>(sourceData);
+                Span<ColorBGRA> result = sourceData.Convert<ColorRGB, ColorBGRA>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)
@@ -258,7 +258,7 @@ public class ConvertTests
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
                 referenceData.CopyTo(sourceData);
 
-                Span<ColorABGR> result = PixelHelper.Convert<ColorRGB, ColorABGR>(sourceData);
+                Span<ColorABGR> result = sourceData.Convert<ColorRGB, ColorABGR>();
 
                 Assert.AreEqual(referenceData.Length, result.Length);
                 for (int i = 0; i < referenceData.Length; i++)

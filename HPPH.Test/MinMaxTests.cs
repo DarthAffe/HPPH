@@ -26,7 +26,7 @@ public class MinMaxTests
             ReadOnlySpan<ColorRGB> span = data;
 
             IMinMax reference = ReferencePixelHelper.MinMax(span);
-            IMinMax test = PixelHelper.MinMax(span);
+            IMinMax test = span.MinMax();
 
             Assert.AreEqual(reference.RedMin, test.RedMin, "RedMin differs");
             Assert.AreEqual(reference.GreenMin, test.GreenMin, "GreenMin differs");
@@ -64,7 +64,7 @@ public class MinMaxTests
             ReadOnlySpan<ColorRGBA> span = data;
 
             IMinMax reference = ReferencePixelHelper.MinMax(span);
-            IMinMax test = PixelHelper.MinMax(span);
+            IMinMax test = span.MinMax();
 
             Assert.AreEqual(reference.RedMin, test.RedMin, "RedMin differs");
             Assert.AreEqual(reference.GreenMin, test.GreenMin, "GreenMin differs");

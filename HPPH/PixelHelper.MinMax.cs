@@ -9,7 +9,7 @@ public static unsafe partial class PixelHelper
 {
     #region Methods
 
-    public static IMinMax MinMax(IImage image)
+    public static IMinMax MinMax(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -27,7 +27,7 @@ public static unsafe partial class PixelHelper
         }
     }
 
-    public static IMinMax MinMax<T>(RefImage<T> image)
+    public static IMinMax MinMax<T>(this RefImage<T> image)
         where T : struct, IColor
     {
         int dataLength = image.Width * image.Height;
@@ -44,7 +44,7 @@ public static unsafe partial class PixelHelper
         }
     }
 
-    public static IMinMax MinMax<T>(ReadOnlySpan<T> colors)
+    public static IMinMax MinMax<T>(this ReadOnlySpan<T> colors)
         where T : struct, IColor
         => T.ColorFormat.MinMax(MemoryMarshal.AsBytes(colors));
 

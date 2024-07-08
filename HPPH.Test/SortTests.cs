@@ -20,7 +20,7 @@ public class SortTests
             referenceSpan.CopyTo(testSpan);
 
             ReferencePixelHelper.SortByRed(referenceSpan);
-            PixelHelper.SortByRed(testSpan);
+            testSpan.SortByRed();
 
             for (int i = 0; i < referenceData.Length; i++)
                 Assert.AreEqual(referenceSpan[i], testSpan[i], $"Index {i} differs");
@@ -39,7 +39,7 @@ public class SortTests
             referenceSpan.CopyTo(testSpan);
 
             ReferencePixelHelper.SortByGreen(referenceSpan);
-            PixelHelper.SortByGreen(testSpan);
+            testSpan.SortByGreen();
 
             for (int i = 0; i < referenceData.Length; i++)
                 Assert.AreEqual(referenceSpan[i], testSpan[i], $"Index {i} differs");
@@ -58,7 +58,7 @@ public class SortTests
             referenceSpan.CopyTo(testSpan);
 
             ReferencePixelHelper.SortByBlue(referenceSpan);
-            PixelHelper.SortByBlue(testSpan);
+            testSpan.SortByBlue();
 
             for (int i = 0; i < referenceData.Length; i++)
                 Assert.AreEqual(referenceSpan[i], testSpan[i], $"Index {i} differs");
@@ -77,7 +77,7 @@ public class SortTests
             referenceSpan.CopyTo(testSpan);
 
             ReferencePixelHelper.SortByRed(referenceSpan);
-            PixelHelper.SortByRed(testSpan);
+            testSpan.SortByRed();
 
             for (int i = 0; i < referenceData.Length; i++)
                 Assert.AreEqual(referenceSpan[i], testSpan[i], $"Index {i} differs");
@@ -96,7 +96,7 @@ public class SortTests
             referenceSpan.CopyTo(testSpan);
 
             ReferencePixelHelper.SortByGreen(referenceSpan);
-            PixelHelper.SortByGreen(testSpan);
+            testSpan.SortByGreen();
 
             for (int i = 0; i < referenceData.Length; i++)
                 Assert.AreEqual(referenceSpan[i], testSpan[i], $"Index {i} differs");
@@ -115,7 +115,7 @@ public class SortTests
             referenceSpan.CopyTo(testSpan);
 
             ReferencePixelHelper.SortByBlue(referenceSpan);
-            PixelHelper.SortByBlue(testSpan);
+            testSpan.SortByBlue();
 
             for (int i = 0; i < referenceData.Length; i++)
                 Assert.AreEqual(referenceSpan[i], testSpan[i], $"Index {i} differs");
@@ -134,7 +134,7 @@ public class SortTests
             referenceSpan.CopyTo(testSpan);
 
             ReferencePixelHelper.SortByAlpha(referenceSpan);
-            PixelHelper.SortByAlpha(testSpan);
+            testSpan.SortByAlpha();
 
             for (int i = 0; i < referenceData.Length; i++)
                 Assert.AreEqual(referenceSpan[i], testSpan[i], $"Index {i} differs");

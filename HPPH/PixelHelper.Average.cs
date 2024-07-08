@@ -8,7 +8,7 @@ public static partial class PixelHelper
 {
     #region Methods
 
-    public static IColor Average(IImage image)
+    public static IColor Average(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -26,7 +26,7 @@ public static partial class PixelHelper
         }
     }
 
-    public static T Average<T>(RefImage<T> image)
+    public static T Average<T>(this RefImage<T> image)
         where T : struct, IColor
     {
         int dataLength = image.Width * image.Height;
@@ -43,7 +43,7 @@ public static partial class PixelHelper
         }
     }
 
-    public static T Average<T>(ReadOnlySpan<T> colors)
+    public static T Average<T>(this ReadOnlySpan<T> colors)
         where T : struct, IColor
     {
         if (colors == null) throw new ArgumentNullException(nameof(colors));

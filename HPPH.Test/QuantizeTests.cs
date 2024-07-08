@@ -16,7 +16,7 @@ public class CreateColorPaletteTests
             Span<ColorRGB> span = data;
 
             ColorRGB[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
-            ColorRGB[] test = [.. PixelHelper.CreateColorPalette(span, 1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
+            ColorRGB[] test = [.. span.CreateColorPalette(1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
 
             Assert.AreEqual(reference.Length, test.Length, "Palette Size differs");
 
@@ -34,7 +34,7 @@ public class CreateColorPaletteTests
             Span<ColorRGB> span = data;
 
             ColorRGB[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
-            ColorRGB[] test = [.. PixelHelper.CreateColorPalette(span, 2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
+            ColorRGB[] test = [.. span.CreateColorPalette(2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
 
             Assert.AreEqual(reference.Length, test.Length, "Palette Size differs");
 
@@ -52,7 +52,7 @@ public class CreateColorPaletteTests
             Span<ColorRGB> span = data;
 
             ColorRGB[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
-            ColorRGB[] test = [.. PixelHelper.CreateColorPalette(span, 16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
+            ColorRGB[] test = [.. span.CreateColorPalette(16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
 
             Assert.AreEqual(reference.Length, test.Length, "Palette Size differs");
 
@@ -70,7 +70,7 @@ public class CreateColorPaletteTests
             Span<ColorRGBA> span = data;
 
             ColorRGBA[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
-            ColorRGBA[] test = [.. PixelHelper.CreateColorPalette(span, 1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
+            ColorRGBA[] test = [.. span.CreateColorPalette(1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
 
             Assert.AreEqual(reference.Length, test.Length, "Palette Size differs");
 
@@ -88,7 +88,7 @@ public class CreateColorPaletteTests
             Span<ColorRGBA> span = data;
 
             ColorRGBA[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
-            ColorRGBA[] test = [.. PixelHelper.CreateColorPalette(span, 2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
+            ColorRGBA[] test = [.. span.CreateColorPalette(2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
 
             Assert.AreEqual(reference.Length, test.Length, "Palette Size differs");
 
@@ -106,7 +106,7 @@ public class CreateColorPaletteTests
             Span<ColorRGBA> span = data;
 
             ColorRGBA[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
-            ColorRGBA[] test = [.. PixelHelper.CreateColorPalette(span, 16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
+            ColorRGBA[] test = [.. span.CreateColorPalette(16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
 
             Assert.AreEqual(reference.Length, test.Length, "Palette Size differs");
 

@@ -7,9 +7,7 @@ public static unsafe partial class PixelHelper
 {
     #region Methods
 
-    #region In-Place
-
-    public static Span<TTarget> ConvertInPlace<TSource, TTarget>(Span<TSource> colors)
+    public static Span<TTarget> ConvertInPlace<TSource, TTarget>(this Span<TSource> colors)
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
@@ -28,11 +26,7 @@ public static unsafe partial class PixelHelper
         return MemoryMarshal.Cast<byte, TTarget>(data);
     }
 
-    #endregion
-
-    #region Allocating
-
-    public static TTarget[] Convert<TSource, TTarget>(Span<TSource> colors)
+    public static TTarget[] Convert<TSource, TTarget>(this Span<TSource> colors)
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
@@ -43,7 +37,7 @@ public static unsafe partial class PixelHelper
         return buffer;
     }
 
-    public static TTarget[] Convert<TSource, TTarget>(ReadOnlySpan<TSource> colors)
+    public static TTarget[] Convert<TSource, TTarget>(this ReadOnlySpan<TSource> colors)
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
@@ -54,7 +48,7 @@ public static unsafe partial class PixelHelper
         return buffer;
     }
 
-    public static void Convert<TSource, TTarget>(ReadOnlySpan<TSource> source, Span<TTarget> target)
+    public static void Convert<TSource, TTarget>(this ReadOnlySpan<TSource> source, Span<TTarget> target)
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
@@ -364,8 +358,6 @@ public static unsafe partial class PixelHelper
             buffer.CopyTo(new Span<byte>(tar, buffer.Length));
         }
     }
-
-    #endregion
 
     #endregion
 }

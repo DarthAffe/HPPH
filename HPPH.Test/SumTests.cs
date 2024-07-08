@@ -26,7 +26,7 @@ public class SumTests
             ReadOnlySpan<ColorRGB> span = data;
 
             ISum reference = ReferencePixelHelper.Sum(span);
-            ISum test = PixelHelper.Sum(span);
+            ISum test = span.Sum();
 
             Assert.AreEqual(reference.R, test.R, "R differs");
             Assert.AreEqual(reference.G, test.G, "G differs");
@@ -54,7 +54,7 @@ public class SumTests
             ReadOnlySpan<ColorRGBA> span = data;
 
             ISum reference = ReferencePixelHelper.Sum(span);
-            ISum test = PixelHelper.Sum(span);
+            ISum test = span.Sum();
 
             Assert.AreEqual(reference.R, test.R, "R differs");
             Assert.AreEqual(reference.G, test.G, "G differs");
