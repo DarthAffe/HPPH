@@ -133,9 +133,9 @@ public static unsafe partial class PixelHelper
                 for (int i = 0; i < chunks; i++)
                 {
                     byte* basePtr = bytePtr + (i * 96);
-                    Vector256<byte> data1 = *(Vector256<byte>*)(basePtr);
-                    Vector256<byte> data2 = *(Vector256<byte>*)(basePtr + 32);
-                    Vector256<byte> data3 = *(Vector256<byte>*)(basePtr + 64);
+                    Vector256<byte> data1 = Vector256.Load(basePtr);
+                    Vector256<byte> data2 = Vector256.Load(basePtr + 32);
+                    Vector256<byte> data3 = Vector256.Load(basePtr + 64);
 
                     Vector256<byte> vectorB1Blend1 = Avx2.BlendVariable(data2, data1, blend1MaskVector);
                     Vector256<byte> vectorB2Blend1 = Avx2.BlendVariable(data2, data1, blend2MaskVector);
@@ -222,9 +222,9 @@ public static unsafe partial class PixelHelper
 
                 for (int j = 0; j < (data.Length / 8); j++, i += 8)
                 {
-                    Vector256<byte> chunk = *(Vector256<byte>*)(bytePtr + (i * 4));
+                    Vector256<byte> chunk = Vector256.Load(bytePtr + (i * 4));
                     Vector256<byte> deinterleaved = Avx2.Shuffle(chunk, avx2ShuffleMaskVector);
-                    Vector256<int> deinterleaved2 = Avx2.PermuteVar8x32(deinterleaved.AsInt32(), *(Vector256<int>*)controlPtr);
+                    Vector256<int> deinterleaved2 = Avx2.PermuteVar8x32(deinterleaved.AsInt32(), Vector256.Load(controlPtr));
                     Vector256<long> sum = Avx2.SumAbsoluteDifferences(deinterleaved2.AsByte(), Vector256<byte>.Zero).AsInt64();
                     rgbaSum64 = Avx2.Add(rgbaSum64, sum);
                 }

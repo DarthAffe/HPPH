@@ -84,7 +84,7 @@ public static unsafe partial class PixelHelper
             {
                 for (int i = 0; i < chunks; i++)
                 {
-                    Vector<byte> vector = *(Vector<byte>*)(colorPtr + (i * bytesPerVector));
+                    Vector<byte> vector = Vector.Load(colorPtr + (i * bytesPerVector));
 
                     max = Vector.Max(max, vector);
                     min = Vector.Min(min, vector);
@@ -154,7 +154,7 @@ public static unsafe partial class PixelHelper
             {
                 for (int i = 0; i < chunks; i++)
                 {
-                    Vector<byte> vector = *(Vector<byte>*)(colorPtr + (i * bytesPerVector));
+                    Vector<byte> vector = Vector.Load(colorPtr + (i * bytesPerVector));
 
                     max = Vector.Max(max, vector);
                     min = Vector.Min(min, vector);
