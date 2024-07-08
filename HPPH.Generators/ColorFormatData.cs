@@ -44,7 +44,7 @@ internal readonly struct ColorFormatData(string typeName, int bpp, char firstEnt
     }
 
     #endregion
-    
+
     #region Methods
 
     private string CreateByteMapping()
@@ -52,19 +52,19 @@ internal readonly struct ColorFormatData(string typeName, int bpp, char firstEnt
         string[] mapping = new string[Bpp];
         if (Bpp > 0)
         {
-            mapping[0] = GetByteMappingIndex(FirstEntry).ToString();
+            mapping[0] = "Color." + FirstEntry.ToUpper();
 
             if (Bpp > 1)
             {
-                mapping[1] = GetByteMappingIndex(SecondEntry).ToString();
+                mapping[1] = "Color." + SecondEntry.ToUpper();
 
                 if (Bpp > 2)
                 {
-                    mapping[2] = GetByteMappingIndex(ThirdEntry).ToString();
+                    mapping[2] = "Color." + ThirdEntry.ToUpper();
 
                     if (Bpp > 3)
                     {
-                        mapping[3] = GetByteMappingIndex(FourthEntry).ToString();
+                        mapping[3] = "Color." + FourthEntry.ToUpper();
                     }
                 }
             }
@@ -81,16 +81,6 @@ internal readonly struct ColorFormatData(string typeName, int bpp, char firstEnt
             "b" => "Blue",
             "a" => "Alpha",
             _ => string.Empty
-        };
-
-    private static int GetByteMappingIndex(string entry)
-        => entry switch
-        {
-            "r" => 0,
-            "g" => 1,
-            "b" => 2,
-            "a" => 3,
-            _ => throw new IndexOutOfRangeException()
         };
 
     #endregion

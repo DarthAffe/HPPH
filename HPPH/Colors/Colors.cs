@@ -3,6 +3,14 @@
 
 namespace HPPH;
 
+internal static class Color
+{
+    internal const int R = 0;
+    internal const int G = 1;
+    internal const int B = 2;
+    internal const int A = 3;
+}
+
 [ColorGenerator]
 public readonly partial struct ColorRGB;
 

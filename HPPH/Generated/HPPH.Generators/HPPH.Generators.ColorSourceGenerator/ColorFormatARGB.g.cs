@@ -10,7 +10,7 @@ public sealed partial class ColorFormatARGB : IColorFormat
     
     public string Name => "ARGB";
 
-    ReadOnlySpan<byte> IColorFormat.ByteMapping => [3, 0, 1, 2];
+    ReadOnlySpan<byte> IColorFormat.ByteMapping => [Color.A, Color.R, Color.G, Color.B];
 
     #endregion
 

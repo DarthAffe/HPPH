@@ -10,7 +10,7 @@ public sealed partial class ColorFormatABGR : IColorFormat
     
     public string Name => "ABGR";
 
-    ReadOnlySpan<byte> IColorFormat.ByteMapping => [3, 2, 1, 0];
+    ReadOnlySpan<byte> IColorFormat.ByteMapping => [Color.A, Color.B, Color.G, Color.R];
 
     #endregion
 
