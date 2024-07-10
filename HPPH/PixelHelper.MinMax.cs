@@ -43,6 +43,9 @@ public static unsafe partial class PixelHelper
             ArrayPool<T>.Shared.Return(array);
         }
     }
+    public static IMinMax MinMax<T>(this Span<T> colors)
+        where T : struct, IColor
+        => T.ColorFormat.MinMax(MemoryMarshal.AsBytes(colors));
 
     public static IMinMax MinMax<T>(this ReadOnlySpan<T> colors)
         where T : struct, IColor
