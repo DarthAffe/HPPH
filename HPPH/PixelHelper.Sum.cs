@@ -211,11 +211,12 @@ public static unsafe partial class PixelHelper
                 4, 0
             ];
 
+            Vector256<int> controlVector = Vector256.LoadUnsafe(ref MemoryMarshal.GetReference(avx2ControlData));
+
             Vector256<long> rgbaSum64 = Vector256<long>.Zero;
 
             ReadOnlySpan<byte> dataBytes = MemoryMarshal.AsBytes(data);
             fixed (byte* bytePtr = dataBytes)
-            fixed (int* controlPtr = avx2ControlData)
             fixed (byte* maskPtr = avx2ShuffleMask)
             {
                 Vector256<byte> avx2ShuffleMaskVector = Avx2.BroadcastVector128ToVector256(maskPtr);
@@ -224,7 +225,7 @@ public static unsafe partial class PixelHelper
                 {
                     Vector256<byte> chunk = Vector256.Load(bytePtr + (i * 4));
                     Vector256<byte> deinterleaved = Avx2.Shuffle(chunk, avx2ShuffleMaskVector);
-                    Vector256<int> deinterleaved2 = Avx2.PermuteVar8x32(deinterleaved.AsInt32(), Vector256.Load(controlPtr));
+                    Vector256<int> deinterleaved2 = Avx2.PermuteVar8x32(deinterleaved.AsInt32(), controlVector);
                     Vector256<long> sum = Avx2.SumAbsoluteDifferences(deinterleaved2.AsByte(), Vector256<byte>.Zero).AsInt64();
                     rgbaSum64 = Avx2.Add(rgbaSum64, sum);
                 }
