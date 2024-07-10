@@ -201,7 +201,7 @@ public sealed class Image<TColor> : IImage
 
         #region Constructors
 
-        internal ImageRows(byte[] buffer, int x, int y, int width, int height, int stride, int bpp)
+        internal ImageRows(byte[] buffer, int x, int y, int width, int height, int stride)
         {
             this._buffer = buffer;
             this._x = x;
