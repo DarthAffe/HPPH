@@ -8,7 +8,7 @@ public readonly ref struct RefImage<TColor>
 {
     #region Properties & Fields
 
-    private readonly ReadOnlySpan<TColor> _pixels;
+    private readonly ReadOnlySpan<byte> _data;
 
     private readonly int _x;
     private readonly int _y;
@@ -40,8 +40,9 @@ public readonly ref struct RefImage<TColor>
         {
             if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new IndexOutOfRangeException();
 
-            ref TColor r0 = ref MemoryMarshal.GetReference(_pixels);
-            nint offset = (nint)(uint)((_y + y) * RawStride) + (_x + x);
+            ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_data[((_y + y) * RawStride)..]);
+            ref TColor r0 = ref MemoryMarshal.GetReference(data);
+            nint offset = (nint)(uint)(_x + x);
             return ref Unsafe.Add(ref r0, offset);
         }
     }
@@ -53,29 +54,29 @@ public readonly ref struct RefImage<TColor>
         {
             if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
 
-            return new RefImage<TColor>(_pixels, _x + x, _y + y, width, height, RawStride);
+            return new RefImage<TColor>(_data, _x + x, _y + y, width, height, RawStride);
         }
     }
 
     public ImageRows Rows
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new(_pixels, _x, _y, Width, Height, RawStride);
+        get => new(_data, _x, _y, Width, Height, RawStride);
     }
 
     public ImageColumns Columns
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new(_pixels, _x, _y, Width, Height, RawStride);
+        get => new(_data, _x, _y, Width, Height, RawStride);
     }
 
     #endregion
 
     #region Constructors
 
-    internal RefImage(ReadOnlySpan<TColor> pixels, int x, int y, int width, int height, int stride)
+    internal RefImage(ReadOnlySpan<byte> data, int x, int y, int width, int height, int stride)
     {
-        this._pixels = pixels;
+        this._data = data;
         this._x = x;
         this._y = y;
         this.Width = width;
@@ -122,44 +123,63 @@ public readonly ref struct RefImage<TColor>
     /// <summary>
     /// Returns a reference to the first element of this image inside the full image buffer.
     /// </summary>
-    public ref readonly TColor GetPinnableReference()
+    public ref readonly byte GetPinnableReference()
     {
-        if (_pixels.Length == 0)
-            return ref Unsafe.NullRef<TColor>();
+        if (_data.Length == 0)
+            return ref Unsafe.NullRef<byte>();
 
-        int offset = (_y * RawStride) + _x;
-        return ref MemoryMarshal.GetReference(_pixels[offset..]);
+        int offset = (_y * RawStride) + (_x * TColor.ColorFormat.BytesPerPixel);
+        return ref MemoryMarshal.GetReference(_data[offset..]);
     }
 
     /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ImageEnumerator GetEnumerator() => new(_pixels);
+    public ImageEnumerator GetEnumerator() => new(_data, _x, _y, Width, Height, RawStride);
 
     #endregion
 
+    //TODO DarthAffe 10.07.2024: anpassen
     public ref struct ImageEnumerator
     {
         #region Properties & Fields
 
-        private readonly ReadOnlySpan<TColor> _pixels;
+        private readonly ReadOnlySpan<byte> _data;
+        private readonly int _x;
+        private readonly int _y;
+        private readonly int _width;
+        private readonly int _stride;
+        private readonly int _count;
+
         private int _position;
 
         /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
         public readonly TColor Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _pixels[_position];
+            get
+            {
+                int row = (_position / _width);
+                int column = _position - (row * _width);
+
+                return MemoryMarshal.Cast<byte, TColor>(_data[(_y * _stride)..])[_x + column];
+            }
         }
 
         #endregion
 
         #region Constructors
 
-
+        // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ImageEnumerator(ReadOnlySpan<TColor> pixels)
+        internal ImageEnumerator(ReadOnlySpan<byte> data, int x, int y, int width, int height, int stride)
         {
-            this._pixels = pixels;
+            this._data = data;
+            this._x = x;
+            this._y = y;
+            this._width = width;
+            this._stride = stride;
+
+            _count = _width * height;
 
             _position = -1;
         }
@@ -170,7 +190,7 @@ public readonly ref struct RefImage<TColor>
 
         /// <inheritdoc cref="System.Collections.IEnumerator.MoveNext"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MoveNext() => ++_position < _pixels.Length;
+        public bool MoveNext() => ++_position < _count;
 
         #endregion
     }
@@ -181,7 +201,7 @@ public readonly ref struct RefImage<TColor>
     {
         #region Properties & Fields
 
-        private readonly ReadOnlySpan<TColor> _pixels;
+        private readonly ReadOnlySpan<byte> _data;
         private readonly int _x;
         private readonly int _y;
         private readonly int _width;
@@ -201,8 +221,10 @@ public readonly ref struct RefImage<TColor>
             {
                 if ((row < 0) || (row > _height)) throw new IndexOutOfRangeException();
 
-                ref TColor r0 = ref MemoryMarshal.GetReference(_pixels);
-                ref TColor rr = ref Unsafe.Add(ref r0, (nint)(uint)(((row + _y) * _stride) + _x));
+
+                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_data[((row + _y) * _stride)..]);
+                ref TColor r0 = ref MemoryMarshal.GetReference(data);
+                ref TColor rr = ref Unsafe.Add(ref r0, (nint)(uint)_x);
 
                 return new ReadOnlyRefEnumerable<TColor>(rr, _width, 1);
             }
@@ -213,9 +235,9 @@ public readonly ref struct RefImage<TColor>
         #region Constructors
 
         // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
-        public ImageRows(ReadOnlySpan<TColor> pixels, int x, int y, int width, int height, int stride)
+        internal ImageRows(ReadOnlySpan<byte> data, int x, int y, int width, int height, int stride)
         {
-            this._pixels = pixels;
+            this._data = data;
             this._x = x;
             this._y = y;
             this._width = width;
@@ -276,7 +298,7 @@ public readonly ref struct RefImage<TColor>
     {
         #region Properties & Fields
 
-        private readonly ReadOnlySpan<TColor> _pixels;
+        private readonly ReadOnlySpan<byte> _data;
         private readonly int _x;
         private readonly int _y;
         private readonly int _width;
@@ -296,8 +318,9 @@ public readonly ref struct RefImage<TColor>
             {
                 if ((column < 0) || (column > _width)) throw new IndexOutOfRangeException();
 
-                ref TColor r0 = ref MemoryMarshal.GetReference(_pixels);
-                ref TColor rc = ref Unsafe.Add(ref r0, (nint)(uint)((_y * _stride) + (column + _x)));
+                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_data[(_y * _stride)..]);
+                ref TColor r0 = ref MemoryMarshal.GetReference(data);
+                ref TColor rc = ref Unsafe.Add(ref r0, (nint)(uint)(column + _x));
 
                 return new ReadOnlyRefEnumerable<TColor>(rc, _height, _stride);
             }
@@ -308,9 +331,9 @@ public readonly ref struct RefImage<TColor>
         #region Constructors
 
         // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
-        public ImageColumns(ReadOnlySpan<TColor> pixels, int x, int y, int width, int height, int stride)
+        internal ImageColumns(ReadOnlySpan<byte> data, int x, int y, int width, int height, int stride)
         {
-            this._pixels = pixels;
+            this._data = data;
             this._x = x;
             this._y = y;
             this._width = width;

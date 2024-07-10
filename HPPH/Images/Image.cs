@@ -45,7 +45,7 @@ public sealed class Image<TColor> : IImage
         {
             if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new IndexOutOfRangeException();
 
-            return MemoryMarshal.Cast<byte, TColor>(_buffer)[((_y + y) * _stride) + (_x + x)];
+            return MemoryMarshal.Cast<byte, TColor>(_buffer.AsSpan()[((_y + y) * _stride)..])[_x + x];
         }
     }
 
@@ -79,7 +79,7 @@ public sealed class Image<TColor> : IImage
 
     #region Constructors
 
-    internal Image(byte[] buffer, int x, int y, int width, int height, int stride)
+    private Image(byte[] buffer, int x, int y, int width, int height, int stride)
     {
         this._buffer = buffer;
         this._x = x;
@@ -92,6 +92,19 @@ public sealed class Image<TColor> : IImage
     #endregion
 
     #region Methods
+
+    public static Image<TColor> Create(ReadOnlySpan<TColor> buffer, int width, int height)
+        => Create(MemoryMarshal.AsBytes(buffer), width, height, width * TColor.ColorFormat.BytesPerPixel);
+
+    public static Image<TColor> Create(ReadOnlySpan<byte> buffer, int width, int height, int stride)
+    {
+        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
+        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+
+        byte[] data = new byte[buffer.Length];
+        buffer.CopyTo(data);
+        return new Image<TColor>(data, 0, 0, width, height, stride);
+    }
 
     /// <inheritdoc />
     public void CopyTo(Span<byte> destination)
@@ -136,7 +149,7 @@ public sealed class Image<TColor> : IImage
     {
         if (typeof(T) != typeof(TColor)) throw new ArgumentException("The requested color format does not fit this image.", nameof(T));
 
-        return new RefImage<T>(MemoryMarshal.Cast<byte, T>(_buffer), _x, _y, Width, Height, _stride);
+        return new RefImage<T>(_buffer, _x, _y, Width, Height, _stride);
     }
 
     /// <inheritdoc />
@@ -180,7 +193,7 @@ public sealed class Image<TColor> : IImage
             {
                 if ((row < 0) || (row >= _height)) throw new IndexOutOfRangeException();
 
-                return new ImageRow(_buffer, (((row + _y) * _stride) + _x), _width);
+                return new ImageRow(_buffer, ((row + _y) * _stride) + (_x * TColor.ColorFormat.BytesPerPixel), _width);
             }
         }
 
@@ -188,7 +201,7 @@ public sealed class Image<TColor> : IImage
 
         #region Constructors
 
-        internal ImageRows(byte[] buffer, int x, int y, int width, int height, int stride)
+        internal ImageRows(byte[] buffer, int x, int y, int width, int height, int stride, int bpp)
         {
             this._buffer = buffer;
             this._x = x;
@@ -241,8 +254,7 @@ public sealed class Image<TColor> : IImage
             {
                 if ((x < 0) || (x >= _length)) throw new IndexOutOfRangeException();
 
-                ReadOnlySpan<TColor> row = MemoryMarshal.Cast<byte, TColor>(_buffer)[_start..];
-                return row[x];
+                return MemoryMarshal.Cast<byte, TColor>(_buffer)[_start..][x];
             }
         }
 
@@ -267,7 +279,7 @@ public sealed class Image<TColor> : IImage
             if (destination == null) throw new ArgumentNullException(nameof(destination));
             if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
-            MemoryMarshal.Cast<byte, TColor>(_buffer).Slice(_start, _length).CopyTo(MemoryMarshal.Cast<byte, TColor>(destination));
+            _buffer.AsSpan().Slice(_start, SizeInBytes).CopyTo(destination);
         }
 
         /// <inheritdoc />
@@ -317,7 +329,7 @@ public sealed class Image<TColor> : IImage
             {
                 if ((column < 0) || (column >= _width)) throw new IndexOutOfRangeException();
 
-                return new ImageColumn(_buffer, (_y * _stride) + _x + column, _height, _stride);
+                return new ImageColumn(_buffer, (_y * _stride) + ((_x + column) * TColor.ColorFormat.BytesPerPixel), _height, _stride);
             }
         }
 
@@ -379,8 +391,7 @@ public sealed class Image<TColor> : IImage
             {
                 if ((y < 0) || (y >= _length)) throw new IndexOutOfRangeException();
 
-                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_buffer)[_start..];
-                return data[y * _step];
+                return MemoryMarshal.Cast<byte, TColor>(_buffer.AsSpan()[_start..])[y * _step];
             }
         }
 
@@ -410,7 +421,7 @@ public sealed class Image<TColor> : IImage
                 _buffer.AsSpan(_start, SizeInBytes).CopyTo(destination);
             else
             {
-                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_buffer)[_start..];
+                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_buffer.AsSpan()[_start..]);
                 Span<TColor> target = MemoryMarshal.Cast<byte, TColor>(destination);
                 for (int i = 0; i < Length; i++)
                     target[i] = data[i * _step];
