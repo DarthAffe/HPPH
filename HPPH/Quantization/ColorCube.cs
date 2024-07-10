@@ -43,26 +43,26 @@ internal struct ColorCube<T>
     private void OrderColors(Span<T> colors, SortTarget preOrdered)
     {
         if (colors.Length < 2) return;
-        IMinMax colorRanges = PixelHelper.MinMax<T>(colors);
+        IMinMax colorRanges = colors.MinMax();
 
         if ((colorRanges.RedRange > colorRanges.GreenRange) && (colorRanges.RedRange > colorRanges.BlueRange))
         {
             if (preOrdered != SortTarget.Red)
-                PixelHelper.SortByRed(colors);
+                colors.SortByRed();
 
             _sortOrder = SortTarget.Red;
         }
         else if (colorRanges.GreenRange > colorRanges.BlueRange)
         {
             if (preOrdered != SortTarget.Green)
-                PixelHelper.SortByGreen(colors);
+                colors.SortByGreen();
 
             _sortOrder = SortTarget.Green;
         }
         else
         {
             if (preOrdered != SortTarget.Blue)
-                PixelHelper.SortByBlue(colors);
+                colors.SortByBlue();
 
             _sortOrder = SortTarget.Blue;
         }
