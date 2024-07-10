@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HPPH.Reference\HPPH.Reference.csproj" />
+    <ProjectReference Include="..\HPPH.System.Drawing\HPPH.System.Drawing.csproj" />
     <ProjectReference Include="..\HPPH\HPPH.csproj" />
   </ItemGroup>
 
