@@ -16,10 +16,10 @@ public static class ImageExtension
                     Bitmap bitmap = new(image.Width, image.Height, PixelFormat.Format24bppRgb);
                     BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
 
-                    IImage<ColorRGB> convertedImage = image.ConvertTo<ColorRGB>();
+                    IImage<ColorBGR> convertedImage = image.ConvertTo<ColorBGR>();
 
                     nint ptr = bmpData.Scan0;
-                    foreach (ImageRow<ColorRGB> row in convertedImage.Rows)
+                    foreach (ImageRow<ColorBGR> row in convertedImage.Rows)
                     {
                         row.CopyTo(new Span<byte>((void*)ptr, bmpData.Stride));
                         ptr += bmpData.Stride;
@@ -35,10 +35,10 @@ public static class ImageExtension
                     Bitmap bitmap = new(image.Width, image.Height, PixelFormat.Format32bppArgb);
                     BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
 
-                    IImage<ColorRGBA> convertedImage = image.ConvertTo<ColorRGBA>();
+                    IImage<ColorBGRA> convertedImage = image.ConvertTo<ColorBGRA>();
 
                     nint ptr = bmpData.Scan0;
-                    foreach (ImageRow<ColorRGBA> row in convertedImage.Rows)
+                    foreach (ImageRow<ColorBGRA> row in convertedImage.Rows)
                     {
                         row.CopyTo(new Span<byte>((void*)ptr, bmpData.Stride));
                         ptr += bmpData.Stride;
@@ -73,9 +73,9 @@ public static class ImageExtension
         IImage image;
 
         if (data.PixelFormat.HasFlag(PixelFormat.Format24bppRgb))
-            image = Image<ColorRGB>.Create(buffer, data.Width, data.Height, data.Stride);
+            image = Image<ColorBGR>.Create(buffer, data.Width, data.Height, data.Stride);
         else if (data.PixelFormat.HasFlag(PixelFormat.Format32bppArgb))
-            image = Image<ColorRGBA>.Create(buffer, data.Width, data.Height, data.Stride);
+            image = Image<ColorBGRA>.Create(buffer, data.Width, data.Height, data.Stride);
         else throw new NotSupportedException($"Unsupported pixel format '{bitmap.PixelFormat}'.");
 
         bitmap.UnlockBits(data);
