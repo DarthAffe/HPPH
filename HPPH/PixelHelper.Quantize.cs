@@ -25,6 +25,10 @@ public static partial class PixelHelper
         }
     }
 
+    public static T[] CreateColorPalette<T>(this IImage<T> image, int paletteSize)
+        where T : unmanaged, IColor
+        => image.AsRefImage().CreateColorPalette(paletteSize);
+
     public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize)
         where T : unmanaged, IColor
     {

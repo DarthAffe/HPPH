@@ -28,6 +28,10 @@ public static unsafe partial class PixelHelper
         }
     }
 
+    public static ISum Sum<T>(this IImage<T> image)
+        where T : struct, IColor
+        => image.AsRefImage().Sum();
+
     public static ISum Sum<T>(this RefImage<T> image)
         where T : struct, IColor
     {
