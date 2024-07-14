@@ -1,4 +1,4 @@
-namespace HPPH.Test;
+namespace HPPH.Test.PixelHelper;
 
 [TestClass]
 public class ConvertTests

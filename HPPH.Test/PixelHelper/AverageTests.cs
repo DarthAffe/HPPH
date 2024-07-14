@@ -1,32 +1,32 @@
 using HPPH.Reference;
 
-namespace HPPH.Test;
+namespace HPPH.Test.PixelHelper;
 
 [TestClass]
-public class SumTests
+public class AverageTests
 {
     private static IEnumerable<string> GetTestImages() => Directory.EnumerateFiles(@"..\..\..\..\sample_data", "*.png", SearchOption.AllDirectories);
 
     [TestMethod]
-    public void SumImage3Byte()
+    public void AverageImage3Byte()
     {
     }
 
     [TestMethod]
-    public void SumRefImage3Byte()
+    public void AverageRefImage3Byte()
     {
     }
 
     [TestMethod]
-    public void SumReadOnlySpan3Byte()
+    public void AverageReadOnlySpan3Byte()
     {
         foreach (string image in GetTestImages())
         {
             ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image);
             ReadOnlySpan<ColorRGB> span = data;
 
-            ISum reference = ReferencePixelHelper.Sum(span);
-            ISum test = span.Sum();
+            ColorRGB reference = ReferencePixelHelper.Average(span);
+            ColorRGB test = span.Average();
 
             Assert.AreEqual(reference.R, test.R, "R differs");
             Assert.AreEqual(reference.G, test.G, "G differs");
@@ -36,25 +36,25 @@ public class SumTests
     }
 
     [TestMethod]
-    public void SumImage4Byte()
+    public void AverageImage4Byte()
     {
     }
 
     [TestMethod]
-    public void SumRefImage4Byte()
+    public void AverageRefImage4Byte()
     {
     }
 
     [TestMethod]
-    public void SumReadOnlySpan4Byte()
+    public void AverageReadOnlySpan4Byte()
     {
         foreach (string image in GetTestImages())
         {
             ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image);
             ReadOnlySpan<ColorRGBA> span = data;
 
-            ISum reference = ReferencePixelHelper.Sum(span);
-            ISum test = span.Sum();
+            ColorRGBA reference = ReferencePixelHelper.Average(span);
+            ColorRGBA test = span.Average();
 
             Assert.AreEqual(reference.R, test.R, "R differs");
             Assert.AreEqual(reference.G, test.G, "G differs");

@@ -1,6 +1,6 @@
 using HPPH.Reference;
 
-namespace HPPH.Test;
+namespace HPPH.Test.PixelHelper;
 
 [TestClass]
 public class SortTests
