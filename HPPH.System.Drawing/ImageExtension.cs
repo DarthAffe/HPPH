@@ -75,7 +75,7 @@ public static class ImageExtension
         if (data.PixelFormat.HasFlag(PixelFormat.Format24bppRgb))
             image = Image<ColorRGB>.Create(buffer, data.Width, data.Height, data.Stride);
         else if (data.PixelFormat.HasFlag(PixelFormat.Format32bppArgb))
-            image = Image<ColorARGB>.Create(buffer, data.Width, data.Height, data.Stride);
+            image = Image<ColorRGBA>.Create(buffer, data.Width, data.Height, data.Stride);
         else throw new NotSupportedException($"Unsupported pixel format '{bitmap.PixelFormat}'.");
 
         bitmap.UnlockBits(data);
