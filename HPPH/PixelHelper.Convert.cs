@@ -33,7 +33,7 @@ public static unsafe partial class PixelHelper
         if (colors == null) throw new ArgumentNullException(nameof(colors));
 
         TTarget[] buffer = new TTarget[colors.Length];
-        Convert<TSource, TTarget>(colors, buffer.AsSpan());
+        Convert(colors, buffer.AsSpan());
         return buffer;
     }
 
@@ -46,6 +46,17 @@ public static unsafe partial class PixelHelper
         TTarget[] buffer = new TTarget[colors.Length];
         Convert(colors, buffer.AsSpan());
         return buffer;
+    }
+
+    public static void Convert<TSource, TTarget>(this Span<TSource> source, Span<TTarget> target)
+        where TSource : struct, IColor
+        where TTarget : struct, IColor
+    {
+        if (source == null) throw new ArgumentNullException(nameof(source));
+        if (target == null) throw new ArgumentNullException(nameof(target));
+        if (target.Length < source.Length) throw new ArgumentException($"Target-buffer is not big enough. {target.Length} < {source.Length}", nameof(target));
+
+        Convert(MemoryMarshal.AsBytes(source), MemoryMarshal.AsBytes(target), TSource.ColorFormat, TTarget.ColorFormat);
     }
 
     public static void Convert<TSource, TTarget>(this ReadOnlySpan<TSource> source, Span<TTarget> target)

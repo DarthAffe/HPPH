@@ -158,5 +158,51 @@ public class ImageTest
                 Assert.AreEqual(image[x, y], refImage[x, y]);
     }
 
+    [TestMethod]
+    public void ConvertToInPlace()
+    {
+        IImage image = TestDataHelper.CreateTestImage<ColorARGB>(TEST_WIDTH, TEST_HEIGHT);
+
+        IColor[] referenceData = image.ToArray();
+
+        image.ConvertTo<ColorBGRA>();
+        IColor[] testData = image.ToArray();
+
+        Assert.AreEqual(referenceData.Length, testData.Length);
+        for (int i = 0; i < referenceData.Length; i++)
+        {
+            IColor reference = referenceData[i];
+            IColor test = testData[i];
+
+            Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
+            Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
+            Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
+            Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+        }
+    }
+
+    [TestMethod]
+    public void ConvertToCopy()
+    {
+        IImage image = TestDataHelper.CreateTestImage<ColorARGB>(TEST_WIDTH, TEST_HEIGHT);
+
+        IColor[] referenceData = image.ToArray();
+
+        image.ConvertTo<ColorBGR>();
+        IColor[] testData = image.ToArray();
+
+        Assert.AreEqual(referenceData.Length, testData.Length);
+        for (int i = 0; i < referenceData.Length; i++)
+        {
+            IColor reference = referenceData[i];
+            IColor test = testData[i];
+
+            Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
+            Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
+            Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
+            Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+        }
+    }
+
     #endregion
 }

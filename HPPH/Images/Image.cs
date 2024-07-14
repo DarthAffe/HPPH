@@ -51,7 +51,6 @@ public sealed class Image<T> : IImage<T>
         }
     }
 
-
     IImage IImage.this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,11 +122,23 @@ public sealed class Image<T> : IImage<T>
         return new Image<T>(data, 0, 0, width, height, stride);
     }
 
-    public void ConvertTo<TColor>()
+    public IImage<TColor> ConvertTo<TColor>()
         where TColor : struct, IColor
     {
-        for (int i = 0; i < Height; i++)
-            MemoryMarshal.Cast<byte, T>(_buffer.AsSpan().Slice(((i + _y) * _stride) + _x, Width)).ConvertInPlace<T, TColor>();
+        int targetBpp = TColor.ColorFormat.BytesPerPixel;
+        if (targetBpp == ColorFormat.BytesPerPixel)
+        {
+            byte[] data = ToRawArray();
+            MemoryMarshal.Cast<byte, T>(data.AsSpan()).ConvertInPlace<T, TColor>();
+            return new Image<TColor>(data, 0, 0, Width, Height, Width * targetBpp);
+        }
+        else
+        {
+            byte[] data = ToRawArray();
+            byte[] target = new byte[Width * Height * targetBpp];
+            MemoryMarshal.Cast<byte, T>(data.AsSpan()).Convert(MemoryMarshal.Cast<byte, TColor>(target));
+            return new Image<TColor>(target, 0, 0, Width, Height, Width * targetBpp);
+        }
     }
 
     public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
