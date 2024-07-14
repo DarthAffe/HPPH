@@ -60,6 +60,8 @@ public interface IImage : IEnumerable<IColor>
     /// <returns>The <inheritdoc cref="RefImage{TColor}"/>.</returns>
     RefImage<TColor> AsRefImage<TColor>() where TColor : struct, IColor;
 
+    void ConvertTo<T>() where T : struct, IColor;
+
     /// <summary>
     /// Copies the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance.
     /// </summary>

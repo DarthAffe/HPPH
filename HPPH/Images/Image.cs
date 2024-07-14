@@ -58,7 +58,7 @@ public sealed class Image<T> : IImage<T>
         get
         {
             if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
-            
+
             return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
         }
     }
@@ -121,6 +121,13 @@ public sealed class Image<T> : IImage<T>
         byte[] data = new byte[buffer.Length];
         buffer.CopyTo(data);
         return new Image<T>(data, 0, 0, width, height, stride);
+    }
+
+    public void ConvertTo<TColor>()
+        where TColor : struct, IColor
+    {
+        for (int i = 0; i < Height; i++)
+            MemoryMarshal.Cast<byte, T>(_buffer.AsSpan().Slice(((i + _y) * _stride) + _x, Width)).ConvertInPlace<T, TColor>();
     }
 
     public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
