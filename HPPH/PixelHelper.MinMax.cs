@@ -36,7 +36,7 @@ public static unsafe partial class PixelHelper
         try
         {
             image.CopyTo(buffer);
-            return MinMax<T>(buffer);
+            return MinMax(buffer);
         }
         finally
         {

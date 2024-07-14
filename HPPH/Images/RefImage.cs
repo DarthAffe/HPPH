@@ -3,8 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace HPPH;
 
-public readonly ref struct RefImage<TColor>
-    where TColor : struct, IColor
+[SkipLocalsInit]
+public readonly ref struct RefImage<T>
+    where T : struct, IColor
 {
     #region Properties & Fields
 
@@ -33,38 +34,35 @@ public readonly ref struct RefImage<TColor>
 
     #region Indexer
 
-    public ref readonly TColor this[int x, int y]
+    public ref readonly T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new IndexOutOfRangeException();
 
-            ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_data[((_y + y) * RawStride)..]);
-            ref TColor r0 = ref MemoryMarshal.GetReference(data);
-            nint offset = (nint)(uint)(_x + x);
-            return ref Unsafe.Add(ref r0, offset);
+            return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (nint)(uint)((_y + y) * RawStride))), (nint)(uint)(_x + x));
         }
     }
 
-    public RefImage<TColor> this[int x, int y, int width, int height]
+    public RefImage<T> this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
 
-            return new RefImage<TColor>(_data, _x + x, _y + y, width, height, RawStride);
+            return new RefImage<T>(_data, _x + x, _y + y, width, height, RawStride);
         }
     }
 
-    public ImageRows Rows
+    public ImageRows<T> Rows
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => new(_data, _x, _y, Width, Height, RawStride);
     }
 
-    public ImageColumns Columns
+    public ImageColumns<T> Columns
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => new(_data, _x, _y, Width, Height, RawStride);
@@ -89,20 +87,20 @@ public readonly ref struct RefImage<TColor>
     #region Methods
 
     /// <summary>
-    /// Copies the contents of this <see cref="RefImage{TColor}"/> into a destination <see cref="Span{T}"/> instance.
+    /// Copies the contents of this <see cref="RefImage{T}"/> into a destination <see cref="Span{T}"/> instance.
     /// </summary>
     /// <param name="destination">The destination <see cref="Span{T}"/> instance.</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="destination"/> is shorter than the source <see cref="RefImage{TColor}"/> instance.
+    /// Thrown when <paramref name="destination"/> is shorter than the source <see cref="RefImage{T}"/> instance.
     /// </exception>
-    public void CopyTo(Span<TColor> destination)
+    public void CopyTo(Span<T> destination)
     {
         if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < (Width * Height)) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
-        ImageRows rows = Rows;
-        Span<TColor> target = destination;
-        foreach (ReadOnlyRefEnumerable<TColor> row in rows)
+        ImageRows<T> rows = Rows;
+        Span<T> target = destination;
+        foreach (ImageRow<T> row in rows)
         {
             row.CopyTo(target);
             target = target[Width..];
@@ -110,12 +108,12 @@ public readonly ref struct RefImage<TColor>
     }
 
     /// <summary>
-    /// Allocates a new array and copies this <see cref="RefImage{TColor}"/> into it.
+    /// Allocates a new array and copies this <see cref="RefImage{T}"/> into it.
     /// </summary>
-    /// <returns>The new array containing the data of this <see cref="RefImage{TColor}"/>.</returns>
-    public TColor[] ToArray()
+    /// <returns>The new array containing the data of this <see cref="RefImage{T}"/>.</returns>
+    public T[] ToArray()
     {
-        TColor[] array = new TColor[Width * Height];
+        T[] array = new T[Width * Height];
         CopyTo(array);
         return array;
     }
@@ -128,7 +126,7 @@ public readonly ref struct RefImage<TColor>
         if (_data.Length == 0)
             return ref Unsafe.NullRef<byte>();
 
-        int offset = (_y * RawStride) + (_x * TColor.ColorFormat.BytesPerPixel);
+        int offset = (_y * RawStride) + (_x * T.ColorFormat.BytesPerPixel);
         return ref MemoryMarshal.GetReference(_data[offset..]);
     }
 
@@ -138,7 +136,6 @@ public readonly ref struct RefImage<TColor>
 
     #endregion
 
-    //TODO DarthAffe 10.07.2024: anpassen
     public ref struct ImageEnumerator
     {
         #region Properties & Fields
@@ -153,15 +150,15 @@ public readonly ref struct RefImage<TColor>
         private int _position;
 
         /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
-        public readonly TColor Current
+        public ref readonly T Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                int row = (_position / _width);
-                int column = _position - (row * _width);
+                int y = (_position / _width);
+                int x = _position - (y * _width);
 
-                return MemoryMarshal.Cast<byte, TColor>(_data[(_y * _stride)..])[_x + column];
+                return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (nint)(uint)((_y + y) * _stride))), (nint)(uint)(_x + x));
             }
         }
 
@@ -194,199 +191,4 @@ public readonly ref struct RefImage<TColor>
 
         #endregion
     }
-
-    #region Indexer-Structs
-
-    public readonly ref struct ImageRows
-    {
-        #region Properties & Fields
-
-        private readonly ReadOnlySpan<byte> _data;
-        private readonly int _x;
-        private readonly int _y;
-        private readonly int _width;
-        private readonly int _height;
-        private readonly int _stride;
-
-        public int Count => _height;
-
-        #endregion
-
-        #region Indexer
-
-        public ReadOnlyRefEnumerable<TColor> this[int row]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if ((row < 0) || (row > _height)) throw new IndexOutOfRangeException();
-
-
-                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_data[((row + _y) * _stride)..]);
-                ref TColor r0 = ref MemoryMarshal.GetReference(data);
-                ref TColor rr = ref Unsafe.Add(ref r0, (nint)(uint)_x);
-
-                return new ReadOnlyRefEnumerable<TColor>(rr, _width, 1);
-            }
-        }
-
-        #endregion
-
-        #region Constructors
-
-        // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
-        internal ImageRows(ReadOnlySpan<byte> data, int x, int y, int width, int height, int stride)
-        {
-            this._data = data;
-            this._x = x;
-            this._y = y;
-            this._width = width;
-            this._height = height;
-            this._stride = stride;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ImageRowsEnumerator GetEnumerator() => new(this);
-
-        #endregion
-
-        public ref struct ImageRowsEnumerator
-        {
-            #region Properties & Fields
-
-            private readonly ImageRows _rows;
-            private int _position;
-
-            /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
-            public readonly ReadOnlyRefEnumerable<TColor> Current
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _rows[_position];
-            }
-
-            #endregion
-
-            #region Constructors
-
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal ImageRowsEnumerator(ImageRows rows)
-            {
-                this._rows = rows;
-
-                _position = -1;
-            }
-
-            #endregion
-
-            #region Methods
-
-            /// <inheritdoc cref="System.Collections.IEnumerator.MoveNext"/>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool MoveNext() => ++_position < _rows._height;
-
-            #endregion
-        }
-    }
-
-    public readonly ref struct ImageColumns
-    {
-        #region Properties & Fields
-
-        private readonly ReadOnlySpan<byte> _data;
-        private readonly int _x;
-        private readonly int _y;
-        private readonly int _width;
-        private readonly int _height;
-        private readonly int _stride;
-
-        public int Count => _width;
-
-        #endregion
-
-        #region Indexer
-
-        public ReadOnlyRefEnumerable<TColor> this[int column]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if ((column < 0) || (column > _width)) throw new IndexOutOfRangeException();
-
-                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_data[(_y * _stride)..]);
-                ref TColor r0 = ref MemoryMarshal.GetReference(data);
-                ref TColor rc = ref Unsafe.Add(ref r0, (nint)(uint)(column + _x));
-
-                return new ReadOnlyRefEnumerable<TColor>(rc, _height, _stride);
-            }
-        }
-
-        #endregion
-
-        #region Constructors
-
-        // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
-        internal ImageColumns(ReadOnlySpan<byte> data, int x, int y, int width, int height, int stride)
-        {
-            this._data = data;
-            this._x = x;
-            this._y = y;
-            this._width = width;
-            this._height = height;
-            this._stride = stride;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ImageColumnsEnumerator GetEnumerator() => new(this);
-
-        #endregion
-
-        public ref struct ImageColumnsEnumerator
-        {
-            #region Properties & Fields
-
-            private readonly ImageColumns _columns;
-            private int _position;
-
-            /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
-            public readonly ReadOnlyRefEnumerable<TColor> Current
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => _columns[_position];
-            }
-
-            #endregion
-
-            #region Constructors
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal ImageColumnsEnumerator(ImageColumns columns)
-            {
-                this._columns = columns;
-                this._position = -1;
-            }
-
-            #endregion
-
-            #region Methods
-
-            /// <inheritdoc cref="System.Collections.IEnumerator.MoveNext"/>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool MoveNext() => ++_position < _columns._width;
-
-            #endregion
-        }
-    }
-
-    #endregion
 }

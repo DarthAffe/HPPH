@@ -6,8 +6,8 @@ namespace HPPH;
 
 /// <inheritdoc />
 [SkipLocalsInit]
-public sealed class Image<TColor> : IImage
-    where TColor : struct, IColor
+public sealed class Image<T> : IImage<T>
+    where T : struct, IColor
 {
     #region Properties & Fields
 
@@ -21,7 +21,7 @@ public sealed class Image<TColor> : IImage
     public IColorFormat ColorFormat
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => TColor.ColorFormat;
+        get => T.ColorFormat;
     }
 
     /// <inheritdoc />
@@ -37,42 +37,59 @@ public sealed class Image<TColor> : IImage
 
     #region Indexer
 
+    IColor IImage.this[int x, int y] => this[x, y];
+
     /// <inheritdoc />
-    public IColor this[int x, int y]
+    public ref readonly T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new IndexOutOfRangeException();
 
-            return MemoryMarshal.Cast<byte, TColor>(_buffer.AsSpan()[((_y + y) * _stride)..])[_x + x];
+            return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (nint)(uint)((_y + y) * _stride))), (nint)(uint)(_x + x));
+        }
+    }
+
+
+    IImage IImage.this[int x, int y, int width, int height]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
+            
+            return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
         }
     }
 
     /// <inheritdoc />
-    public IImage this[int x, int y, int width, int height]
+    public RefImage<T> this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
 
-            return new Image<TColor>(_buffer, _x + x, _y + y, width, height, _stride);
+            return new RefImage<T>(_buffer, _x + x, _y + y, width, height, _stride);
         }
     }
 
-    /// <inheritdoc />
-    public IImage.IImageRows Rows
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new ImageRows(_buffer, _x, _y, Width, Height, _stride);
-    }
+    IImageRows IImage.Rows => new IColorImageRows<T>(_buffer, _x, _y, Width, Height, _stride);
 
     /// <inheritdoc />
-    public IImage.IImageColumns Columns
+    public ImageRows<T> Rows
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new ImageColumns(_buffer, _x, _y, Width, Height, _stride);
+        get => new(_buffer, _x, _y, Width, Height, _stride);
+    }
+
+    IImageColumns IImage.Columns => new IColorImageColumns<T>(_buffer, _x, _y, Width, Height, _stride);
+    /// <inheritdoc />
+    public ImageColumns<T> Columns
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => new(_buffer, _x, _y, Width, Height, _stride);
     }
 
     #endregion
@@ -93,18 +110,20 @@ public sealed class Image<TColor> : IImage
 
     #region Methods
 
-    public static Image<TColor> Create(ReadOnlySpan<TColor> buffer, int width, int height)
-        => Create(MemoryMarshal.AsBytes(buffer), width, height, width * TColor.ColorFormat.BytesPerPixel);
+    public static Image<T> Create(ReadOnlySpan<T> buffer, int width, int height)
+        => Create(MemoryMarshal.AsBytes(buffer), width, height, width * T.ColorFormat.BytesPerPixel);
 
-    public static Image<TColor> Create(ReadOnlySpan<byte> buffer, int width, int height, int stride)
+    public static Image<T> Create(ReadOnlySpan<byte> buffer, int width, int height, int stride)
     {
         if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
         if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
 
         byte[] data = new byte[buffer.Length];
         buffer.CopyTo(data);
-        return new Image<TColor>(data, 0, 0, width, height, stride);
+        return new Image<T>(data, 0, 0, width, height, stride);
     }
+
+    public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
 
     /// <inheritdoc />
     public void CopyTo(Span<byte> destination)
@@ -113,9 +132,9 @@ public sealed class Image<TColor> : IImage
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         int targetStride = Width * ColorFormat.BytesPerPixel;
-        IImage.IImageRows rows = Rows;
+        ImageRows<T> rows = Rows;
         Span<byte> target = destination;
-        foreach (IImage.IImageRow row in rows)
+        foreach (ImageRow<T> row in rows)
         {
             row.CopyTo(target);
             target = target[targetStride..];
@@ -130,324 +149,62 @@ public sealed class Image<TColor> : IImage
         return array;
     }
 
-    //TODO DarthAffe 06.07.2024: This has some potential for optimization
-    public IColor[] ToArray()
+    public T[] ToArray()
+    {
+        T[] colors = new T[Width * Height];
+        CopyTo(colors);
+        return colors;
+    }
+
+    //TODO DarthAffe 11.07.2024: This has some potential for optimization
+    IColor[] IImage.ToArray()
     {
         IColor[] colors = new IColor[Width * Height];
 
         int counter = 0;
-        foreach (IImage.IImageRow row in Rows)
-            foreach (IColor color in row)
+        foreach (ImageRow<T> row in Rows)
+            foreach (T color in row)
                 colors[counter++] = color;
 
         return colors;
     }
 
-    /// <inheritdoc />
-    public RefImage<T> AsRefImage<T>()
-        where T : struct, IColor
-    {
-        if (typeof(T) != typeof(TColor)) throw new ArgumentException("The requested color format does not fit this image.", nameof(T));
+    public RefImage<T> AsRefImage() => new(_buffer, _x, _y, Width, Height, _stride);
 
-        return new RefImage<T>(_buffer, _x, _y, Width, Height, _stride);
+    public RefImage<TColor> AsRefImage<TColor>()
+        where TColor : struct, IColor
+    {
+        if (typeof(TColor) != typeof(T)) throw new ArgumentException("The requested color format does not fit this image.", nameof(TColor));
+
+        return new RefImage<TColor>(_buffer, _x, _y, Width, Height, _stride);
     }
 
-    /// <inheritdoc />
-    public IEnumerator<IColor> GetEnumerator()
+    /// <summary>
+    /// Returns a reference to the first element of this image inside the full image buffer.
+    /// </summary>
+    public ref readonly byte GetPinnableReference()
+    {
+        if (_buffer.Length == 0)
+            return ref Unsafe.NullRef<byte>();
+
+        return ref MemoryMarshal.GetReference(new ReadOnlySpan<byte>(_buffer)[((_y * _stride) + (_x * ColorFormat.BytesPerPixel))..]);
+    }
+
+    public IEnumerator<T> GetEnumerator()
     {
         for (int y = 0; y < Height; y++)
             for (int x = 0; x < Width; x++)
                 yield return this[x, y];
     }
 
-    /// <inheritdoc />
+    IEnumerator<IColor> IEnumerable<IColor>.GetEnumerator()
+    {
+        for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+                yield return this[x, y];
+    }
+
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    #endregion
-
-    #region Indexer-Classes
-
-    /// <inheritdoc />
-    private sealed class ImageRows : IImage.IImageRows
-    {
-        #region Properties & Fields
-
-        private readonly byte[] _buffer;
-        private readonly int _x;
-        private readonly int _y;
-        private readonly int _width;
-        private readonly int _height;
-        private readonly int _stride;
-
-        /// <inheritdoc />
-        public int Count => _height;
-
-        #endregion
-
-        #region Indexer
-
-        /// <inheritdoc />
-        public IImage.IImageRow this[int row]
-        {
-            get
-            {
-                if ((row < 0) || (row >= _height)) throw new IndexOutOfRangeException();
-
-                return new ImageRow(_buffer, ((row + _y) * _stride) + (_x * TColor.ColorFormat.BytesPerPixel), _width);
-            }
-        }
-
-        #endregion
-
-        #region Constructors
-
-        internal ImageRows(byte[] buffer, int x, int y, int width, int height, int stride)
-        {
-            this._buffer = buffer;
-            this._x = x;
-            this._y = y;
-            this._width = width;
-            this._height = height;
-            this._stride = stride;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <inheritdoc />
-        public IEnumerator<IImage.IImageRow> GetEnumerator()
-        {
-            for (int y = 0; y < _height; y++)
-                yield return this[y];
-        }
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        #endregion
-    }
-
-    /// <inheritdoc />
-    private sealed class ImageRow : IImage.IImageRow
-    {
-        #region Properties & Fields
-
-        private readonly byte[] _buffer;
-        private readonly int _start;
-        private readonly int _length;
-
-        /// <inheritdoc />
-        public int Length => _length;
-
-        /// <inheritdoc />
-        public int SizeInBytes => Length * TColor.ColorFormat.BytesPerPixel;
-
-        #endregion
-
-        #region Indexer
-
-        /// <inheritdoc />
-        public IColor this[int x]
-        {
-            get
-            {
-                if ((x < 0) || (x >= _length)) throw new IndexOutOfRangeException();
-
-                return MemoryMarshal.Cast<byte, TColor>(_buffer)[_start..][x];
-            }
-        }
-
-        #endregion
-
-        #region Constructors
-
-        internal ImageRow(byte[] buffer, int start, int length)
-        {
-            this._buffer = buffer;
-            this._start = start;
-            this._length = length;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <inheritdoc />
-        public void CopyTo(Span<byte> destination)
-        {
-            if (destination == null) throw new ArgumentNullException(nameof(destination));
-            if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
-
-            _buffer.AsSpan().Slice(_start, SizeInBytes).CopyTo(destination);
-        }
-
-        /// <inheritdoc />
-        public byte[] ToArray()
-        {
-            byte[] array = new byte[SizeInBytes];
-            CopyTo(array);
-            return array;
-        }
-
-        /// <inheritdoc />
-        public IEnumerator<IColor> GetEnumerator()
-        {
-            for (int x = 0; x < _length; x++)
-                yield return this[x];
-        }
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        #endregion
-    }
-
-    /// <inheritdoc />
-    private sealed class ImageColumns : IImage.IImageColumns
-    {
-        #region Properties & Fields
-
-        private readonly byte[] _buffer;
-        private readonly int _x;
-        private readonly int _y;
-        private readonly int _width;
-        private readonly int _height;
-        private readonly int _stride;
-
-        /// <inheritdoc />
-        public int Count => _width;
-
-        #endregion
-
-        #region Indexer
-
-        /// <inheritdoc />
-        public IImage.IImageColumn this[int column]
-        {
-            get
-            {
-                if ((column < 0) || (column >= _width)) throw new IndexOutOfRangeException();
-
-                return new ImageColumn(_buffer, (_y * _stride) + ((_x + column) * TColor.ColorFormat.BytesPerPixel), _height, _stride);
-            }
-        }
-
-        #endregion
-
-        #region Constructors
-
-        internal ImageColumns(byte[] buffer, int x, int y, int width, int height, int stride)
-        {
-            this._buffer = buffer;
-            this._x = x;
-            this._y = y;
-            this._width = width;
-            this._height = height;
-            this._stride = stride;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <inheritdoc />
-        public IEnumerator<IImage.IImageColumn> GetEnumerator()
-        {
-            for (int y = 0; y < _height; y++)
-                yield return this[y];
-        }
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        #endregion
-    }
-
-    /// <inheritdoc />
-    private sealed class ImageColumn : IImage.IImageColumn
-    {
-        #region Properties & Fields
-
-        private readonly byte[] _buffer;
-        private readonly int _start;
-        private readonly int _length;
-        private readonly int _step;
-
-        /// <inheritdoc />
-        public int Length => _length;
-
-        /// <inheritdoc />
-        public int SizeInBytes => Length * TColor.ColorFormat.BytesPerPixel;
-
-        #endregion
-
-        #region Indexer
-
-        /// <inheritdoc />
-        public IColor this[int y]
-        {
-            get
-            {
-                if ((y < 0) || (y >= _length)) throw new IndexOutOfRangeException();
-
-                return MemoryMarshal.Cast<byte, TColor>(_buffer.AsSpan()[_start..])[y * _step];
-            }
-        }
-
-        #endregion
-
-        #region Constructors
-
-        internal ImageColumn(byte[] buffer, int start, int length, int step)
-        {
-            this._buffer = buffer;
-            this._start = start;
-            this._length = length;
-            this._step = step;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <inheritdoc />
-        public void CopyTo(Span<byte> destination)
-        {
-            if (destination == null) throw new ArgumentNullException(nameof(destination));
-            if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
-
-            if (_step == 1)
-                _buffer.AsSpan(_start, SizeInBytes).CopyTo(destination);
-            else
-            {
-                ReadOnlySpan<TColor> data = MemoryMarshal.Cast<byte, TColor>(_buffer.AsSpan()[_start..]);
-                Span<TColor> target = MemoryMarshal.Cast<byte, TColor>(destination);
-                for (int i = 0; i < Length; i++)
-                    target[i] = data[i * _step];
-            }
-        }
-
-        /// <inheritdoc />
-        public byte[] ToArray()
-        {
-            byte[] array = new byte[SizeInBytes];
-            CopyTo(array);
-            return array;
-        }
-
-        /// <inheritdoc />
-        public IEnumerator<IColor> GetEnumerator()
-        {
-            for (int y = 0; y < _length; y++)
-                yield return this[y];
-        }
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        #endregion
-    }
 
     #endregion
 }
