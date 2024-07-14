@@ -74,6 +74,12 @@ public static unsafe partial class PixelHelper
     {
         if (source.Length == 0) return;
 
+        if (sourceFormat == targetFormat)
+        {
+            source.CopyTo(target);
+            return;
+        }
+
         switch (sourceFormat.BytesPerPixel)
         {
             case 3 when (targetFormat.BytesPerPixel == 3):
