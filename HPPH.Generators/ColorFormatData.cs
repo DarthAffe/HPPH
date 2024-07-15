@@ -2,16 +2,16 @@
 
 namespace HPPH.Generators;
 
-internal readonly struct ColorFormatData(string typeName, int bpp, char firstEntry, char secondEntry, char thirdEntry, char fourthEntry)
+internal readonly record struct ColorFormatData
 {
     #region Properties & Fields
 
-    public readonly string TypeName = typeName;
-    public readonly int Bpp = bpp;
-    public readonly string FirstEntry = firstEntry.ToString().ToLowerInvariant();
-    public readonly string SecondEntry = secondEntry.ToString().ToLowerInvariant();
-    public readonly string ThirdEntry = thirdEntry.ToString().ToLowerInvariant();
-    public readonly string FourthEntry = fourthEntry.ToString().ToLowerInvariant();
+    public readonly string TypeName;
+    public readonly int Bpp;
+    public readonly string FirstEntry;
+    public readonly string SecondEntry;
+    public readonly string ThirdEntry;
+    public readonly string FourthEntry;
 
     public string FirstEntryName => GetEntryName(FirstEntry);
     public string SecondEntryName => GetEntryName(SecondEntry);
@@ -40,6 +40,20 @@ internal readonly struct ColorFormatData(string typeName, int bpp, char firstEnt
 
             return sb.ToString().ToUpper();
         }
+    }
+
+    #endregion
+
+    #region Constructors
+
+    public ColorFormatData(string typeName, int bpp, char firstEntry, char secondEntry, char thirdEntry, char fourthEntry)
+    {
+        this.TypeName = typeName;
+        this.Bpp = bpp;
+        this.FirstEntry = firstEntry.ToString().ToLowerInvariant();
+        this.SecondEntry = secondEntry.ToString().ToLowerInvariant();
+        this.ThirdEntry = thirdEntry.ToString().ToLowerInvariant();
+        this.FourthEntry = fourthEntry.ToString().ToLowerInvariant();
     }
 
     #endregion
