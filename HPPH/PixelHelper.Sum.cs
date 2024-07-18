@@ -41,7 +41,7 @@ public static unsafe partial class PixelHelper
         try
         {
             image.CopyTo(buffer);
-            return Sum<T>(buffer);
+            return Sum(buffer);
         }
         finally
         {
@@ -50,6 +50,10 @@ public static unsafe partial class PixelHelper
     }
 
     public static ISum Sum<T>(this ReadOnlySpan<T> colors)
+        where T : struct, IColor
+        => T.ColorFormat.Sum(MemoryMarshal.AsBytes(colors));
+
+    public static ISum Sum<T>(this Span<T> colors)
         where T : struct, IColor
         => T.ColorFormat.Sum(MemoryMarshal.AsBytes(colors));
 

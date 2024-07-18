@@ -35,6 +35,22 @@ public static partial class ReferencePixelHelper
         return new SumRGBA(sumR, sumG, sumB, sumA);
     }
 
+    public static ISum Sum<T>(Span<T> colors)
+        where T : struct, IColor
+    {
+        long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
+
+        foreach (T color in colors)
+        {
+            sumR += color.R;
+            sumG += color.G;
+            sumB += color.B;
+            sumA += color.A;
+        }
+
+        return new SumRGBA(sumR, sumG, sumB, sumA);
+    }
+
     public static ISum Sum<T>(ReadOnlySpan<T> colors)
         where T : struct, IColor
     {

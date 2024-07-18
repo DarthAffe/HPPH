@@ -60,10 +60,10 @@ public readonly ref struct ImageColumn<T>
             _buffer.Slice(_start, SizeInBytes).CopyTo(destination);
         else
         {
-            ReadOnlySpan<T> data = MemoryMarshal.Cast<byte, T>(_buffer[_start..]);
+            ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), _start);
             Span<T> target = MemoryMarshal.Cast<byte, T>(destination);
             for (int i = 0; i < Length; i++)
-                target[i] = data[i * _step];
+                target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
         }
     }
 
@@ -143,7 +143,7 @@ internal class IColorImageColumn<T> : IImageColumn
         {
             if ((y < 0) || (y >= _length)) throw new IndexOutOfRangeException();
 
-            return MemoryMarshal.Cast<byte, T>(_buffer.AsSpan()[(_start + (y * _step))..])[0];
+            return Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), _start + (y * _step)));
         }
     }
 
@@ -181,10 +181,10 @@ internal class IColorImageColumn<T> : IImageColumn
             _buffer.AsSpan().Slice(_start, SizeInBytes).CopyTo(destination);
         else
         {
-            ReadOnlySpan<T> data = MemoryMarshal.Cast<byte, T>(_buffer.AsSpan()[_start..]);
+            ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), _start);
             Span<T> target = MemoryMarshal.Cast<byte, T>(destination);
             for (int i = 0; i < Length; i++)
-                target[i] = data[i * _step];
+                target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
         }
     }
 

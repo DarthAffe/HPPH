@@ -86,7 +86,7 @@ public static partial class PixelHelper
 
         T[] result = new T[cubes.Length];
         for (int i = 0; i < cubes.Length; i++)
-            result[i] = Average<T>(cubes[i].Slice(colors));
+            result[i] = Average(cubes[i].Slice(colors));
 
         return result;
     }

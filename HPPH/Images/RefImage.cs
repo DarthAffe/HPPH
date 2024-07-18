@@ -126,8 +126,7 @@ public readonly ref struct RefImage<T>
         if (_data.Length == 0)
             return ref Unsafe.NullRef<byte>();
 
-        int offset = (_y * RawStride) + (_x * T.ColorFormat.BytesPerPixel);
-        return ref MemoryMarshal.GetReference(_data[offset..]);
+        return ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (_y * RawStride) + (_x * T.ColorFormat.BytesPerPixel));
     }
 
     /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>

@@ -13,7 +13,7 @@ public class SortTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGB[] referenceData = ImageHelper.Get3ByteColorsFromImage(image);
+            ColorRGB[] referenceData = ImageHelper.GetColorsFromImage<ColorRGB>(image);
             ColorRGB[] testData = new ColorRGB[referenceData.Length];
             Span<ColorRGB> referenceSpan = referenceData;
             Span<ColorRGB> testSpan = testData;
@@ -32,7 +32,7 @@ public class SortTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGB[] referenceData = ImageHelper.Get3ByteColorsFromImage(image);
+            ColorRGB[] referenceData = ImageHelper.GetColorsFromImage<ColorRGB>(image);
             ColorRGB[] testData = new ColorRGB[referenceData.Length];
             Span<ColorRGB> referenceSpan = referenceData;
             Span<ColorRGB> testSpan = testData;
@@ -51,7 +51,7 @@ public class SortTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGB[] referenceData = ImageHelper.Get3ByteColorsFromImage(image);
+            ColorRGB[] referenceData = ImageHelper.GetColorsFromImage<ColorRGB>(image);
             ColorRGB[] testData = new ColorRGB[referenceData.Length];
             Span<ColorRGB> referenceSpan = referenceData;
             Span<ColorRGB> testSpan = testData;
@@ -70,7 +70,7 @@ public class SortTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGBA[] referenceData = ImageHelper.Get4ByteColorsFromImage(image);
+            ColorRGBA[] referenceData = ImageHelper.GetColorsFromImage<ColorRGBA>(image);
             ColorRGBA[] testData = new ColorRGBA[referenceData.Length];
             Span<ColorRGBA> referenceSpan = referenceData;
             Span<ColorRGBA> testSpan = testData;
@@ -89,7 +89,7 @@ public class SortTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGBA[] referenceData = ImageHelper.Get4ByteColorsFromImage(image);
+            ColorRGBA[] referenceData = ImageHelper.GetColorsFromImage<ColorRGBA>(image);
             ColorRGBA[] testData = new ColorRGBA[referenceData.Length];
             Span<ColorRGBA> referenceSpan = referenceData;
             Span<ColorRGBA> testSpan = testData;
@@ -108,7 +108,7 @@ public class SortTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGBA[] referenceData = ImageHelper.Get4ByteColorsFromImage(image);
+            ColorRGBA[] referenceData = ImageHelper.GetColorsFromImage<ColorRGBA>(image);
             ColorRGBA[] testData = new ColorRGBA[referenceData.Length];
             Span<ColorRGBA> referenceSpan = referenceData;
             Span<ColorRGBA> testSpan = testData;
@@ -127,7 +127,7 @@ public class SortTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGBA[] referenceData = ImageHelper.Get4ByteColorsFromImage(image);
+            ColorRGBA[] referenceData = ImageHelper.GetColorsFromImage<ColorRGBA>(image);
             ColorRGBA[] testData = new ColorRGBA[referenceData.Length];
             Span<ColorRGBA> referenceSpan = referenceData;
             Span<ColorRGBA> testSpan = testData;

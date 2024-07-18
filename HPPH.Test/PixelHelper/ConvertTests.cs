@@ -12,7 +12,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGB> referenceData = data;
 
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
@@ -42,7 +42,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGBA[] data = ImageHelper.GetColorsFromImage<ColorRGBA>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGBA> referenceData = data;
 
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
@@ -72,7 +72,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGBA[] data = ImageHelper.GetColorsFromImage<ColorRGBA>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGBA> referenceData = data;
 
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
@@ -102,7 +102,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGBA[] data = ImageHelper.GetColorsFromImage<ColorRGBA>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGBA> referenceData = data;
 
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
@@ -132,7 +132,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGBA[] data = ImageHelper.GetColorsFromImage<ColorRGBA>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGBA> referenceData = data;
 
                 Span<ColorRGBA> sourceData = new ColorRGBA[referenceData.Length];
@@ -162,7 +162,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGB> referenceData = data;
 
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
@@ -192,7 +192,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGB> referenceData = data;
 
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
@@ -222,7 +222,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGB> referenceData = data;
 
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
@@ -252,7 +252,7 @@ public class ConvertTests
         {
             for (int skip = 0; skip < 4; skip++)
             {
-                ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image).SkipLast(skip).ToArray();
+                ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image).SkipLast(skip).ToArray();
                 ReadOnlySpan<ColorRGB> referenceData = data;
 
                 Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];

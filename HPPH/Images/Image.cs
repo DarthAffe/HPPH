@@ -205,7 +205,7 @@ public sealed class Image<T> : IImage<T>
         if (_buffer.Length == 0)
             return ref Unsafe.NullRef<byte>();
 
-        return ref MemoryMarshal.GetReference(new ReadOnlySpan<byte>(_buffer)[((_y * _stride) + (_x * ColorFormat.BytesPerPixel))..]);
+        return ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (_y * _stride) + (_x * ColorFormat.BytesPerPixel));
     }
 
     public IEnumerator<T> GetEnumerator()

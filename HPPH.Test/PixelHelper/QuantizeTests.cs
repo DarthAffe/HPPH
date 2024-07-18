@@ -12,7 +12,7 @@ public class CreateColorPaletteTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image);
+            ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image);
             Span<ColorRGB> span = data;
 
             ColorRGB[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
@@ -30,7 +30,7 @@ public class CreateColorPaletteTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image);
+            ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image);
             Span<ColorRGB> span = data;
 
             ColorRGB[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
@@ -48,7 +48,7 @@ public class CreateColorPaletteTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGB[] data = ImageHelper.Get3ByteColorsFromImage(image);
+            ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image);
             Span<ColorRGB> span = data;
 
             ColorRGB[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
@@ -66,7 +66,7 @@ public class CreateColorPaletteTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image);
+            ColorRGBA[] data = ImageHelper.GetColorsFromImage<ColorRGBA>(image);
             Span<ColorRGBA> span = data;
 
             ColorRGBA[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 1).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
@@ -84,7 +84,7 @@ public class CreateColorPaletteTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image);
+            ColorRGBA[] data = ImageHelper.GetColorsFromImage<ColorRGBA>(image);
             Span<ColorRGBA> span = data;
 
             ColorRGBA[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 2).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
@@ -102,7 +102,7 @@ public class CreateColorPaletteTests
     {
         foreach (string image in GetTestImages())
         {
-            ColorRGBA[] data = ImageHelper.Get4ByteColorsFromImage(image);
+            ColorRGBA[] data = ImageHelper.GetColorsFromImage<ColorRGBA>(image);
             Span<ColorRGBA> span = data;
 
             ColorRGBA[] reference = [.. ReferencePixelHelper.CreateColorPalette(span, 16).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];

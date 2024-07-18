@@ -131,7 +131,7 @@ internal class IColorImageRow<T> : IImageRow
         {
             if ((x < 0) || (x >= _length)) throw new IndexOutOfRangeException();
 
-            return MemoryMarshal.Cast<byte, T>(_buffer.AsSpan()[_start..])[x];
+            return Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (nint)(uint)_start)), (nint)(uint)x);
         }
     }
 

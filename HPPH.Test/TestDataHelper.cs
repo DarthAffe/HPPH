@@ -10,7 +10,7 @@ internal static class TestDataHelper
         return (T)T.Create(xBytes[0], xBytes[1], yBytes[0], yBytes[1]);
     }
 
-    public static Image<T> CreateTestImage<T>(int width, int height)
+    public static T[] GetPixelData<T>(int width, int height)
         where T : struct, IColor
     {
         T[] buffer = new T[width * height];
@@ -19,6 +19,10 @@ internal static class TestDataHelper
             for (int x = 0; x < width; x++)
                 buffer[(y * width) + x] = GetColorFromLocation<T>(x, y);
 
-        return Image<T>.Create(buffer, width, height);
+        return buffer;
     }
+
+    public static Image<T> CreateTestImage<T>(int width, int height)
+        where T : struct, IColor
+        => Image<T>.Create(GetPixelData<T>(width, height), width, height);
 }

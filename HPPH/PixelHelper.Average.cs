@@ -39,12 +39,25 @@ public static partial class PixelHelper
         try
         {
             image.CopyTo(buffer);
-            return Average<T>(buffer);
+            return Average(buffer);
         }
         finally
         {
             ArrayPool<T>.Shared.Return(array);
         }
+    }
+
+    public static T Average<T>(this Span<T> colors)
+        where T : struct, IColor
+    {
+        if (colors == null) throw new ArgumentNullException(nameof(colors));
+
+        return T.ColorFormat.BytesPerPixel switch
+        {
+            3 => Unsafe.BitCast<Generic3ByteData, T>(Average(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
+            4 => Unsafe.BitCast<Generic4ByteData, T>(Average(MemoryMarshal.Cast<T, Generic4ByteData>(colors))),
+            _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
+        };
     }
 
     public static T Average<T>(this ReadOnlySpan<T> colors)
