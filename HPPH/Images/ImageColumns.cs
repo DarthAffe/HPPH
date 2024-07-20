@@ -113,12 +113,14 @@ internal class IColorImageColumns<T> : IImageColumns
     private readonly int _stride;
     private readonly int _bpp;
 
+    /// <inheritdoc />
     public int Count => _width;
 
     #endregion
 
     #region Indexer
 
+    /// <inheritdoc />
     public IImageColumn this[int column]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -151,12 +153,14 @@ internal class IColorImageColumns<T> : IImageColumns
 
     #region Methods
 
+    /// <inheritdoc />
     public IEnumerator<IImageColumn> GetEnumerator()
     {
         for (int i = 0; i < _width; i++)
             yield return this[i];
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     #endregion

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace HPPH;
 
-/// <inheritdoc />
+/// <inheritdoc cref="IImage{T}" />
 [SkipLocalsInit]
 public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     where T : struct, IColor
@@ -37,6 +37,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     #region Indexer
 
+    /// <inheritdoc />
     IColor IImage.this[int x, int y] => this[x, y];
 
     /// <inheritdoc />
@@ -51,6 +52,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         }
     }
 
+    /// <inheritdoc />
     IImage IImage.this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,6 +76,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         }
     }
 
+    /// <inheritdoc />
     IImageRows IImage.Rows => new IColorImageRows<T>(_buffer, _x, _y, Width, Height, _stride);
 
     /// <inheritdoc />
@@ -122,6 +125,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return new Image<T>(data, 0, 0, width, height, stride);
     }
 
+    /// <inheritdoc />
     public IImage<TColor> ConvertTo<TColor>()
         where TColor : struct, IColor
     {
@@ -141,6 +145,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         }
     }
 
+    /// <inheritdoc />
     public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
 
     /// <inheritdoc />
@@ -167,6 +172,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return array;
     }
 
+    /// <inheritdoc />
     public T[] ToArray()
     {
         T[] colors = new T[Width * Height];
@@ -175,6 +181,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     }
 
     //TODO DarthAffe 11.07.2024: This has some potential for optimization
+    /// <inheritdoc />
     IColor[] IImage.ToArray()
     {
         IColor[] colors = new IColor[Width * Height];
@@ -187,8 +194,10 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return colors;
     }
 
+    /// <inheritdoc />
     public RefImage<T> AsRefImage() => new(_buffer, _x, _y, Width, Height, _stride);
 
+    /// <inheritdoc />
     public RefImage<TColor> AsRefImage<TColor>()
         where TColor : struct, IColor
     {
@@ -208,6 +217,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (_y * _stride) + (_x * ColorFormat.BytesPerPixel));
     }
 
+    /// <inheritdoc />
     public IEnumerator<T> GetEnumerator()
     {
         for (int y = 0; y < Height; y++)
@@ -215,6 +225,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
                 yield return this[x, y];
     }
 
+    /// <inheritdoc />
     IEnumerator<IColor> IEnumerable<IColor>.GetEnumerator()
     {
         for (int y = 0; y < Height; y++)
@@ -222,9 +233,11 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
                 yield return this[x, y];
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     //TODO DarthAffe 20.07.2024: All of those equals can be optimized
+    /// <inheritdoc />
     public bool Equals(IImage? other)
     {
         if (other == null) return false;
@@ -240,6 +253,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return true;
     }
 
+    /// <inheritdoc />
     public bool Equals(IImage<T>? other)
     {
         if (other == null) return false;
@@ -254,6 +268,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return true;
     }
 
+    /// <inheritdoc />
     public bool Equals(Image<T>? other)
     {
         if (other == null) return false;
@@ -267,6 +282,12 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
         return true;
     }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => Equals(obj as Image<T>);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => HashCode.Combine(ColorFormat, Width, Height, _buffer.GetHashCode());
 
     #endregion
 }

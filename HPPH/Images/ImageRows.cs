@@ -111,12 +111,14 @@ internal class IColorImageRows<T> : IImageRows
     private readonly int _height;
     private readonly int _stride;
 
+    /// <inheritdoc />
     public int Count => _height;
 
     #endregion
 
     #region Indexer
 
+    /// <inheritdoc />
     public IImageRow this[int row]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -147,12 +149,14 @@ internal class IColorImageRows<T> : IImageRows
 
     #region Methods
 
+    /// <inheritdoc />
     public IEnumerator<IImageRow> GetEnumerator()
     {
         for (int i = 0; i < _height; i++)
             yield return this[i];
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     #endregion

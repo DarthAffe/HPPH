@@ -117,14 +117,17 @@ internal class IColorImageRow<T> : IImageRow
     private readonly int _start;
     private readonly int _length;
 
+    /// <inheritdoc />
     public int Length => _length;
 
+    /// <inheritdoc />
     public int SizeInBytes => Length * T.ColorFormat.BytesPerPixel;
 
     #endregion
 
     #region Indexer
 
+    /// <inheritdoc />
     public IColor this[int x]
     {
         get
@@ -150,6 +153,7 @@ internal class IColorImageRow<T> : IImageRow
 
     #region Methods
 
+    /// <inheritdoc />
     public void CopyTo(Span<IColor> destination)
     {
         if (destination == null) throw new ArgumentNullException(nameof(destination));
@@ -159,6 +163,7 @@ internal class IColorImageRow<T> : IImageRow
             destination[i] = this[i];
     }
 
+    /// <inheritdoc />
     public void CopyTo(Span<byte> destination)
     {
         if (destination == null) throw new ArgumentNullException(nameof(destination));
@@ -167,6 +172,7 @@ internal class IColorImageRow<T> : IImageRow
         _buffer.AsSpan().Slice(_start, SizeInBytes).CopyTo(destination);
     }
 
+    /// <inheritdoc />
     public IColor[] ToArray()
     {
         IColor[] array = new IColor[Length];
@@ -174,12 +180,14 @@ internal class IColorImageRow<T> : IImageRow
         return array;
     }
 
+    /// <inheritdoc />
     public IEnumerator<IColor> GetEnumerator()
     {
         for (int i = 0; i < _length; i++)
             yield return this[i];
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     #endregion

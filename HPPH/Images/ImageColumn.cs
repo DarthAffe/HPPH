@@ -124,14 +124,17 @@ internal class IColorImageColumn<T> : IImageColumn
     private readonly int _length;
     private readonly int _step;
 
+    /// <inheritdoc />
     public int Length => _length;
 
+    /// <inheritdoc />
     public int SizeInBytes => Length * T.ColorFormat.BytesPerPixel;
 
     #endregion
 
     #region Indexer
 
+    /// <inheritdoc />
     public IColor this[int y]
     {
         get
@@ -158,6 +161,7 @@ internal class IColorImageColumn<T> : IImageColumn
 
     #region Methods
 
+    /// <inheritdoc />
     public void CopyTo(Span<IColor> destination)
     {
         if (destination == null) throw new ArgumentNullException(nameof(destination));
@@ -167,6 +171,7 @@ internal class IColorImageColumn<T> : IImageColumn
             destination[i] = this[i];
     }
 
+    /// <inheritdoc />
     public void CopyTo(Span<byte> destination)
     {
         if (destination == null) throw new ArgumentNullException(nameof(destination));
@@ -178,6 +183,7 @@ internal class IColorImageColumn<T> : IImageColumn
             target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
     }
 
+    /// <inheritdoc />
     public IColor[] ToArray()
     {
         IColor[] array = new IColor[Length];
@@ -185,12 +191,14 @@ internal class IColorImageColumn<T> : IImageColumn
         return array;
     }
 
+    /// <inheritdoc />
     public IEnumerator<IColor> GetEnumerator()
     {
         for (int i = 0; i < Length; i++)
             yield return this[i];
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     #endregion
