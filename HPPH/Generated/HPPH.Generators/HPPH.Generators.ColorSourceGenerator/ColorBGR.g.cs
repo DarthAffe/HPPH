@@ -48,6 +48,9 @@ public readonly partial struct ColorBGR(byte b, byte g, byte r): IColor
     #region Methods
 
     /// <inheritdoc />
+    public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
+
+    /// <inheritdoc />
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
 
     /// <inheritdoc />

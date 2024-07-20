@@ -66,6 +66,9 @@ public static partial class PixelHelper
     public static T[] CreateColorPalette<T>(this Span<T> colors, int paletteSize)
         where T : unmanaged, IColor
     {
+        if (paletteSize < 0) throw new ArgumentException("PaletteSize Can't be < 0", nameof(paletteSize));
+        if (paletteSize == 0) return [];
+
         int splits = BitOperations.Log2((uint)paletteSize);
 
         Span<ColorCube<T>> cubes = new ColorCube<T>[1 << splits];

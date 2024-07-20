@@ -22,6 +22,8 @@ public interface IImageRow : IEnumerable<IColor>
     /// <returns>The <see cref="IColor"/> at the specified location.</returns>
     IColor this[int x] { get; }
 
+    void CopyTo(Span<IColor> destination);
+
     /// <summary>
     /// Copies the contents of this <see cref="IImageRow"/> into a destination <see cref="Span{T}"/> instance.
     /// </summary>

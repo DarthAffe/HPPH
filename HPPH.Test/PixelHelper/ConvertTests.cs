@@ -26,10 +26,10 @@ public class ConvertTests
                     ColorRGB reference = referenceData[i];
                     ColorBGR test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -56,10 +56,10 @@ public class ConvertTests
                     ColorRGBA reference = referenceData[i];
                     ColorARGB test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -86,10 +86,10 @@ public class ConvertTests
                     ColorRGBA reference = referenceData[i];
                     ColorBGRA test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -116,10 +116,10 @@ public class ConvertTests
                     ColorRGBA reference = referenceData[i];
                     ColorRGB test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(255, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -146,10 +146,10 @@ public class ConvertTests
                     ColorRGBA reference = referenceData[i];
                     ColorBGR test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(255, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -176,10 +176,10 @@ public class ConvertTests
                     ColorRGB reference = referenceData[i];
                     ColorRGBA test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -206,10 +206,10 @@ public class ConvertTests
                     ColorRGB reference = referenceData[i];
                     ColorARGB test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -236,10 +236,10 @@ public class ConvertTests
                     ColorRGB reference = referenceData[i];
                     ColorBGRA test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }
@@ -266,10 +266,10 @@ public class ConvertTests
                     ColorRGB reference = referenceData[i];
                     ColorABGR test = result[i];
 
-                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}");
-                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}");
-                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}");
-                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}");
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
                 }
             }
         }

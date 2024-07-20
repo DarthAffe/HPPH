@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a generic color made of 4 bytes (alpha, red, green and blue)
 /// </summary>
-public interface IColor
+public interface IColor : IEquatable<IColor>
 {
     /// <summary>
     /// Gets the red-component of this color.

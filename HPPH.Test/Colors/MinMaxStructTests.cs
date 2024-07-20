@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace HPPH.Test.Colors;
+﻿namespace HPPH.Test.Colors;
 
 [TestClass]
 public class MinMaxStructTests

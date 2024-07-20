@@ -13,8 +13,4 @@ internal readonly struct Generic3ByteMinMax(byte b1Min, byte b1Max, byte b2Min, 
 
     public readonly byte B3Min = b3Min;
     public readonly byte B3Max = b3Max;
-
-    public byte B1Range => (byte)(B1Max - B1Min);
-    public byte B2Range => (byte)(B2Max - B2Min);
-    public byte B3Range => (byte)(B3Max - B3Min);
 }
