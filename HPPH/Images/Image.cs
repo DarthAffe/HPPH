@@ -6,7 +6,7 @@ namespace HPPH;
 
 /// <inheritdoc />
 [SkipLocalsInit]
-public sealed class Image<T> : IImage<T>
+public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     where T : struct, IColor
 {
     #region Properties & Fields
@@ -223,6 +223,50 @@ public sealed class Image<T> : IImage<T>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    //TODO DarthAffe 20.07.2024: All of those equals can be optimized
+    public bool Equals(IImage? other)
+    {
+        if (other == null) return false;
+        if (other.ColorFormat != ColorFormat) return false;
+        if (other.Width != Width) return false;
+        if (other.Height != Height) return false;
+
+        for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+                if (!this[x, y].Equals(other[x, y]))
+                    return false;
+
+        return true;
+    }
+
+    public bool Equals(IImage<T>? other)
+    {
+        if (other == null) return false;
+        if (other.Width != Width) return false;
+        if (other.Height != Height) return false;
+
+        for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+                if (!this[x, y].Equals(other[x, y]))
+                    return false;
+
+        return true;
+    }
+
+    public bool Equals(Image<T>? other)
+    {
+        if (other == null) return false;
+        if (other.Width != Width) return false;
+        if (other.Height != Height) return false;
+
+        for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+                if (!this[x, y].Equals(other[x, y]))
+                    return false;
+
+        return true;
+    }
 
     #endregion
 }

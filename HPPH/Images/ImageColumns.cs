@@ -28,7 +28,7 @@ public readonly ref struct ImageColumns<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((column < 0) || (column > _width)) throw new IndexOutOfRangeException();
+            if ((column < 0) || (column >= _width)) throw new IndexOutOfRangeException();
 
             return new ImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
         }
@@ -124,7 +124,7 @@ internal class IColorImageColumns<T> : IImageColumns
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((column < 0) || (column > _width)) throw new IndexOutOfRangeException();
+            if ((column < 0) || (column >= _width)) throw new IndexOutOfRangeException();
 
             return new IColorImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
         }

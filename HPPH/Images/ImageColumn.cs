@@ -56,15 +56,10 @@ public readonly ref struct ImageColumn<T>
         if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
-        if (_step == 1)
-            _buffer.Slice(_start, SizeInBytes).CopyTo(destination);
-        else
-        {
-            ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), _start);
-            Span<T> target = MemoryMarshal.Cast<byte, T>(destination);
-            for (int i = 0; i < Length; i++)
-                target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
-        }
+        ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), _start);
+        Span<T> target = MemoryMarshal.Cast<byte, T>(destination);
+        for (int i = 0; i < Length; i++)
+            target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
     }
 
     public T[] ToArray()
@@ -177,15 +172,10 @@ internal class IColorImageColumn<T> : IImageColumn
         if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
-        if (_step == 1)
-            _buffer.AsSpan().Slice(_start, SizeInBytes).CopyTo(destination);
-        else
-        {
-            ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), _start);
-            Span<T> target = MemoryMarshal.Cast<byte, T>(destination);
-            for (int i = 0; i < Length; i++)
-                target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
-        }
+        ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), _start);
+        Span<T> target = MemoryMarshal.Cast<byte, T>(destination);
+        for (int i = 0; i < Length; i++)
+            target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
     }
 
     public IColor[] ToArray()

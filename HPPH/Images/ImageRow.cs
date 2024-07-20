@@ -152,6 +152,9 @@ internal class IColorImageRow<T> : IImageRow
 
     public void CopyTo(Span<IColor> destination)
     {
+        if (destination == null) throw new ArgumentNullException(nameof(destination));
+        if (destination.Length < _length) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
+
         for (int i = 0; i < _length; i++)
             destination[i] = this[i];
     }

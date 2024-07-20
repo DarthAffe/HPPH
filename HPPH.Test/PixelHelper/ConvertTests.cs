@@ -274,4 +274,34 @@ public class ConvertTests
             }
         }
     }
+
+    [TestMethod]
+    public void Convert3ByteSameBppRGBToBGRReadOnlySpan()
+    {
+        foreach (string image in GetTestImages())
+        {
+            for (int skip = 0; skip < 4; skip++)
+            {
+                ColorRGB[] data = ImageHelper.GetColorsFromImage<ColorRGB>(image).SkipLast(skip).ToArray();
+                ReadOnlySpan<ColorRGB> referenceData = data;
+
+                Span<ColorRGB> sourceData = new ColorRGB[referenceData.Length];
+                referenceData.CopyTo(sourceData);
+
+                Span<ColorBGR> result = ((ReadOnlySpan<ColorRGB>)sourceData).Convert<ColorRGB, ColorBGR>();
+
+                Assert.AreEqual(referenceData.Length, result.Length);
+                for (int i = 0; i < referenceData.Length; i++)
+                {
+                    ColorRGB reference = referenceData[i];
+                    ColorBGR test = result[i];
+
+                    Assert.AreEqual(reference.R, test.R, $"R differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.G, test.G, $"G differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.B, test.B, $"B differs at index {i}. Image: {image}, skip: {skip}");
+                    Assert.AreEqual(reference.A, test.A, $"A differs at index {i}. Image: {image}, skip: {skip}");
+                }
+            }
+        }
+    }
 }

@@ -15,11 +15,12 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
     <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\HPPH.Reference\HPPH.Reference.csproj" />
+    <ProjectReference Include="..\HPPH.SkiaSharp\HPPH.SkiaSharp.csproj" />
+    <ProjectReference Include="..\HPPH.System.Drawing\HPPH.System.Drawing.csproj" />
     <ProjectReference Include="..\HPPH\HPPH.csproj" />
   </ItemGroup>
 

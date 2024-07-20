@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents an image.
 /// </summary>
-public interface IImage : IEnumerable<IColor>
+public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
 {
     /// <summary>
     /// Gets the color format used in this image.
@@ -61,7 +61,7 @@ public interface IImage : IEnumerable<IColor>
     RefImage<TColor> AsRefImage<TColor>() where TColor : struct, IColor;
 
     IImage<TColor> ConvertTo<TColor>() where TColor : struct, IColor;
-    
+
     /// <summary>
     /// Copies the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance.
     /// </summary>
@@ -83,7 +83,7 @@ public interface IImage : IEnumerable<IColor>
 /// <summary>
 /// Represents an image.
 /// </summary>
-public interface IImage<T> : IImage
+public interface IImage<T> : IImage, IEquatable<IImage<T>>
     where T : struct, IColor
 {
     /// <summary>

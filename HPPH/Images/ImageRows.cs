@@ -27,7 +27,7 @@ public readonly ref struct ImageRows<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((row < 0) || (row > _height)) throw new IndexOutOfRangeException();
+            if ((row < 0) || (row >= _height)) throw new IndexOutOfRangeException();
 
             return new ImageRow<T>(_data, ((row + _y) * _stride) + _x, _width);
         }
@@ -122,7 +122,7 @@ internal class IColorImageRows<T> : IImageRows
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((row < 0) || (row > _height)) throw new IndexOutOfRangeException();
+            if ((row < 0) || (row >= _height)) throw new IndexOutOfRangeException();
 
             return new IColorImageRow<T>(_data, ((row + _y) * _stride) + _x, _width);
         }
