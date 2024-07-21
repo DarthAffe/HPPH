@@ -9,11 +9,11 @@ This library contains helpers to work with color data (currently only 24 and 32 
 
 It consists of the following packages:
 
-| Package                                                    | Description                                                                    |
-|------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [HPPH](https://www.nuget.org/packages/HPPH)                | Core-package, containg all the features described below                        |
-| [HPPH](https://www.nuget.org/packages/HPPH.System.Drawing) | Contains extensions to convert Images from and to System.Drawing.Bitmaps       |
-| [HPPH](https://www.nuget.org/packages/HPPH.SkiaSharp)      | Contains extensions to convert Images from and to SkiaSharp images and bitmaps |
+| Package                                                                   | Description                                                                    |
+|---------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [HPPH](https://www.nuget.org/packages/HPPH)                               | Core-package, containg all the features described below                        |
+| [HPPH.System.Drawing](https://www.nuget.org/packages/HPPH.System.Drawing) | Contains extensions to convert Images from and to System.Drawing.Bitmaps       |
+| [HPPH.SkiaSharp](https://www.nuget.org/packages/HPPH.SkiaSharp)           | Contains extensions to convert Images from and to SkiaSharp images and bitmaps |
 
 ## Supported Operations
 
