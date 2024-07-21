@@ -9,10 +9,10 @@ public static partial class ReferencePixelHelper
         float count = image.Width * image.Height;
 
         ISum sum = Sum(image);
-        return new ColorRGBA((byte)(sum.R / count),
-                             (byte)(sum.G / count),
-                             (byte)(sum.B / count),
-                             (byte)(sum.A / count));
+        return new ColorRGBA((byte)MathF.Round(sum.R / count),
+                             (byte)MathF.Round(sum.G / count),
+                             (byte)MathF.Round(sum.B / count),
+                             (byte)MathF.Round(sum.A / count));
     }
 
     public static T Average<T>(IImage<T> image)
@@ -21,10 +21,10 @@ public static partial class ReferencePixelHelper
         float count = image.Width * image.Height;
 
         ISum sum = Sum(image);
-        return (T)T.Create((byte)(sum.R / count),
-                           (byte)(sum.G / count),
-                           (byte)(sum.B / count),
-                           (byte)(sum.A / count));
+        return (T)T.Create((byte)MathF.Round(sum.R / count),
+                           (byte)MathF.Round(sum.G / count),
+                           (byte)MathF.Round(sum.B / count),
+                           (byte)MathF.Round(sum.A / count));
     }
 
     public static T Average<T>(RefImage<T> image)
@@ -33,10 +33,10 @@ public static partial class ReferencePixelHelper
         float count = image.Width * image.Height;
 
         ISum sum = Sum(image);
-        return (T)T.Create((byte)(sum.R / count),
-                           (byte)(sum.G / count),
-                           (byte)(sum.B / count),
-                           (byte)(sum.A / count));
+        return (T)T.Create((byte)MathF.Round(sum.R / count),
+                           (byte)MathF.Round(sum.G / count),
+                           (byte)MathF.Round(sum.B / count),
+                           (byte)MathF.Round(sum.A / count));
     }
 
     public static T Average<T>(Span<T> colors)
@@ -45,10 +45,10 @@ public static partial class ReferencePixelHelper
         float count = colors.Length;
 
         ISum sum = Sum(colors);
-        return (T)T.Create((byte)(sum.R / count),
-                           (byte)(sum.G / count),
-                           (byte)(sum.B / count),
-                           (byte)(sum.A / count));
+        return (T)T.Create((byte)MathF.Round(sum.R / count),
+                           (byte)MathF.Round(sum.G / count),
+                           (byte)MathF.Round(sum.B / count),
+                           (byte)MathF.Round(sum.A / count));
     }
 
     public static T Average<T>(ReadOnlySpan<T> colors)
@@ -57,10 +57,10 @@ public static partial class ReferencePixelHelper
         float count = colors.Length;
 
         ISum sum = Sum(colors);
-        return (T)T.Create((byte)(sum.R / count),
-                           (byte)(sum.G / count),
-                           (byte)(sum.B / count),
-                           (byte)(sum.A / count));
+        return (T)T.Create((byte)MathF.Round(sum.R / count),
+                           (byte)MathF.Round(sum.G / count),
+                           (byte)MathF.Round(sum.B / count),
+                           (byte)MathF.Round(sum.A / count));
     }
 
     #endregion

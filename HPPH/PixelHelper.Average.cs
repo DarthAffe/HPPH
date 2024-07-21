@@ -82,9 +82,9 @@ public static partial class PixelHelper
         Generic4LongData sum = Sum(data);
 
         float count = data.Length;
-        return new Generic3ByteData((byte)(sum.L1 / count),
-                                    (byte)(sum.L2 / count),
-                                    (byte)(sum.L3 / count));
+        return new Generic3ByteData((byte)MathF.Round(sum.L1 / count),
+                                    (byte)MathF.Round(sum.L2 / count),
+                                    (byte)MathF.Round(sum.L3 / count));
     }
 
     private static Generic4ByteData Average(ReadOnlySpan<Generic4ByteData> data)
@@ -96,10 +96,10 @@ public static partial class PixelHelper
         Generic4LongData sum = Sum(data);
 
         float count = data.Length;
-        return new Generic4ByteData((byte)(sum.L1 / count),
-                                    (byte)(sum.L2 / count),
-                                    (byte)(sum.L3 / count),
-                                    (byte)(sum.L4 / count));
+        return new Generic4ByteData((byte)MathF.Round(sum.L1 / count),
+                                    (byte)MathF.Round(sum.L2 / count),
+                                    (byte)MathF.Round(sum.L3 / count),
+                                    (byte)MathF.Round(sum.L4 / count));
     }
 
     #endregion
