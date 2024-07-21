@@ -24,13 +24,13 @@ jobs:
         dotnet-version: 8.0.x
         
     - name: Restore dependencies
-      run: dotnet restore HPPH
+      run: dotnet restore
       
     - name: Build
-      run: dotnet build HPPH --no-restore --configuration Release /p:Version=${{ github.event.inputs.version }}
+      run: dotnet build --no-restore --configuration Release /p:Version=${{ github.event.inputs.version }}
       
     - name: Test
-      run: dotnet test HPPH --no-build --verbosity normal --configuration Release
+      run: dotnet test --no-build --verbosity normal --configuration Release
 
     - name: List files
       run: tree
