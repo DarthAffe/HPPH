@@ -39,8 +39,8 @@ public class CreateSimpleColorPaletteTests
         foreach (int size in SimpleSizes)
             _simpleReference[image][typeof(T)][size] = [.. ReferencePixelHelper.CreateSimpleColorPalette(img, size).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
 
-        foreach (int size in Sizes)
-            _reference[image][typeof(T)][size] = [.. ReferencePixelHelper.CreateColorPalette(img, size).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
+        //foreach (int size in Sizes)
+        //    _reference[image][typeof(T)][size] = [.. ReferencePixelHelper.CreateColorPalette(img, size).OrderBy(x => x.R).ThenBy(x => x.G).ThenBy(x => x.B).ThenBy(x => x.A)];
     }
 
     [TestMethod]
