@@ -1,5 +1,7 @@
 ﻿using System.Buffers;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace HPPH;
 
@@ -12,16 +14,27 @@ public static partial class PixelHelper
         ArgumentNullException.ThrowIfNull(image);
 
         int dataLength = image.SizeInBytes;
-        byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
-        Span<byte> buffer = array.AsSpan()[..dataLength];
-        try
+
+        if (dataLength <= 1024)
         {
+            Span<byte> buffer = stackalloc byte[dataLength];
+
             image.CopyTo(buffer);
             return image.ColorFormat.CreateColorPalette(buffer, paletteSize);
         }
-        finally
+        else
         {
-            ArrayPool<byte>.Shared.Return(array);
+            byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
+            Span<byte> buffer = array.AsSpan()[..dataLength];
+            try
+            {
+                image.CopyTo(buffer);
+                return image.ColorFormat.CreateColorPalette(buffer, paletteSize);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(array);
+            }
         }
     }
 
@@ -33,33 +46,57 @@ public static partial class PixelHelper
         where T : unmanaged, IColor
     {
         int dataLength = image.Width * image.Height;
-        T[] array = ArrayPool<T>.Shared.Rent(dataLength);
-        Span<T> buffer = array.AsSpan()[..(dataLength)];
-        try
+        int sizeInBytes = dataLength * T.ColorFormat.BytesPerPixel;
+
+        if (sizeInBytes <= 1024)
         {
+            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
+
             image.CopyTo(buffer);
             return CreateColorPalette(buffer, paletteSize);
         }
-        finally
+        else
         {
-            ArrayPool<T>.Shared.Return(array);
+            T[] array = ArrayPool<T>.Shared.Rent(dataLength);
+            Span<T> buffer = array.AsSpan()[..(dataLength)];
+            try
+            {
+                image.CopyTo(buffer);
+                return CreateColorPalette(buffer, paletteSize);
+            }
+            finally
+            {
+                ArrayPool<T>.Shared.Return(array);
+            }
         }
     }
 
     public static T[] CreateColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
         where T : unmanaged, IColor
     {
-        T[] buffer = ArrayPool<T>.Shared.Rent(colors.Length);
-        try
-        {
-            Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
-            colors.CopyTo(colorBuffer);
+        int sizeInBytes = colors.Length * T.ColorFormat.BytesPerPixel;
 
-            return CreateColorPalette(colorBuffer, paletteSize);
-        }
-        finally
+        if (sizeInBytes <= 1024)
         {
-            ArrayPool<T>.Shared.Return(buffer);
+            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
+
+            colors.CopyTo(buffer);
+            return CreateColorPalette(buffer, paletteSize);
+        }
+        else
+        {
+            T[] buffer = ArrayPool<T>.Shared.Rent(colors.Length);
+            try
+            {
+                Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
+                colors.CopyTo(colorBuffer);
+
+                return CreateColorPalette(colorBuffer, paletteSize);
+            }
+            finally
+            {
+                ArrayPool<T>.Shared.Return(buffer);
+            }
         }
     }
 
@@ -69,7 +106,7 @@ public static partial class PixelHelper
         throw new NotImplementedException("This requires some more research and will be implemented later");
 
         //TODO DarthAffe 21.07.2024: Run some tests how the result to performance ratio is with the options described at http://blog.pkh.me/p/39-improving-color-quantization-heuristics.html
-        
+
         //if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
         //if (paletteSize == 0) return [];
 
@@ -102,16 +139,27 @@ public static partial class PixelHelper
         ArgumentNullException.ThrowIfNull(image);
 
         int dataLength = image.SizeInBytes;
-        byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
-        Span<byte> buffer = array.AsSpan()[..dataLength];
-        try
+
+        if (dataLength <= 1024)
         {
+            Span<byte> buffer = stackalloc byte[dataLength];
+
             image.CopyTo(buffer);
             return image.ColorFormat.CreateSimpleColorPalette(buffer, paletteSize);
         }
-        finally
+        else
         {
-            ArrayPool<byte>.Shared.Return(array);
+            byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
+            Span<byte> buffer = array.AsSpan()[..dataLength];
+            try
+            {
+                image.CopyTo(buffer);
+                return image.ColorFormat.CreateSimpleColorPalette(buffer, paletteSize);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(array);
+            }
         }
     }
 
@@ -123,33 +171,57 @@ public static partial class PixelHelper
         where T : unmanaged, IColor
     {
         int dataLength = image.Width * image.Height;
-        T[] array = ArrayPool<T>.Shared.Rent(dataLength);
-        Span<T> buffer = array.AsSpan()[..(dataLength)];
-        try
+        int sizeInBytes = dataLength * T.ColorFormat.BytesPerPixel;
+
+        if (sizeInBytes <= 1024)
         {
+            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
+
             image.CopyTo(buffer);
             return CreateSimpleColorPalette(buffer, paletteSize);
         }
-        finally
+        else
         {
-            ArrayPool<T>.Shared.Return(array);
+            T[] array = ArrayPool<T>.Shared.Rent(dataLength);
+            Span<T> buffer = array.AsSpan()[..(dataLength)];
+            try
+            {
+                image.CopyTo(buffer);
+                return CreateSimpleColorPalette(buffer, paletteSize);
+            }
+            finally
+            {
+                ArrayPool<T>.Shared.Return(array);
+            }
         }
     }
 
     public static T[] CreateSimpleColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
         where T : unmanaged, IColor
     {
-        T[] buffer = ArrayPool<T>.Shared.Rent(colors.Length);
-        try
-        {
-            Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
-            colors.CopyTo(colorBuffer);
+        int sizeInBytes = colors.Length * T.ColorFormat.BytesPerPixel;
 
-            return CreateSimpleColorPalette(colorBuffer, paletteSize);
-        }
-        finally
+        if (sizeInBytes <= 1024)
         {
-            ArrayPool<T>.Shared.Return(buffer);
+            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
+
+            colors.CopyTo(buffer);
+            return CreateSimpleColorPalette(buffer, paletteSize);
+        }
+        else
+        {
+            T[] buffer = ArrayPool<T>.Shared.Rent(colors.Length);
+            try
+            {
+                Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
+                colors.CopyTo(colorBuffer);
+
+                return CreateSimpleColorPalette(colorBuffer, paletteSize);
+            }
+            finally
+            {
+                ArrayPool<T>.Shared.Return(buffer);
+            }
         }
     }
 

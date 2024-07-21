@@ -13,16 +13,27 @@ public static partial class PixelHelper
         ArgumentNullException.ThrowIfNull(image);
 
         int dataLength = image.SizeInBytes;
-        byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
-        Span<byte> buffer = array.AsSpan()[..dataLength];
-        try
+
+        if (dataLength <= 1024)
         {
+            Span<byte> buffer = stackalloc byte[dataLength];
+
             image.CopyTo(buffer);
             return image.ColorFormat.Average(buffer);
         }
-        finally
+        else
         {
-            ArrayPool<byte>.Shared.Return(array);
+            byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
+            Span<byte> buffer = array.AsSpan()[..dataLength];
+            try
+            {
+                image.CopyTo(buffer);
+                return image.ColorFormat.Average(buffer);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(array);
+            }
         }
     }
 
@@ -34,16 +45,28 @@ public static partial class PixelHelper
         where T : struct, IColor
     {
         int dataLength = image.Width * image.Height;
-        T[] array = ArrayPool<T>.Shared.Rent(dataLength);
-        Span<T> buffer = array.AsSpan()[..(dataLength)];
-        try
+        int sizeInBytes = dataLength * T.ColorFormat.BytesPerPixel;
+
+        if (sizeInBytes <= 1024)
         {
+            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
+
             image.CopyTo(buffer);
             return Average(buffer);
         }
-        finally
+        else
         {
-            ArrayPool<T>.Shared.Return(array);
+            T[] array = ArrayPool<T>.Shared.Rent(dataLength);
+            Span<T> buffer = array.AsSpan()[..dataLength];
+            try
+            {
+                image.CopyTo(buffer);
+                return Average(buffer);
+            }
+            finally
+            {
+                ArrayPool<T>.Shared.Return(array);
+            }
         }
     }
 
