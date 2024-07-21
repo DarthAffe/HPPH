@@ -36,7 +36,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         name: HPPH-Nuget
-        path: HPPH\bin\Release\*.nupkg
+        path: HPPH\bin\*.nupkg
         if-no-files-found: error
 
     - name: List files
@@ -47,7 +47,7 @@ jobs:
       with:
         tag_name: ${{ github.event.inputs.version }}
         generate_release_notes: true
-        files: HPPH/bin/Release/net8.0/*.dll
+        files: HPPH/bin/net8.0/*.dll
                   
     - name: Nuget Push
       id: nuget_push
