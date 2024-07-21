@@ -118,6 +118,25 @@ public class ImageTest
     }
 
     [TestMethod]
+    public void ImageRowIndexerSubImage()
+    {
+        (int width, int height) = SIZES[0];
+
+        IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+        image = image[163, 280, 720, 13];
+
+        Assert.AreEqual(image.Height, image.Rows.Count);
+
+        for (int y = 0; y < image.Height; y++)
+        {
+            IImageRow row = image.Rows[y];
+            Assert.AreEqual(image.Width, row.Length);
+            for (int x = 0; x < row.Length; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(163 + x, 280 + y), row[x]);
+        }
+    }
+
+    [TestMethod]
     public void ImageRowEnumerator()
     {
         foreach ((int width, int height) in SIZES)
@@ -151,6 +170,25 @@ public class ImageTest
                 for (int y = 0; y < column.Length; y++)
                     Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), column[y]);
             }
+        }
+    }
+
+    [TestMethod]
+    public void ImageColumnIndexerSubImage()
+    {
+        (int width, int height) = SIZES[0];
+
+        IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+        image = image[163, 280, 720, 13];
+
+        Assert.AreEqual(image.Width, image.Columns.Count);
+
+        for (int x = 0; x < image.Width; x++)
+        {
+            IImageColumn column = image.Columns[x];
+            Assert.AreEqual(image.Height, column.Length);
+            for (int y = 0; y < column.Length; y++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(163 + x, 280 + y), column[y]);
         }
     }
 

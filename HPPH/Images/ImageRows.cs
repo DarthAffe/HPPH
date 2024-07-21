@@ -15,6 +15,7 @@ public readonly ref struct ImageRows<T>
     private readonly int _width;
     private readonly int _height;
     private readonly int _stride;
+    private readonly int _bpp;
 
     public int Count => _height;
 
@@ -29,7 +30,7 @@ public readonly ref struct ImageRows<T>
         {
             if ((row < 0) || (row >= _height)) throw new IndexOutOfRangeException();
 
-            return new ImageRow<T>(_data, ((row + _y) * _stride) + _x, _width);
+            return new ImageRow<T>(_data, ((row + _y) * _stride) + (_x * _bpp), _width);
         }
     }
 
@@ -46,6 +47,8 @@ public readonly ref struct ImageRows<T>
         this._width = width;
         this._height = height;
         this._stride = stride;
+
+        _bpp = T.ColorFormat.BytesPerPixel;
     }
 
     #endregion
@@ -110,6 +113,7 @@ internal class IColorImageRows<T> : IImageRows
     private readonly int _width;
     private readonly int _height;
     private readonly int _stride;
+    private readonly int _bpp;
 
     /// <inheritdoc />
     public int Count => _height;
@@ -126,7 +130,7 @@ internal class IColorImageRows<T> : IImageRows
         {
             if ((row < 0) || (row >= _height)) throw new IndexOutOfRangeException();
 
-            return new IColorImageRow<T>(_data, ((row + _y) * _stride) + _x, _width);
+            return new IColorImageRow<T>(_data, ((row + _y) * _stride) + (_x * _bpp), _width);
         }
     }
 
@@ -143,6 +147,8 @@ internal class IColorImageRows<T> : IImageRows
         this._width = width;
         this._height = height;
         this._stride = stride;
+
+        _bpp = T.ColorFormat.BytesPerPixel;
     }
 
     #endregion
