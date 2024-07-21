@@ -65,7 +65,7 @@ public static unsafe partial class PixelHelper
 
         return T.ColorFormat.BytesPerPixel switch
         {
-            // DarthAffe 05.07.2024: Important: The sum of 3-byte colors are result in 4 byte data!
+            // DarthAffe 05.07.2024: Important: The sum of 3-byte colors result in 4 byte data!
             3 => Unsafe.BitCast<Generic4LongData, TSum>(Sum(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
             4 => Unsafe.BitCast<Generic4LongData, TSum>(Sum(MemoryMarshal.Cast<T, Generic4ByteData>(colors))),
             _ => throw new NotSupportedException("Data is not of a supported valid color-type.")

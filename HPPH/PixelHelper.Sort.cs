@@ -21,5 +21,7 @@ public static unsafe partial class PixelHelper
     public static partial void SortByAlpha<T>(this Span<T> colors)
         where T : unmanaged, IColor;
 
+    //TODO DarthAffe 21.07.2024: Add CIE-Sorting
+
     #endregion
 }

@@ -37,6 +37,17 @@ internal class Quantize : IGeneratorFeature
                          return result;
                      }
                  
+                     unsafe IColor[] IColorFormat.CreateSimpleColorPalette(ReadOnlySpan<byte> data, int paletteSize)
+                     {
+                         Color{{colorFormat.Format}}[] colors = PixelHelper.CreateSimpleColorPalette<Color{{colorFormat.Format}}>(MemoryMarshal.Cast<byte, Color{{colorFormat.Format}}>(data), paletteSize);
+                         
+                         IColor[] result = new IColor[colors.Length];
+                         for(int i = 0; i < colors.Length; i++)
+                             result[i] = colors[i];
+                     
+                         return result;
+                     }
+                 
                      #endregion
                  }
                  """;
@@ -50,6 +61,7 @@ internal class Quantize : IGeneratorFeature
                public partial interface IColorFormat
                {
                    internal IColor[] CreateColorPalette(ReadOnlySpan<byte> data, int paletteSize);
+                   internal IColor[] CreateSimpleColorPalette(ReadOnlySpan<byte> data, int paletteSize);
                }
                """;
     }

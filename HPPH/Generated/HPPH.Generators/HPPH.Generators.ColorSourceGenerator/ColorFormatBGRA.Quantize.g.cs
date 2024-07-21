@@ -17,5 +17,16 @@ public sealed partial class ColorFormatBGRA
         return result;
     }
 
+    unsafe IColor[] IColorFormat.CreateSimpleColorPalette(ReadOnlySpan<byte> data, int paletteSize)
+    {
+        ColorBGRA[] colors = PixelHelper.CreateSimpleColorPalette<ColorBGRA>(MemoryMarshal.Cast<byte, ColorBGRA>(data), paletteSize);
+        
+        IColor[] result = new IColor[colors.Length];
+        for(int i = 0; i < colors.Length; i++)
+            result[i] = colors[i];
+    
+        return result;
+    }
+
     #endregion
 }

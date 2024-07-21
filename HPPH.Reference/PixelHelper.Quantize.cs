@@ -6,19 +6,19 @@ public static partial class ReferencePixelHelper
 {
     #region Methods
 
-    public static T[] CreateColorPalette<T>(Image<T> image, int paletteSize)
+    public static T[] CreateSimpleColorPalette<T>(Image<T> image, int paletteSize)
         where T : unmanaged, IColor
-        => CreateColorPalette<T>(image.ToArray(), paletteSize);
+        => CreateSimpleColorPalette<T>(image.ToArray(), paletteSize);
 
-    public static T[] CreateColorPalette<T>(RefImage<T> image, int paletteSize)
+    public static T[] CreateSimpleColorPalette<T>(RefImage<T> image, int paletteSize)
         where T : unmanaged, IColor
-        => CreateColorPalette<T>(image.ToArray(), paletteSize);
+        => CreateSimpleColorPalette<T>(image.ToArray(), paletteSize);
 
-    public static T[] CreateColorPalette<T>(Span<T> colors, int paletteSize)
+    public static T[] CreateSimpleColorPalette<T>(Span<T> colors, int paletteSize)
         where T : unmanaged, IColor =>
-        CreateColorPalette<T>(colors.ToArray().Cast<IColor>().ToArray(), paletteSize).Select(x => T.Create(x.R, x.G, x.B, x.A)).Cast<T>().ToArray();
+        CreateSimpleColorPalette<T>(colors.ToArray().Cast<IColor>().ToArray(), paletteSize).Select(x => T.Create(x.R, x.G, x.B, x.A)).Cast<T>().ToArray();
 
-    private static IColor[] CreateColorPalette<T>(IColor[] colors, int paletteSize)
+    private static IColor[] CreateSimpleColorPalette<T>(IColor[] colors, int paletteSize)
         where T : struct, IColor
     {
         if (paletteSize == 0) return [];
