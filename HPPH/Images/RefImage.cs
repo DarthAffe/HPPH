@@ -86,6 +86,17 @@ public readonly ref struct RefImage<T>
 
     #region Methods
 
+    public static RefImage<T> Wrap(ReadOnlySpan<T> buffer, int width, int height)
+        => Wrap(MemoryMarshal.AsBytes(buffer), width, height, width * T.ColorFormat.BytesPerPixel);
+
+    public static RefImage<T> Wrap(ReadOnlySpan<byte> buffer, int width, int height, int stride)
+    {
+        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
+        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+
+        return new RefImage<T>(buffer, 0, 0, width, height, stride);
+    }
+
     /// <summary>
     /// Copies the contents of this <see cref="RefImage{T}"/> into a destination <see cref="Span{T}"/> instance.
     /// </summary>

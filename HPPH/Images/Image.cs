@@ -125,6 +125,14 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return new Image<T>(data, 0, 0, width, height, stride);
     }
 
+    public static Image<T> Wrap(byte[] buffer, int width, int height, int stride)
+    {
+        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
+        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+
+        return new Image<T>(buffer, 0, 0, width, height, stride);
+    }
+
     /// <inheritdoc />
     public IImage<TColor> ConvertTo<TColor>()
         where TColor : struct, IColor
