@@ -97,10 +97,10 @@ internal class ColorCube
         int b = _colors.Sum(x => x.B);
         int a = _colors.Sum(x => x.A);
 
-        return T.Create((byte)(r / _colors.Count),
-                        (byte)(g / _colors.Count),
-                        (byte)(b / _colors.Count),
-                        (byte)(a / _colors.Count));
+        return T.Create((byte)MathF.Round(r / (float)_colors.Count),
+                        (byte)MathF.Round(g / (float)_colors.Count),
+                        (byte)MathF.Round(b / (float)_colors.Count),
+                        (byte)MathF.Round(a / (float)_colors.Count));
     }
 
     #endregion
