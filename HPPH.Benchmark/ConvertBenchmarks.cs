@@ -1,6 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using HPPH.System.Drawing;
 
 namespace HPPH.Benchmark;
 
@@ -11,7 +10,8 @@ public class ConvertBenchmarks
 {
     #region Properties & Fields
 
-    private readonly List<ColorRGB[]> _colors = [];
+    private readonly List<ColorRGB[]> _colors3bpp;
+    private readonly List<ColorRGBA[]> _colors4bpp;
 
     #endregion
 
@@ -19,13 +19,8 @@ public class ConvertBenchmarks
 
     public ConvertBenchmarks()
     {
-        if (!Directory.Exists(@"..\..\..\..\sample_data")) return;
-
-        _colors = [];
-
-        IEnumerable<string> files = Directory.EnumerateFiles(@"..\..\..\..\sample_data", "*.png", SearchOption.AllDirectories);
-        foreach (string file in files)
-            _colors.Add(ImageHelper.LoadImage(file).AsRefImage<ColorRGB>().ToArray());
+        _colors3bpp = BenchmarkHelper.GetSampleData<ColorRGB>();
+        _colors4bpp = BenchmarkHelper.GetSampleData<ColorRGBA>();
     }
 
     #endregion
@@ -36,10 +31,8 @@ public class ConvertBenchmarks
     public ColorBGR[] RGBToBGR()
     {
         ColorBGR[] result = [];
-        foreach (ColorRGB[] color in _colors)
-        {
+        foreach (ColorRGB[] color in _colors3bpp)
             result = new ReadOnlySpan<ColorRGB>(color).Convert<ColorRGB, ColorBGR>();
-        }
 
         return result;
     }
@@ -48,10 +41,44 @@ public class ConvertBenchmarks
     public ColorBGRA[] RGBToBGRA()
     {
         ColorBGRA[] result = [];
-        foreach (ColorRGB[] color in _colors)
+        foreach (ColorRGB[] color in _colors3bpp)
             result = new ReadOnlySpan<ColorRGB>(color).Convert<ColorRGB, ColorBGRA>();
 
         return result;
+    }
+
+    [Benchmark]
+    public ColorABGR[] RGBAToABGR()
+    {
+        ColorABGR[] result = [];
+        foreach (ColorRGBA[] color in _colors4bpp)
+            result = new ReadOnlySpan<ColorRGBA>(color).Convert<ColorRGBA, ColorABGR>();
+
+        return result;
+    }
+
+    [Benchmark]
+    public ColorBGR[] ARGBToBGR()
+    {
+        ColorBGR[] result = [];
+        foreach (ColorRGBA[] color in _colors4bpp)
+            result = new ReadOnlySpan<ColorRGBA>(color).Convert<ColorRGBA, ColorBGR>();
+
+        return result;
+    }
+
+    [Benchmark]
+    public void RGBToBGR_InPlace()
+    {
+        foreach (ColorRGB[] color in _colors3bpp)
+            new Span<ColorRGB>(color).ConvertInPlace<ColorRGB, ColorBGR>();
+    }
+
+    [Benchmark]
+    public void RGBAToABGR_InPlace()
+    {
+        foreach (ColorRGBA[] color in _colors4bpp)
+            new Span<ColorRGBA>(color).ConvertInPlace<ColorRGBA, ColorABGR>();
     }
 
     #endregion

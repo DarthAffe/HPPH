@@ -1,4 +1,4 @@
 ﻿using BenchmarkDotNet.Running;
 using HPPH.Benchmark;
 
-BenchmarkRunner.Run<ConvertBenchmarks>();
+BenchmarkRunner.Run(typeof(Program).Assembly);
