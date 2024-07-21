@@ -1,4 +1,6 @@
-﻿// ReSharper disable ConvertToAutoProperty
+﻿#nullable enable
+
+// ReSharper disable ConvertToAutoProperty
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable ReplaceWithPrimaryConstructorParameter
 

@@ -18,6 +18,8 @@ internal class Quantize : IGeneratorFeature
     private static string GenerateColorFormatQuantize(ColorFormatData colorFormat)
     {
         return $$"""
+                 #nullable enable
+                 
                  using System.Runtime.InteropServices;
                  
                  namespace HPPH;
@@ -56,6 +58,8 @@ internal class Quantize : IGeneratorFeature
     private static string GenerateColorFormatInterfaceQuantize()
     {
         return """
+               #nullable enable
+               
                namespace HPPH;
                
                public partial interface IColorFormat

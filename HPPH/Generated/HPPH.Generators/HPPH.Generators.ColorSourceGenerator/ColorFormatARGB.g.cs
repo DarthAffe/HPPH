@@ -1,4 +1,6 @@
-﻿namespace HPPH;
+﻿#nullable enable
+
+namespace HPPH;
 
 public sealed partial class ColorFormatARGB : IColorFormat
 {

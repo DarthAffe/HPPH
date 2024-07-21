@@ -1,4 +1,6 @@
-﻿using System.Buffers;
+﻿#nullable enable
+
+using System.Buffers;
 
 namespace HPPH;
 

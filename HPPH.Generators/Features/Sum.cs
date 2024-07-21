@@ -20,6 +20,8 @@ internal class Sum : IGeneratorFeature
      => colorFormat.Bpp switch
      {
          3 => $$"""
+                #nullable enable
+                
                 // ReSharper disable ConvertToAutoProperty
                 // ReSharper disable ConvertToAutoPropertyWhenPossible
                 // ReSharper disable ReplaceWithPrimaryConstructorParameter
@@ -58,6 +60,8 @@ internal class Sum : IGeneratorFeature
                 """,
 
          4 => $$"""
+                #nullable enable
+                
                 // ReSharper disable ConvertToAutoProperty
                 // ReSharper disable ConvertToAutoPropertyWhenPossible
                 // ReSharper disable ReplaceWithPrimaryConstructorParameter
@@ -100,6 +104,8 @@ internal class Sum : IGeneratorFeature
     private static string GenerateColorFormatSum(ColorFormatData colorFormat)
     {
         return $$"""
+                 #nullable enable
+                 
                  using System.Runtime.InteropServices;
                  
                  namespace HPPH;
@@ -118,6 +124,8 @@ internal class Sum : IGeneratorFeature
     private static string GenerateColorFormatInterfaceSum()
     {
         return """
+               #nullable enable
+               
                namespace HPPH;
                
                public partial interface IColorFormat

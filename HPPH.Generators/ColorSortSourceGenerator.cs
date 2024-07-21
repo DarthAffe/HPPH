@@ -15,6 +15,8 @@ public class ColorSortSourceGenerator : IIncrementalGenerator
     #region Properties & Fields
 
     private const string SORT_GENERATOR_ATTRIBUTE_SOURCE = """
+                                                            #nullable enable
+                                                            
                                                             namespace HPPH;
                                                             
                                                             [AttributeUsage(AttributeTargets.Method)]
@@ -79,6 +81,8 @@ public class ColorSortSourceGenerator : IIncrementalGenerator
         foreach (KeyValuePair<(string @namespace, string @class, string classModifier), string> data in sourceMapping)
         {
             context.AddSource($"{data.Key.@class}.g.cs", SourceText.From($$"""
+                                                                           #nullable enable
+                                                                           
                                                                            using System.Buffers;
                                                                            
                                                                            namespace {{data.Key.@namespace}};

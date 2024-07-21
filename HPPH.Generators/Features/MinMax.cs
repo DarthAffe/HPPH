@@ -20,6 +20,8 @@ internal class MinMax : IGeneratorFeature
      => colorFormat.Bpp switch
      {
          3 => $$"""
+                 #nullable enable
+                 
                  // ReSharper disable ConvertToAutoProperty
                  // ReSharper disable ReplaceWithPrimaryConstructorParameter
                  
@@ -73,6 +75,8 @@ internal class MinMax : IGeneratorFeature
                  """,
 
          4 => $$"""
+                #nullable enable
+                
                 // ReSharper disable ConvertToAutoProperty
                 // ReSharper disable ReplaceWithPrimaryConstructorParameter
                 
@@ -133,6 +137,8 @@ internal class MinMax : IGeneratorFeature
     private static string GenerateColorFormatMinMax(ColorFormatData colorFormat)
     {
         return $$"""
+                 #nullable enable
+                 
                  using System.Runtime.InteropServices;
                  
                  namespace HPPH;
@@ -151,6 +157,8 @@ internal class MinMax : IGeneratorFeature
     private static string GenerateColorFormatInterfaceMinMax()
     {
         return """
+               #nullable enable
+               
                namespace HPPH;
                
                public partial interface IColorFormat

@@ -1,4 +1,6 @@
-﻿namespace HPPH;
+﻿#nullable enable
+
+namespace HPPH;
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class ColorSortGeneratorAttribute(string dataTypeName, string sortValueName) : Attribute

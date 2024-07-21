@@ -18,6 +18,8 @@ internal class Average : IGeneratorFeature
     private static string GenerateColorFormatAverage(ColorFormatData colorFormat)
     {
         return $$"""
+                 #nullable enable
+                 
                  using System.Runtime.InteropServices;
                  
                  namespace HPPH;
@@ -36,6 +38,8 @@ internal class Average : IGeneratorFeature
     private static string GenerateColorFormatInterfaceAverage()
     {
         return """
+               #nullable enable
+               
                namespace HPPH;
                
                public partial interface IColorFormat

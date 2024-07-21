@@ -25,6 +25,8 @@ internal class Colors : IGeneratorFeature
      => colorFormat.Bpp switch
      {
          3 => $$"""
+                #nullable enable
+                
                 // ReSharper disable ConvertToAutoProperty
                 // ReSharper disable ConvertToAutoPropertyWhenPossible
                 // ReSharper disable ReplaceWithPrimaryConstructorParameter
@@ -89,6 +91,8 @@ internal class Colors : IGeneratorFeature
                 """,
 
          4 => $$"""
+                #nullable enable
+                
                 // ReSharper disable ConvertToAutoProperty
                 // ReSharper disable ConvertToAutoPropertyWhenPossible
                 // ReSharper disable ReplaceWithPrimaryConstructorParameter
@@ -159,6 +163,8 @@ internal class Colors : IGeneratorFeature
     private static string GenerateColorFormatCode(ColorFormatData colorFormat)
     {
         return $$"""
+                 #nullable enable
+                 
                  namespace HPPH;
 
                  public sealed partial class ColorFormat{{colorFormat.Format}} : IColorFormat
@@ -188,6 +194,8 @@ internal class Colors : IGeneratorFeature
     {
         StringBuilder sb = new();
         sb.AppendLine("""
+                      #nullable enable
+                      
                       namespace HPPH;
 
                       public partial interface IColorFormat
