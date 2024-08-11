@@ -16,6 +16,14 @@ public class SystemDrawingTests
         IImage image2 = bitmap.ToImage();
 
         Assert.AreEqual(IColorFormat.BGR, image2.ColorFormat);
+        for (int y = 0; y < image.Height; y++)
+            for (int x = 0; x < image.Width; x++)
+            {
+                Assert.AreEqual(image[x, y].A, image2[x, y].A, $"{x}-{y}");
+                Assert.AreEqual(image[x, y].R, image2[x, y].R, $"{x}-{y}");
+                Assert.AreEqual(image[x, y].G, image2[x, y].G, $"{x}-{y}");
+                Assert.AreEqual(image[x, y].B, image2[x, y].B, $"{x}-{y}");
+            }
 
         image2 = image2.ConvertTo<ColorRGB>();
 
@@ -30,6 +38,14 @@ public class SystemDrawingTests
         IImage image2 = bitmap.ToImage();
 
         Assert.AreEqual(IColorFormat.BGRA, image2.ColorFormat);
+        for (int y = 0; y < image.Height; y++)
+            for (int x = 0; x < image.Width; x++)
+            {
+                Assert.AreEqual(image[x, y].A, image2[x, y].A);
+                Assert.AreEqual(image[x, y].R, image2[x, y].R);
+                Assert.AreEqual(image[x, y].G, image2[x, y].G);
+                Assert.AreEqual(image[x, y].B, image2[x, y].B);
+            }
 
         image2 = image2.ConvertTo<ColorRGBA>();
 

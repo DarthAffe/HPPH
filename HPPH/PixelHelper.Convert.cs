@@ -174,12 +174,14 @@ public static unsafe partial class PixelHelper
                     tar += bytesPerVector;
                 }
 
+                Span<byte> buffer = stackalloc byte[missingElements * BPP];
                 for (int i = 0; i < missingElements; i++)
                 {
-                    tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
-                    tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
-                    tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                    buffer[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                    buffer[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                    buffer[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
                 }
+                buffer.CopyTo(new Span<byte>(tar, buffer.Length));
             }
             else
             {
@@ -191,12 +193,14 @@ public static unsafe partial class PixelHelper
                     byte* missingSrc = sourcePtr + (batches * batchSize * BPP);
                     byte* missingTar = targetPtr + (batches * batchSize * BPP);
 
+                    Span<byte> buffer = stackalloc byte[missing * BPP];
                     for (int i = 0; i < missing; i++)
                     {
-                        missingTar[(i * BPP) + 0] = missingSrc[(i * BPP) + maskVector[0]];
-                        missingTar[(i * BPP) + 1] = missingSrc[(i * BPP) + maskVector[1]];
-                        missingTar[(i * BPP) + 2] = missingSrc[(i * BPP) + maskVector[2]];
+                        buffer[(i * BPP) + 0] = missingSrc[(i * BPP) + maskVector[0]];
+                        buffer[(i * BPP) + 1] = missingSrc[(i * BPP) + maskVector[1]];
+                        buffer[(i * BPP) + 2] = missingSrc[(i * BPP) + maskVector[2]];
                     }
+                    buffer.CopyTo(new Span<byte>(missingTar, buffer.Length));
                 }
 
                 void Process(int index)
@@ -217,12 +221,14 @@ public static unsafe partial class PixelHelper
                         tar += bytesPerVector;
                     }
 
+                    Span<byte> buffer = stackalloc byte[missingElements * BPP];
                     for (int i = 0; i < missingElements; i++)
                     {
-                        tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
-                        tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
-                        tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                        buffer[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                        buffer[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                        buffer[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
                     }
+                    buffer.CopyTo(new Span<byte>(tar, buffer.Length));
                 }
             }
         }
@@ -292,13 +298,15 @@ public static unsafe partial class PixelHelper
                     tar += bytesPerVector;
                 }
 
+                Span<byte> buffer = stackalloc byte[missingElements * BPP];
                 for (int i = 0; i < missingElements; i++)
                 {
-                    tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
-                    tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
-                    tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
-                    tar[(i * BPP) + 3] = src[(i * BPP) + maskVector[3]];
+                    buffer[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                    buffer[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                    buffer[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                    buffer[(i * BPP) + 3] = src[(i * BPP) + maskVector[3]];
                 }
+                buffer.CopyTo(new Span<byte>(tar, buffer.Length));
             }
             else
             {
@@ -310,13 +318,15 @@ public static unsafe partial class PixelHelper
                     byte* missingSrc = sourcePtr + (batches * batchSize * BPP);
                     byte* missingTar = targetPtr + (batches * batchSize * BPP);
 
+                    Span<byte> buffer = stackalloc byte[missing * BPP];
                     for (int i = 0; i < missing; i++)
                     {
-                        missingTar[(i * BPP) + 0] = missingSrc[(i * BPP) + maskVector[0]];
-                        missingTar[(i * BPP) + 1] = missingSrc[(i * BPP) + maskVector[1]];
-                        missingTar[(i * BPP) + 2] = missingSrc[(i * BPP) + maskVector[2]];
-                        missingTar[(i * BPP) + 3] = missingSrc[(i * BPP) + maskVector[3]];
+                        buffer[(i * BPP) + 0] = missingSrc[(i * BPP) + maskVector[0]];
+                        buffer[(i * BPP) + 1] = missingSrc[(i * BPP) + maskVector[1]];
+                        buffer[(i * BPP) + 2] = missingSrc[(i * BPP) + maskVector[2]];
+                        buffer[(i * BPP) + 3] = missingSrc[(i * BPP) + maskVector[3]];
                     }
+                    buffer.CopyTo(new Span<byte>(missingTar, buffer.Length));
                 }
 
                 void Process(int index)
@@ -337,18 +347,20 @@ public static unsafe partial class PixelHelper
                         tar += bytesPerVector;
                     }
 
+                    Span<byte> buffer = stackalloc byte[missingElements * BPP];
                     for (int i = 0; i < missingElements; i++)
                     {
-                        tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
-                        tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
-                        tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
-                        tar[(i * BPP) + 3] = src[(i * BPP) + maskVector[3]];
+                        buffer[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                        buffer[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                        buffer[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                        buffer[(i * BPP) + 3] = src[(i * BPP) + maskVector[3]];
                     }
+                    buffer.CopyTo(new Span<byte>(tar, buffer.Length));
                 }
             }
         }
     }
-    
+
     private static void ConvertWiden3To4Bytes(ReadOnlySpan<byte> source, Span<byte> target, IColorFormat sourceFormat, IColorFormat targetFormat)
     {
         const int SOURCE_BPP = 3;
