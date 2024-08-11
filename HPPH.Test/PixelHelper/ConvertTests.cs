@@ -33,6 +33,12 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorBGR>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
     }
 
     [TestMethod]
@@ -63,6 +69,12 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorARGB>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
     }
 
     [TestMethod]
@@ -93,6 +105,12 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGRA>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorBGRA>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
     }
 
     [TestMethod]
@@ -123,6 +141,12 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorRGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorRGB>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorRGB>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
     }
 
     [TestMethod]
@@ -153,6 +177,12 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGR>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorBGR>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
     }
 
     [TestMethod]
@@ -183,6 +213,20 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorRGBA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorRGBA>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+            {
+                ColorABGR refColor = TestDataHelper.GetColorFromLocation<ColorABGR>(x, y);
+                ColorRGBA color = converted[x, y];
+
+                Assert.AreEqual(255, color.A, $"Wrong A at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.R, color.R, $"Wrong R at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.G, color.G, $"Wrong G at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.B, color.B, $"Wrong B at x: {x}, y: {y}");
+            }
     }
 
     [TestMethod]
@@ -213,6 +257,20 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorARGB>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+            {
+                ColorABGR refColor = TestDataHelper.GetColorFromLocation<ColorABGR>(x, y);
+                ColorARGB color = converted[x, y];
+
+                Assert.AreEqual(255, color.A, $"Wrong A at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.R, color.R, $"Wrong R at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.G, color.G, $"Wrong G at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.B, color.B, $"Wrong B at x: {x}, y: {y}");
+            }
     }
 
     [TestMethod]
@@ -243,6 +301,20 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGRA>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+            {
+                ColorABGR refColor = TestDataHelper.GetColorFromLocation<ColorABGR>(x, y);
+                ColorBGRA color = converted[x, y];
+
+                Assert.AreEqual(255, color.A, $"Wrong A at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.R, color.R, $"Wrong R at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.G, color.G, $"Wrong G at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.B, color.B, $"Wrong B at x: {x}, y: {y}");
+            }
     }
 
     [TestMethod]
@@ -273,6 +345,20 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorABGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorABGR>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+            {
+                ColorABGR refColor = TestDataHelper.GetColorFromLocation<ColorABGR>(x, y);
+                ColorABGR color = converted[x, y];
+
+                Assert.AreEqual(255, color.A, $"Wrong A at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.R, color.R, $"Wrong R at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.G, color.G, $"Wrong G at x: {x}, y: {y}");
+                Assert.AreEqual(refColor.B, color.B, $"Wrong B at x: {x}, y: {y}");
+            }
     }
 
     [TestMethod]
@@ -303,5 +389,11 @@ public class ConvertTests
                 }
             }
         }
+
+        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
+
+        for (int y = 0; y < converted.Height; y++)
+            for (int x = 0; x < converted.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorBGR>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
     }
 }
