@@ -97,9 +97,11 @@ All of the included formats can freely be converted between each other.
 
 Allocation-free in-place conversion is only supported for formats of same size (both 24 or 32 bit).
 
-| Method     | Mean     | Error     | StdDev    | Allocated |
-|----------- |---------:|----------:|----------:|----------:|
-| RGBToBGR   | 6.272 ms | 0.0288 ms | 0.0240 ms |   8.81 MB |
-| RGBToBGRA  | 8.534 ms | 0.0684 ms | 0.0640 ms |  11.75 MB |
-| RGBAToABGR | 8.128 ms | 0.0927 ms | 0.0867 ms |  11.75 MB |
-| ARGBToBGR  | 8.004 ms | 0.0353 ms | 0.0313 ms |   8.81 MB |
+| Method             | Mean     | Error     | StdDev    | Allocated   |
+|------------------- |---------:|----------:|----------:|------------:|
+| RGBToBGR           | 1.487 ms | 0.0221 ms | 0.0196 ms |  9073.58 KB |
+| RGBToBGRA          | 1.676 ms | 0.0330 ms | 0.0353 ms | 12064.76 KB |
+| RGBAToABGR         | 1.766 ms | 0.0348 ms | 0.0476 ms | 12084.93 KB |
+| ARGBToBGR          | 1.533 ms | 0.0072 ms | 0.0064 ms |  9085.36 KB |
+| RGBToBGR_InPlace   | 1.025 ms | 0.0021 ms | 0.0017 ms |    34.47 KB |
+| RGBAToABGR_InPlace | 1.054 ms | 0.0023 ms | 0.0020 ms |    34.16 KB |
