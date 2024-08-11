@@ -40,7 +40,11 @@ public static unsafe partial class PixelHelper
 
     public static IMinMax MinMax<T>(this IImage<T> image)
         where T : struct, IColor
-        => image.AsRefImage().MinMax();
+    {
+        ArgumentNullException.ThrowIfNull(image, nameof(image));
+
+        return image.AsRefImage().MinMax();
+    }
 
     public static IMinMax MinMax<T>(this RefImage<T> image)
         where T : struct, IColor

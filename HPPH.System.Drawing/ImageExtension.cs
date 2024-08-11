@@ -9,6 +9,8 @@ public static class ImageExtension
     [SupportedOSPlatform("windows")]
     public static unsafe Bitmap ToBitmap(this IImage image)
     {
+        ArgumentNullException.ThrowIfNull(image, nameof(image));
+
         switch (image.ColorFormat.BytesPerPixel)
         {
             case 3:
@@ -57,6 +59,8 @@ public static class ImageExtension
     [SupportedOSPlatform("windows")]
     public static byte[] ToPng(this IImage image)
     {
+        ArgumentNullException.ThrowIfNull(image, nameof(image));
+
         using Bitmap bitmap = ToBitmap(image);
         using MemoryStream ms = new();
         bitmap.Save(ms, ImageFormat.Png);
@@ -67,6 +71,8 @@ public static class ImageExtension
     [SupportedOSPlatform("windows")]
     public static unsafe IImage ToImage(this Bitmap bitmap)
     {
+        ArgumentNullException.ThrowIfNull(bitmap, nameof(bitmap));
+
         BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
         ReadOnlySpan<byte> buffer = new(data.Scan0.ToPointer(), data.Stride * data.Height);
 

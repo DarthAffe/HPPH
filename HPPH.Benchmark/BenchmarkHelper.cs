@@ -1,4 +1,6 @@
-﻿using HPPH.System.Drawing;
+﻿#pragma warning disable CA1416
+
+using HPPH.System.Drawing;
 
 namespace HPPH.Benchmark;
 

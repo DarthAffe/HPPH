@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
-    
+
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-all</AnalysisLevel>
 
@@ -45,6 +45,10 @@
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="../Analyzers.globalconfig" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DefineConstants>$(DefineConstants);TRACE;DEBUG</DefineConstants>

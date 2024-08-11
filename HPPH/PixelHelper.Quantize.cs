@@ -1,7 +1,6 @@
 ﻿using System.Buffers;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace HPPH;
 
@@ -40,7 +39,11 @@ public static partial class PixelHelper
 
     public static T[] CreateColorPalette<T>(this IImage<T> image, int paletteSize)
         where T : unmanaged, IColor
-        => image.AsRefImage().CreateColorPalette(paletteSize);
+    {
+        ArgumentNullException.ThrowIfNull(image, nameof(image));
+
+        return image.AsRefImage().CreateColorPalette(paletteSize);
+    }
 
     public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize)
         where T : unmanaged, IColor
@@ -165,7 +168,11 @@ public static partial class PixelHelper
 
     public static T[] CreateSimpleColorPalette<T>(this IImage<T> image, int paletteSize)
         where T : unmanaged, IColor
-        => image.AsRefImage().CreateSimpleColorPalette(paletteSize);
+    {
+        ArgumentNullException.ThrowIfNull(image, nameof(image));
+
+        return image.AsRefImage().CreateSimpleColorPalette(paletteSize);
+    }
 
     public static T[] CreateSimpleColorPalette<T>(this RefImage<T> image, int paletteSize)
         where T : unmanaged, IColor

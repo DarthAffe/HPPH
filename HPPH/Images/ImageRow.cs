@@ -26,7 +26,7 @@ public readonly ref struct ImageRow<T>
     {
         get
         {
-            if ((x < 0) || (x >= _length)) throw new IndexOutOfRangeException();
+            if ((x < 0) || (x >= _length)) throw new ArgumentOutOfRangeException(nameof(x));
 
             return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), (nint)(uint)_start)), (nint)(uint)x);
         }
@@ -108,7 +108,7 @@ public readonly ref struct ImageRow<T>
 
 //HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
 [SkipLocalsInit]
-internal class IColorImageRow<T> : IImageRow
+internal sealed class IColorImageRow<T> : IImageRow
     where T : struct, IColor
 {
     #region Properties & Fields
@@ -132,7 +132,7 @@ internal class IColorImageRow<T> : IImageRow
     {
         get
         {
-            if ((x < 0) || (x >= _length)) throw new IndexOutOfRangeException();
+            if ((x < 0) || (x >= _length)) throw new ArgumentOutOfRangeException(nameof(x));
 
             return Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (nint)(uint)_start)), (nint)(uint)x);
         }

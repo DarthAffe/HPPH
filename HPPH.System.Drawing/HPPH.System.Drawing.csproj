@@ -44,6 +44,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="../Analyzers.globalconfig" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DefineConstants>$(DefineConstants);TRACE;DEBUG</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
