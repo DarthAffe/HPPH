@@ -49,7 +49,7 @@ internal class Colors : IGeneratorFeature
                 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
                 [SkipLocalsInit]
                 [StructLayout(LayoutKind.Sequential)]
-                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}): IColor
+                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}): IColor, IEquatable<{{colorFormat.TypeName}}>
                 {
                     #region Properties & Fields
                 
@@ -74,10 +74,26 @@ internal class Colors : IGeneratorFeature
                 
                     #endregion
                 
+                    #region Operators
+                    
+                    public static bool operator ==({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => left.Equals(right);
+                    public static bool operator !=({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => !left.Equals(right);
+                    
+                    #endregion
+                
                     #region Methods
                 
                     /// <inheritdoc />
                     public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
+                
+                    /// <inheritdoc />
+                    public bool Equals({{colorFormat.TypeName}} other) => (_{{colorFormat.FirstEntry}} == other._{{colorFormat.FirstEntry}}) && (_{{colorFormat.SecondEntry}} == other._{{colorFormat.SecondEntry}}) && (_{{colorFormat.ThirdEntry}} == other._{{colorFormat.ThirdEntry}});
+                    
+                    /// <inheritdoc />
+                    public override bool Equals(object? obj) => obj is {{colorFormat.TypeName}} other && Equals(other);
+                    
+                    /// <inheritdoc />
+                    public override int GetHashCode() => HashCode.Combine(_{{colorFormat.FirstEntry}}, _{{colorFormat.SecondEntry}}, _{{colorFormat.ThirdEntry}});
                 
                     /// <inheritdoc />
                     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
@@ -116,7 +132,7 @@ internal class Colors : IGeneratorFeature
                 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
                 [SkipLocalsInit]
                 [StructLayout(LayoutKind.Sequential)]
-                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}, byte {{colorFormat.FourthEntry}}) : IColor
+                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}, byte {{colorFormat.FourthEntry}}) : IColor, IEquatable<{{colorFormat.TypeName}}>
                 {
                     #region Properties & Fields
                 
@@ -142,10 +158,26 @@ internal class Colors : IGeneratorFeature
                 
                     #endregion
                 
+                    #region Operators
+                    
+                    public static bool operator ==({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => left.Equals(right);
+                    public static bool operator !=({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => !left.Equals(right);
+                    
+                    #endregion
+                
                     #region Methods
                 
                     /// <inheritdoc />
                     public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
+                
+                    /// <inheritdoc />
+                    public bool Equals({{colorFormat.TypeName}} other) => (_{{colorFormat.FirstEntry}} == other._{{colorFormat.FirstEntry}}) && (_{{colorFormat.SecondEntry}} == other._{{colorFormat.SecondEntry}}) && (_{{colorFormat.ThirdEntry}} == other._{{colorFormat.ThirdEntry}})&& (_{{colorFormat.FourthEntry}}== other._{{colorFormat.FourthEntry}});
+                    
+                    /// <inheritdoc />
+                    public override bool Equals(object? obj) => obj is {{colorFormat.TypeName}} other && Equals(other);
+                    
+                    /// <inheritdoc />
+                    public override int GetHashCode() => HashCode.Combine(_{{colorFormat.FirstEntry}}, _{{colorFormat.SecondEntry}}, _{{colorFormat.ThirdEntry}}, _{{colorFormat.FourthEntry}});
                 
                     /// <inheritdoc />
                     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";

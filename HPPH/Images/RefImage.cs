@@ -34,12 +34,14 @@ public readonly ref struct RefImage<T>
 
     #region Indexer
 
+#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
+
     public ref readonly T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new IndexOutOfRangeException();
+            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new ArgumentOutOfRangeException();
 
             return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (nint)(uint)((_y + y) * RawStride))), (nint)(uint)(_x + x));
         }
@@ -50,11 +52,13 @@ public readonly ref struct RefImage<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
+            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
 
             return new RefImage<T>(_data, _x + x, _y + y, width, height, RawStride);
         }
     }
+
+#pragma warning restore CA2208
 
     public ImageRows<T> Rows
     {

@@ -23,7 +23,7 @@ namespace HPPH;
 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
 [SkipLocalsInit]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct ColorBGRA(byte b, byte g, byte r, byte a) : IColor
+public readonly partial struct ColorBGRA(byte b, byte g, byte r, byte a) : IColor, IEquatable<ColorBGRA>
 {
     #region Properties & Fields
 
@@ -49,10 +49,26 @@ public readonly partial struct ColorBGRA(byte b, byte g, byte r, byte a) : IColo
 
     #endregion
 
+    #region Operators
+    
+    public static bool operator ==(ColorBGRA left, ColorBGRA right) => left.Equals(right);
+    public static bool operator !=(ColorBGRA left, ColorBGRA right) => !left.Equals(right);
+    
+    #endregion
+
     #region Methods
 
     /// <inheritdoc />
     public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
+
+    /// <inheritdoc />
+    public bool Equals(ColorBGRA other) => (_b == other._b) && (_g == other._g) && (_r == other._r)&& (_a== other._a);
+    
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is ColorBGRA other && Equals(other);
+    
+    /// <inheritdoc />
+    public override int GetHashCode() => HashCode.Combine(_b, _g, _r, _a);
 
     /// <inheritdoc />
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";

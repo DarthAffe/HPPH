@@ -39,7 +39,11 @@ public static partial class PixelHelper
 
     public static T Average<T>(this IImage<T> image)
         where T : struct, IColor
-        => image.AsRefImage().Average();
+    {
+        ArgumentNullException.ThrowIfNull(image, nameof(image));
+
+        return image.AsRefImage().Average();
+    }
 
     public static T Average<T>(this RefImage<T> image)
         where T : struct, IColor

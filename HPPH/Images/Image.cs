@@ -40,13 +40,15 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     IColor IImage.this[int x, int y] => this[x, y];
 
+#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
+
     /// <inheritdoc />
     public ref readonly T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new IndexOutOfRangeException();
+            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new ArgumentOutOfRangeException();
 
             return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (nint)(uint)((_y + y) * _stride))), (nint)(uint)(_x + x));
         }
@@ -58,7 +60,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
+            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
 
             return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
         }
@@ -70,11 +72,13 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new IndexOutOfRangeException();
+            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
 
             return new RefImage<T>(_buffer, _x + x, _y + y, width, height, _stride);
         }
     }
+
+#pragma warning restore CA2208
 
     /// <inheritdoc />
     IImageRows IImage.Rows => new IColorImageRows<T>(_buffer, _x, _y, Width, Height, _stride);
@@ -127,6 +131,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     public static Image<T> Wrap(byte[] buffer, int width, int height, int stride)
     {
+        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
         if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
         if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
 

@@ -28,7 +28,7 @@ public readonly ref struct ImageColumns<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((column < 0) || (column >= _width)) throw new IndexOutOfRangeException();
+            if ((column < 0) || (column >= _width)) throw new ArgumentOutOfRangeException(nameof(column));
 
             return new ImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
         }
@@ -100,7 +100,7 @@ public readonly ref struct ImageColumns<T>
 
 //HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
 [SkipLocalsInit]
-internal class IColorImageColumns<T> : IImageColumns
+internal sealed class IColorImageColumns<T> : IImageColumns
     where T : struct, IColor
 {
     #region Properties & Fields
@@ -126,7 +126,7 @@ internal class IColorImageColumns<T> : IImageColumns
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((column < 0) || (column >= _width)) throw new IndexOutOfRangeException();
+            if ((column < 0) || (column >= _width)) throw new ArgumentOutOfRangeException(nameof(column));
 
             return new IColorImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
         }
