@@ -748,7 +748,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongXBig()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -756,7 +756,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongYBig()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -764,7 +764,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongXSmall()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -772,7 +772,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongYSmall()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -780,7 +780,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongX()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -788,7 +788,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongY()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -796,7 +796,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongWidth()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -804,7 +804,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongHeight()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -812,7 +812,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInvalidSizeWidth()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -820,7 +820,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInvalidSizeHeight()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -828,7 +828,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongX()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -836,7 +836,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongY()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -844,7 +844,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -852,7 +852,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -860,7 +860,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceInvalidSizeWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -868,7 +868,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceInvalidSizeHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -876,7 +876,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnsIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -884,7 +884,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnsIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -892,7 +892,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowsIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -900,7 +900,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowsIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -908,7 +908,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -916,7 +916,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -924,7 +924,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
@@ -932,7 +932,7 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(IndexOutOfRangeException))]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
