@@ -18,10 +18,10 @@ public static class ImageExtension
                     Bitmap bitmap = new(image.Width, image.Height, PixelFormat.Format24bppRgb);
                     BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
 
-                    IImage<ColorBGR> convertedImage = image.ConvertTo<ColorBGR>();
+                    IImage<ColorBGR> img = image as IImage<ColorBGR> ?? image.ConvertTo<ColorBGR>();
 
                     nint ptr = bmpData.Scan0;
-                    foreach (ImageRow<ColorBGR> row in convertedImage.Rows)
+                    foreach (ImageRow<ColorBGR> row in img.Rows)
                     {
                         row.CopyTo(new Span<byte>((void*)ptr, bmpData.Stride));
                         ptr += bmpData.Stride;
@@ -37,10 +37,10 @@ public static class ImageExtension
                     Bitmap bitmap = new(image.Width, image.Height, PixelFormat.Format32bppArgb);
                     BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
 
-                    IImage<ColorBGRA> convertedImage = image.ConvertTo<ColorBGRA>();
+                    IImage<ColorBGRA> img = image as IImage<ColorBGRA> ?? image.ConvertTo<ColorBGRA>();
 
                     nint ptr = bmpData.Scan0;
-                    foreach (ImageRow<ColorBGRA> row in convertedImage.Rows)
+                    foreach (ImageRow<ColorBGRA> row in img.Rows)
                     {
                         row.CopyTo(new Span<byte>((void*)ptr, bmpData.Stride));
                         ptr += bmpData.Stride;
