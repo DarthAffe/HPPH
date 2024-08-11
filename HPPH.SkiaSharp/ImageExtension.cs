@@ -21,7 +21,8 @@ public static class ImageExtension
 
         SKBitmap bitmap = new(image.Width, image.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         nint pixelPtr = bitmap.GetPixels(out nint length);
-        image.ConvertTo<ColorBGRA>().CopyTo(new Span<byte>((void*)pixelPtr, (int)length));
+
+        (image as IImage<ColorBGRA> ?? image.ConvertTo<ColorBGRA>()).CopyTo(new Span<byte>((void*)pixelPtr, (int)length));
 
         return bitmap;
     }
@@ -32,9 +33,9 @@ public static class ImageExtension
         return skImage.Encode(SKEncodedImageFormat.Png, 100).ToArray();
     }
 
-    public static IImage ToImage(this SKImage skImage) => SKBitmap.FromImage(skImage).ToImage();
+    public static IImage<ColorBGRA> ToImage(this SKImage skImage) => SKBitmap.FromImage(skImage).ToImage();
 
-    public static IImage ToImage(this SKBitmap bitmap)
+    public static IImage<ColorBGRA> ToImage(this SKBitmap bitmap)
     {
         ArgumentNullException.ThrowIfNull(bitmap, nameof(bitmap));
 
