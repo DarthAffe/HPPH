@@ -5,6 +5,12 @@ namespace HPPH;
 
 public static unsafe partial class PixelHelper
 {
+    #region Constants
+
+    private const int MIN_BATCH_SIZE = 8;
+
+    #endregion
+
     #region Methods
 
     public static Span<TTarget> ConvertInPlace<TSource, TTarget>(this Span<TSource> colors)
@@ -105,6 +111,8 @@ public static unsafe partial class PixelHelper
 
     private static void Convert3Bytes(ReadOnlySpan<byte> source, Span<byte> target, IColorFormat sourceFormat, IColorFormat targetFormat)
     {
+        const int BPP = 3;
+
         ReadOnlySpan<byte> sourceMapping = sourceFormat.ByteMapping;
         ReadOnlySpan<byte> targetMapping = targetFormat.ByteMapping;
 
@@ -133,12 +141,97 @@ public static unsafe partial class PixelHelper
 
             15
         ];
+        Vector128<byte> maskVector = Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(mask));
 
-        ConvertSameBpp(source, target, mask, 3);
+        int elements = source.Length / BPP;
+        int elementsPerVector = Vector128<byte>.Count / BPP;
+        int bytesPerVector = elementsPerVector * BPP;
+
+        int chunks = elements / elementsPerVector;
+        int batches = Math.Max(1, Math.Min(chunks / MIN_BATCH_SIZE, Environment.ProcessorCount));
+        int batchSize = elements / batches;
+
+        fixed (byte* fixedSourcePtr = source)
+        fixed (byte* fixedTargetPtr = target)
+        {
+            byte* sourcePtr = fixedSourcePtr;
+            byte* targetPtr = fixedTargetPtr;
+
+            if (batches == 1)
+            {
+                byte* src = sourcePtr;
+                byte* tar = targetPtr;
+
+                int chunkCount = Math.Max(0, (batchSize / elementsPerVector) - 1);
+                int missingElements = batchSize - (chunkCount * elementsPerVector);
+
+                for (int i = 0; i < chunkCount; i++)
+                {
+                    Vector128<byte> vector = Vector128.Load(src);
+                    Vector128.Shuffle(vector, maskVector).Store(tar);
+
+                    src += bytesPerVector;
+                    tar += bytesPerVector;
+                }
+
+                for (int i = 0; i < missingElements; i++)
+                {
+                    tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                    tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                    tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                }
+            }
+            else
+            {
+                Parallel.For(0, batches, Process);
+
+                int missing = elements - (batchSize * batches);
+                if (missing > 0)
+                {
+                    byte* missingSrc = sourcePtr + (batches * batchSize * BPP);
+                    byte* missingTar = targetPtr + (batches * batchSize * BPP);
+
+                    for (int i = 0; i < missing; i++)
+                    {
+                        missingTar[(i * BPP) + 0] = missingSrc[(i * BPP) + maskVector[0]];
+                        missingTar[(i * BPP) + 1] = missingSrc[(i * BPP) + maskVector[1]];
+                        missingTar[(i * BPP) + 2] = missingSrc[(i * BPP) + maskVector[2]];
+                    }
+                }
+
+                void Process(int index)
+                {
+                    int offset = index * batchSize;
+                    byte* src = sourcePtr + (offset * BPP);
+                    byte* tar = targetPtr + (offset * BPP);
+
+                    int chunkCount = Math.Max(0, (batchSize / elementsPerVector) - 1);
+                    int missingElements = batchSize - (chunkCount * elementsPerVector);
+
+                    for (int i = 0; i < chunkCount; i++)
+                    {
+                        Vector128<byte> vector = Vector128.Load(src);
+                        Vector128.Shuffle(vector, maskVector).Store(tar);
+
+                        src += bytesPerVector;
+                        tar += bytesPerVector;
+                    }
+
+                    for (int i = 0; i < missingElements; i++)
+                    {
+                        tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                        tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                        tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                    }
+                }
+            }
+        }
     }
 
     private static void Convert4Bytes(ReadOnlySpan<byte> source, Span<byte> target, IColorFormat sourceFormat, IColorFormat targetFormat)
     {
+        const int BPP = 4;
+
         ReadOnlySpan<byte> sourceMapping = sourceFormat.ByteMapping;
         ReadOnlySpan<byte> targetMapping = targetFormat.ByteMapping;
 
@@ -166,49 +259,106 @@ public static unsafe partial class PixelHelper
             (byte)(mapping[3] + 12),
         ];
 
-        ConvertSameBpp(source, target, mask, 4);
-    }
-
-    private static void ConvertSameBpp(ReadOnlySpan<byte> source, Span<byte> target, ReadOnlySpan<byte> mask, int bpp)
-    {
-        int elementsPerVector = Vector128<byte>.Count / bpp;
-        int bytesPerVector = elementsPerVector * bpp;
-
-        int chunks = source.Length / bytesPerVector;
         Vector128<byte> maskVector = Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(mask));
 
-        int missingElements = (source.Length - (chunks * bytesPerVector)) / bpp;
+        int elements = source.Length / BPP;
+        int elementsPerVector = Vector128<byte>.Count / BPP;
+        int bytesPerVector = elementsPerVector * BPP;
 
-        fixed (byte* sourcePtr = source)
-        fixed (byte* targetPtr = target)
+        int chunks = elements / elementsPerVector;
+        int batches = Math.Max(1, Math.Min(chunks / MIN_BATCH_SIZE, Environment.ProcessorCount));
+        int batchSize = elements / batches;
+
+        fixed (byte* fixedSourcePtr = source)
+        fixed (byte* fixedTargetPtr = target)
         {
-            byte* src = sourcePtr;
-            byte* tar = targetPtr;
+            byte* sourcePtr = fixedSourcePtr;
+            byte* targetPtr = fixedTargetPtr;
 
-            for (int i = 0; i < chunks; i++)
+            if (batches == 1)
             {
-                Vector128<byte> vector = Vector128.Load(src);
-                Vector128.Shuffle(vector, maskVector).Store(tar);
+                byte* src = sourcePtr;
+                byte* tar = targetPtr;
 
-                src += bytesPerVector;
-                tar += bytesPerVector;
+                int chunkCount = batchSize / elementsPerVector;
+                int missingElements = batchSize - (chunkCount * elementsPerVector);
+
+                for (int i = 0; i < chunkCount; i++)
+                {
+                    Vector128<byte> vector = Vector128.Load(src);
+                    Vector128.Shuffle(vector, maskVector).Store(tar);
+
+                    src += bytesPerVector;
+                    tar += bytesPerVector;
+                }
+
+                for (int i = 0; i < missingElements; i++)
+                {
+                    tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                    tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                    tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                    tar[(i * BPP) + 3] = src[(i * BPP) + maskVector[3]];
+                }
             }
+            else
+            {
+                Parallel.For(0, batches, Process);
 
-            Span<byte> buffer = stackalloc byte[missingElements * bpp]; // DarthAffe 08.07.2024: This is fine as it's always < 16 bytes
-            for (int j = 0; j < buffer.Length; j++)
-                buffer[j] = src[mask[j]];
+                int missing = elements - (batchSize * batches);
+                if (missing > 0)
+                {
+                    byte* missingSrc = sourcePtr + (batches * batchSize * BPP);
+                    byte* missingTar = targetPtr + (batches * batchSize * BPP);
 
-            buffer.CopyTo(new Span<byte>(tar, buffer.Length));
+                    for (int i = 0; i < missing; i++)
+                    {
+                        missingTar[(i * BPP) + 0] = missingSrc[(i * BPP) + maskVector[0]];
+                        missingTar[(i * BPP) + 1] = missingSrc[(i * BPP) + maskVector[1]];
+                        missingTar[(i * BPP) + 2] = missingSrc[(i * BPP) + maskVector[2]];
+                        missingTar[(i * BPP) + 3] = missingSrc[(i * BPP) + maskVector[3]];
+                    }
+                }
+
+                void Process(int index)
+                {
+                    int offset = index * batchSize;
+                    byte* src = sourcePtr + (offset * BPP);
+                    byte* tar = targetPtr + (offset * BPP);
+
+                    int chunkCount = batchSize / elementsPerVector;
+                    int missingElements = batchSize - (chunkCount * elementsPerVector);
+
+                    for (int i = 0; i < chunkCount; i++)
+                    {
+                        Vector128<byte> vector = Vector128.Load(src);
+                        Vector128.Shuffle(vector, maskVector).Store(tar);
+
+                        src += bytesPerVector;
+                        tar += bytesPerVector;
+                    }
+
+                    for (int i = 0; i < missingElements; i++)
+                    {
+                        tar[(i * BPP) + 0] = src[(i * BPP) + maskVector[0]];
+                        tar[(i * BPP) + 1] = src[(i * BPP) + maskVector[1]];
+                        tar[(i * BPP) + 2] = src[(i * BPP) + maskVector[2]];
+                        tar[(i * BPP) + 3] = src[(i * BPP) + maskVector[3]];
+                    }
+                }
+            }
         }
     }
-
+    
     private static void ConvertWiden3To4Bytes(ReadOnlySpan<byte> source, Span<byte> target, IColorFormat sourceFormat, IColorFormat targetFormat)
     {
+        const int SOURCE_BPP = 3;
+        const int TARGET_BPP = 4;
+
         ReadOnlySpan<byte> sourceMapping = sourceFormat.ByteMapping;
         ReadOnlySpan<byte> targetMapping = targetFormat.ByteMapping;
 
         // DarthAffe 08.07.2024: For now alpha is the only thing to be added
-        Span<byte> isAlpha =
+        byte[] isAlpha =
         [
             targetMapping[0] == Color.A ? byte.MaxValue : (byte)0,
             targetMapping[1] == Color.A ? byte.MaxValue : (byte)0,
@@ -270,46 +420,105 @@ public static unsafe partial class PixelHelper
             isAlpha[3],
         ];
 
-        int sourceBpp = sourceFormat.BytesPerPixel;
-        int targetBpp = targetFormat.BytesPerPixel;
-
-        int targetElementsPerVector = Vector128<byte>.Count / targetBpp;
-        int targetBytesPerVector = targetElementsPerVector * targetBpp;
-        int sourceBytesPerVector = targetElementsPerVector * sourceBpp;
-
-        int chunks = (source.Length / sourceBytesPerVector);
         Vector128<byte> maskVector = Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(mask));
         Vector128<byte> alphaMaskVector = Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(alphaMask));
 
-        int missingElements = (source.Length - (chunks * sourceBytesPerVector)) / sourceBpp;
+        int elements = source.Length / SOURCE_BPP;
+        int targetElementsPerVector = Vector128<byte>.Count / TARGET_BPP;
+        int sourceBytesPerVector = targetElementsPerVector * SOURCE_BPP;
+        int targetBytesPerVector = targetElementsPerVector * TARGET_BPP;
 
-        fixed (byte* sourcePtr = source)
-        fixed (byte* targetPtr = target)
+        int chunks = elements / targetElementsPerVector;
+        int batches = Math.Max(1, Math.Min(chunks / MIN_BATCH_SIZE, Environment.ProcessorCount));
+        int batchSize = elements / batches;
+
+        fixed (byte* fixedSourcePtr = source)
+        fixed (byte* fixedTargetPtr = target)
         {
-            byte* src = sourcePtr;
-            byte* tar = targetPtr;
+            byte* sourcePtr = fixedSourcePtr;
+            byte* targetPtr = fixedTargetPtr;
 
-            for (int i = 0; i < chunks; i++)
+            if (batches == 1)
             {
-                Vector128<byte> vector = Vector128.Load(src);
-                Vector128<byte> shuffled = Vector128.Shuffle(vector, maskVector);
-                Vector128.BitwiseOr(shuffled, alphaMaskVector).Store(tar);
+                byte* src = sourcePtr;
+                byte* tar = targetPtr;
 
-                src += sourceBytesPerVector;
-                tar += targetBytesPerVector;
+                int chunkCount = batchSize / targetElementsPerVector;
+                int missingElements = batchSize - (chunkCount * targetElementsPerVector);
+
+                for (int i = 0; i < chunkCount; i++)
+                {
+                    Vector128<byte> vector = Vector128.Load(src);
+                    Vector128<byte> shuffled = Vector128.Shuffle(vector, maskVector);
+                    Vector128.BitwiseOr(shuffled, alphaMaskVector).Store(tar);
+
+                    src += sourceBytesPerVector;
+                    tar += targetBytesPerVector;
+                }
+
+                for (int i = 0; i < missingElements; i++)
+                {
+                    tar[(i * TARGET_BPP) + 0] = Math.Max(isAlpha[0], src[(i * SOURCE_BPP) + maskVector[0]]);
+                    tar[(i * TARGET_BPP) + 1] = Math.Max(isAlpha[1], src[(i * SOURCE_BPP) + maskVector[1]]);
+                    tar[(i * TARGET_BPP) + 2] = Math.Max(isAlpha[2], src[(i * SOURCE_BPP) + maskVector[2]]);
+                    tar[(i * TARGET_BPP) + 3] = Math.Max(isAlpha[3], src[(i * SOURCE_BPP) + maskVector[3]]);
+                }
             }
+            else
+            {
+                Parallel.For(0, batches, Process);
 
-            Span<byte> buffer = stackalloc byte[missingElements * targetBpp]; // DarthAffe 08.07.2024: This is fine as it's always < 16 bytes
-            for (int i = 0; i < missingElements; i++)
-                for (int j = 0; j < targetBpp; j++)
-                    buffer[(i * targetBpp) + j] = Math.Max(isAlpha[j], src[(i * sourceBpp) + mask[j]]);
+                int missing = elements - (batchSize * batches);
+                if (missing > 0)
+                {
+                    byte* missingSrc = sourcePtr + (batches * batchSize * SOURCE_BPP);
+                    byte* missingTar = targetPtr + (batches * batchSize * TARGET_BPP);
 
-            buffer.CopyTo(new Span<byte>(tar, buffer.Length));
+                    for (int i = 0; i < missing; i++)
+                    {
+                        missingTar[(i * TARGET_BPP) + 0] = Math.Max(isAlpha[0], missingSrc[(i * SOURCE_BPP) + maskVector[0]]);
+                        missingTar[(i * TARGET_BPP) + 1] = Math.Max(isAlpha[1], missingSrc[(i * SOURCE_BPP) + maskVector[1]]);
+                        missingTar[(i * TARGET_BPP) + 2] = Math.Max(isAlpha[2], missingSrc[(i * SOURCE_BPP) + maskVector[2]]);
+                        missingTar[(i * TARGET_BPP) + 3] = Math.Max(isAlpha[3], missingSrc[(i * SOURCE_BPP) + maskVector[3]]);
+                    }
+                }
+
+                void Process(int index)
+                {
+                    int offset = index * batchSize;
+                    byte* src = sourcePtr + (offset * SOURCE_BPP);
+                    byte* tar = targetPtr + (offset * TARGET_BPP);
+
+                    int chunkCount = batchSize / targetElementsPerVector;
+                    int missingElements = batchSize - (chunkCount * targetElementsPerVector);
+
+                    for (int i = 0; i < chunkCount; i++)
+                    {
+                        Vector128<byte> vector = Vector128.Load(src);
+                        Vector128<byte> shuffled = Vector128.Shuffle(vector, maskVector);
+                        Vector128.BitwiseOr(shuffled, alphaMaskVector).Store(tar);
+
+                        src += sourceBytesPerVector;
+                        tar += targetBytesPerVector;
+                    }
+
+                    for (int i = 0; i < missingElements; i++)
+                    {
+                        tar[(i * TARGET_BPP) + 0] = Math.Max(isAlpha[0], src[(i * SOURCE_BPP) + maskVector[0]]);
+                        tar[(i * TARGET_BPP) + 1] = Math.Max(isAlpha[1], src[(i * SOURCE_BPP) + maskVector[1]]);
+                        tar[(i * TARGET_BPP) + 2] = Math.Max(isAlpha[2], src[(i * SOURCE_BPP) + maskVector[2]]);
+                        tar[(i * TARGET_BPP) + 3] = Math.Max(isAlpha[3], src[(i * SOURCE_BPP) + maskVector[3]]);
+                    }
+                }
+            }
         }
     }
 
     private static void ConvertNarrow4To3Bytes(ReadOnlySpan<byte> source, Span<byte> target, IColorFormat sourceFormat, IColorFormat targetFormat)
     {
+        const int SOURCE_BPP = 4;
+        const int TARGET_BPP = 3;
+
         ReadOnlySpan<byte> sourceMapping = sourceFormat.ByteMapping;
         ReadOnlySpan<byte> targetMapping = targetFormat.ByteMapping;
 
@@ -340,39 +549,91 @@ public static unsafe partial class PixelHelper
             15
         ];
 
-        int sourceBpp = sourceFormat.BytesPerPixel;
-        int targetBpp = targetFormat.BytesPerPixel;
-
-        int sourceElementsPerVector = Vector128<byte>.Count / sourceBpp;
-        int sourceBytesPerVector = sourceElementsPerVector * sourceBpp;
-        int targetBytesPerVector = sourceElementsPerVector * targetBpp;
-
-        int chunks = (source.Length / sourceBytesPerVector) - 1; // DarthAffe 08.07.2024: -1 since we don't have enough space to copy a full target vector for the last set
         Vector128<byte> maskVector = Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(mask));
 
-        int missingElements = (source.Length - (chunks * sourceBytesPerVector)) / sourceBpp;
+        int elements = source.Length / SOURCE_BPP;
+        int sourceElementsPerVector = Vector128<byte>.Count / SOURCE_BPP;
+        int sourceBytesPerVector = sourceElementsPerVector * SOURCE_BPP;
+        int targetBytesPerVector = sourceElementsPerVector * TARGET_BPP;
 
-        fixed (byte* sourcePtr = source)
-        fixed (byte* targetPtr = target)
+        int chunks = elements / sourceElementsPerVector;
+        int batches = Math.Max(1, Math.Min(chunks / MIN_BATCH_SIZE, Environment.ProcessorCount));
+        int batchSize = elements / batches;
+
+        fixed (byte* fixedSourcePtr = source)
+        fixed (byte* fixedTargetPtr = target)
         {
-            byte* src = sourcePtr;
-            byte* tar = targetPtr;
+            byte* sourcePtr = fixedSourcePtr;
+            byte* targetPtr = fixedTargetPtr;
 
-            for (int i = 0; i < chunks; i++)
+            if (batches == 1)
             {
-                Vector128<byte> vector = Vector128.Load(src);
-                Vector128.Shuffle(vector, maskVector).Store(tar);
+                byte* src = sourcePtr;
+                byte* tar = targetPtr;
 
-                src += sourceBytesPerVector;
-                tar += targetBytesPerVector;
+                int chunkCount = Math.Max(0, (batchSize / sourceElementsPerVector) - 1); // DarthAffe 08.07.2024: -1 since we don't have enough space to copy a full target vector for the last set
+                int missingElements = batchSize - (chunkCount * sourceElementsPerVector);
+
+                for (int i = 0; i < chunkCount; i++)
+                {
+                    Vector128<byte> vector = Vector128.Load(src);
+                    Vector128.Shuffle(vector, maskVector).Store(tar);
+
+                    src += sourceBytesPerVector;
+                    tar += targetBytesPerVector;
+                }
+
+                for (int i = 0; i < missingElements; i++)
+                {
+                    tar[(i * TARGET_BPP) + 0] = src[(i * SOURCE_BPP) + mapping[0]];
+                    tar[(i * TARGET_BPP) + 1] = src[(i * SOURCE_BPP) + mapping[1]];
+                    tar[(i * TARGET_BPP) + 2] = src[(i * SOURCE_BPP) + mapping[2]];
+                }
             }
+            else
+            {
+                Parallel.For(0, batches, Process);
 
-            Span<byte> buffer = stackalloc byte[missingElements * targetBpp]; // DarthAffe 08.07.2024: This is fine as it's always < 24 bytes
-            for (int i = 0; i < missingElements; i++)
-                for (int j = 0; j < targetBpp; j++)
-                    buffer[(i * targetBpp) + j] = src[(i * sourceBpp) + mask[j]];
+                int missing = elements - (batchSize * batches);
+                if (missing > 0)
+                {
+                    byte* missingSrc = sourcePtr + (batches * batchSize * SOURCE_BPP);
+                    byte* missingTar = targetPtr + (batches * batchSize * TARGET_BPP);
 
-            buffer.CopyTo(new Span<byte>(tar, buffer.Length));
+                    for (int i = 0; i < missing; i++)
+                    {
+                        missingTar[(i * TARGET_BPP) + 0] = missingSrc[(i * SOURCE_BPP) + maskVector[0]];
+                        missingTar[(i * TARGET_BPP) + 1] = missingSrc[(i * SOURCE_BPP) + maskVector[1]];
+                        missingTar[(i * TARGET_BPP) + 2] = missingSrc[(i * SOURCE_BPP) + maskVector[2]];
+                    }
+                }
+
+                void Process(int index)
+                {
+                    int offset = index * batchSize;
+                    byte* src = sourcePtr + (offset * SOURCE_BPP);
+                    byte* tar = targetPtr + (offset * TARGET_BPP);
+
+                    int chunkCount = Math.Max(0, (batchSize / sourceElementsPerVector) - 1); // DarthAffe 08.07.2024: -1 since we don't have enough space to copy a full target vector for the last set
+                    int missingElements = batchSize - (chunkCount * sourceElementsPerVector);
+
+                    for (int i = 0; i < chunkCount; i++)
+                    {
+                        Vector128<byte> vector = Vector128.Load(src);
+                        Vector128.Shuffle(vector, maskVector).Store(tar);
+
+                        src += sourceBytesPerVector;
+                        tar += targetBytesPerVector;
+                    }
+
+                    for (int i = 0; i < missingElements; i++)
+                    {
+                        tar[(i * TARGET_BPP) + 0] = src[(i * SOURCE_BPP) + maskVector[0]];
+                        tar[(i * TARGET_BPP) + 1] = src[(i * SOURCE_BPP) + maskVector[1]];
+                        tar[(i * TARGET_BPP) + 2] = src[(i * SOURCE_BPP) + maskVector[2]];
+                    }
+                }
+            }
         }
     }
 
