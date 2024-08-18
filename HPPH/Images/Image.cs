@@ -249,49 +249,41 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    //TODO DarthAffe 20.07.2024: All of those equals can be optimized
     /// <inheritdoc />
     public bool Equals(IImage? other)
     {
         if (other == null) return false;
         if (other.ColorFormat != ColorFormat) return false;
-        if (other.Width != Width) return false;
-        if (other.Height != Height) return false;
 
-        for (int y = 0; y < Height; y++)
-            for (int x = 0; x < Width; x++)
-                if (!this[x, y].Equals(other[x, y]))
-                    return false;
-
-        return true;
+        return Equals(other.AsRefImage<T>());
     }
 
     /// <inheritdoc />
     public bool Equals(IImage<T>? other)
     {
         if (other == null) return false;
-        if (other.Width != Width) return false;
-        if (other.Height != Height) return false;
 
-        for (int y = 0; y < Height; y++)
-            for (int x = 0; x < Width; x++)
-                if (!this[x, y].Equals(other[x, y]))
-                    return false;
-
-        return true;
+        return Equals(other.AsRefImage());
     }
 
     /// <inheritdoc />
     public bool Equals(Image<T>? other)
     {
         if (other == null) return false;
+
+        return Equals(other.AsRefImage());
+    }
+
+    public bool Equals(RefImage<T> other)
+    {
         if (other.Width != Width) return false;
         if (other.Height != Height) return false;
 
+        RefImage<T> thisRef = AsRefImage();
+
         for (int y = 0; y < Height; y++)
-            for (int x = 0; x < Width; x++)
-                if (!this[x, y].Equals(other[x, y]))
-                    return false;
+            if (!thisRef.Rows[y].AsByteSpan().SequenceEqual(other.Rows[y].AsByteSpan()))
+                return false;
 
         return true;
     }
