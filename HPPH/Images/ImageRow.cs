@@ -47,6 +47,9 @@ public readonly ref struct ImageRow<T>
 
     #region Methods
 
+    public ReadOnlySpan<T> AsSpan() => MemoryMarshal.Cast<byte, T>(AsByteSpan());
+    public ReadOnlySpan<byte> AsByteSpan() => _buffer.Slice(_start, SizeInBytes);
+
     public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
 
     public void CopyTo(Span<byte> destination)
@@ -54,7 +57,7 @@ public readonly ref struct ImageRow<T>
         if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
-        _buffer.Slice(_start, SizeInBytes).CopyTo(destination);
+        AsByteSpan().CopyTo(destination);
     }
 
     public T[] ToArray()
