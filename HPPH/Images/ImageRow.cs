@@ -157,6 +157,9 @@ internal sealed class IColorImageRow<T> : IImageRow
     #region Methods
 
     /// <inheritdoc />
+    public ReadOnlySpan<byte> AsByteSpan() => _buffer.AsSpan().Slice(_start, SizeInBytes);
+
+    /// <inheritdoc />
     public void CopyTo(Span<IColor> destination)
     {
         if (destination == null) throw new ArgumentNullException(nameof(destination));
