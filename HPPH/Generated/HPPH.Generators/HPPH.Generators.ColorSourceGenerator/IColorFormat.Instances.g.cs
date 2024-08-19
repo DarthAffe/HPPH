@@ -13,5 +13,7 @@ public partial interface IColorFormat
     public static ColorFormatRGBA RGBA => ColorFormatRGBA.Instance;
     public static ColorFormatBGRA BGRA => ColorFormatBGRA.Instance;
 
+    IColor CreateColor(byte r, byte g, byte b, byte a);
+
     #endregion
 }
