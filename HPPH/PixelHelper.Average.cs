@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace HPPH;
@@ -12,29 +11,14 @@ public static partial class PixelHelper
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        int dataLength = image.SizeInBytes;
+        float count = image.Width * image.Height;
 
-        if (dataLength <= 1024)
-        {
-            Span<byte> buffer = stackalloc byte[dataLength];
+        ISum sum = Sum(image);
 
-            image.CopyTo(buffer);
-            return image.ColorFormat.Average(buffer);
-        }
-        else
-        {
-            byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
-            Span<byte> buffer = array.AsSpan()[..dataLength];
-            try
-            {
-                image.CopyTo(buffer);
-                return image.ColorFormat.Average(buffer);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(array);
-            }
-        }
+        return image.ColorFormat.CreateColor((byte)MathF.Round(sum.R / count),
+                                             (byte)MathF.Round(sum.G / count),
+                                             (byte)MathF.Round(sum.B / count),
+                                             (byte)MathF.Round(sum.A / count));
     }
 
     public static T Average<T>(this IImage<T> image)
@@ -48,30 +32,13 @@ public static partial class PixelHelper
     public static T Average<T>(this RefImage<T> image)
         where T : struct, IColor
     {
-        int dataLength = image.Width * image.Height;
-        int sizeInBytes = dataLength * T.ColorFormat.BytesPerPixel;
+        float count = image.Width * image.Height;
 
-        if (sizeInBytes <= 1024)
-        {
-            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
-
-            image.CopyTo(buffer);
-            return Average(buffer);
-        }
-        else
-        {
-            T[] array = ArrayPool<T>.Shared.Rent(dataLength);
-            Span<T> buffer = array.AsSpan()[..dataLength];
-            try
-            {
-                image.CopyTo(buffer);
-                return Average(buffer);
-            }
-            finally
-            {
-                ArrayPool<T>.Shared.Return(array);
-            }
-        }
+        ISum sum = Sum(image);
+        return (T)T.Create((byte)MathF.Round(sum.R / count),
+                           (byte)MathF.Round(sum.G / count),
+                           (byte)MathF.Round(sum.B / count),
+                           (byte)MathF.Round(sum.A / count));
     }
 
     public static T Average<T>(this Span<T> colors)

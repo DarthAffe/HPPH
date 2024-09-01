@@ -139,6 +139,7 @@ internal class MinMax : IGeneratorFeature
         return $$"""
                  #nullable enable
                  
+                 using System.Runtime.CompilerServices;
                  using System.Runtime.InteropServices;
                  
                  namespace HPPH;
@@ -147,7 +148,8 @@ internal class MinMax : IGeneratorFeature
                  {
                      #region Methods
                  
-                     unsafe IMinMax IColorFormat.MinMax(ReadOnlySpan<byte> data) => PixelHelper.MinMax<Color{{colorFormat.Format}}, MinMax{{colorFormat.Format}}>(MemoryMarshal.Cast<byte, Color{{colorFormat.Format}}>(data));
+                     unsafe IMinMax IColorFormat.ToMinMax(Generic3ByteMinMax data) => {{(colorFormat.Bpp == 3 ? $"Unsafe.BitCast<Generic3ByteMinMax, MinMax{colorFormat.Format}>(data);" : "throw new NotSupportedException();")}}
+                     unsafe IMinMax IColorFormat.ToMinMax(Generic4ByteMinMax data) => {{(colorFormat.Bpp == 4 ? $"Unsafe.BitCast<Generic4ByteMinMax, MinMax{colorFormat.Format}>(data);" : "throw new NotSupportedException();")}}
                  
                      #endregion
                  }
@@ -163,7 +165,8 @@ internal class MinMax : IGeneratorFeature
                
                public partial interface IColorFormat
                {
-                   internal IMinMax MinMax(ReadOnlySpan<byte> data);
+                   internal IMinMax ToMinMax(Generic3ByteMinMax data);
+                   internal IMinMax ToMinMax(Generic4ByteMinMax data);
                }
                """;
     }

@@ -21,4 +21,10 @@ public sealed partial class ColorFormatBGRA : IColorFormat
     private ColorFormatBGRA() {}
 
     #endregion
+    
+    #region Methods
+    
+    public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorBGRA.Create(r, g, b, a);
+    
+    #endregion
 }

@@ -4,5 +4,6 @@ namespace HPPH;
 
 public partial interface IColorFormat
 {
-    internal ISum Sum(ReadOnlySpan<byte> data);
+    internal Generic4LongData Sum(ReadOnlySpan<byte> data);
+    internal ISum ToSum(Generic4LongData data);
 }

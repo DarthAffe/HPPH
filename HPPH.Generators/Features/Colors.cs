@@ -218,6 +218,12 @@ internal class Colors : IGeneratorFeature
                      private ColorFormat{{colorFormat.Format}}() {}
                  
                      #endregion
+                     
+                     #region Methods
+                     
+                     public IColor CreateColor(byte r, byte g, byte b, byte a) => Color{{colorFormat.Format}}.Create(r, g, b, a);
+                     
+                     #endregion
                  }
                  """;
     }
@@ -243,6 +249,8 @@ internal class Colors : IGeneratorFeature
         sb.AppendLine();
 
         sb.AppendLine("""
+                          IColor CreateColor(byte r, byte g, byte b, byte a);
+                      
                           #endregion
                       }
                       """);

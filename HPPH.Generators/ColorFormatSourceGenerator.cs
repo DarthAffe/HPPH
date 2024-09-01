@@ -19,7 +19,6 @@ public class ColorSourceGenerator : IIncrementalGenerator
     private static readonly IGeneratorFeature[] FEATURES =
     [
         new Colors(),
-        new Average(),
         new MinMax(),
         new Sum(),
         new Quantize()

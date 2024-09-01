@@ -245,8 +245,6 @@ public static partial class PixelHelper
         ColorCube<T>[] cubes = new ColorCube<T>[1 << splits];
         cubes[0] = new ColorCube<T>(0, colors.Length, SortTarget.None);
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
-
         int colorsLength = colors.Length;
         fixed (T* colorsPtr = colors)
         {
@@ -257,7 +255,7 @@ public static partial class PixelHelper
             {
                 int currentCubeCount = 1 << i;
 
-                Parallel.For(0, currentCubeCount, parallelOptions, CreateCubes);
+                Parallel.For(0, currentCubeCount, PARALLEL_OPTIONS, CreateCubes);
 
                 void CreateCubes(int index)
                 {

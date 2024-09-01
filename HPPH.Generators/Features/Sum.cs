@@ -106,6 +106,7 @@ internal class Sum : IGeneratorFeature
         return $$"""
                  #nullable enable
                  
+                 using System.Runtime.CompilerServices;
                  using System.Runtime.InteropServices;
                  
                  namespace HPPH;
@@ -114,7 +115,8 @@ internal class Sum : IGeneratorFeature
                  {
                      #region Methods
                  
-                     unsafe ISum IColorFormat.Sum(ReadOnlySpan<byte> data) => PixelHelper.Sum<Color{{colorFormat.Format}}, Sum{{colorFormat.Format}}>(MemoryMarshal.Cast<byte, Color{{colorFormat.Format}}>(data));
+                     unsafe Generic4LongData IColorFormat.Sum(ReadOnlySpan<byte> data) => PixelHelper.Sum(MemoryMarshal.Cast<byte, Generic{{colorFormat.Bpp}}ByteData>(data));
+                     unsafe ISum IColorFormat.ToSum(Generic4LongData data) => Unsafe.BitCast<Generic4LongData, Sum{{colorFormat.Format}}>(data);
                  
                      #endregion
                  }
@@ -130,7 +132,8 @@ internal class Sum : IGeneratorFeature
                
                public partial interface IColorFormat
                {
-                   internal ISum Sum(ReadOnlySpan<byte> data);
+                   internal Generic4LongData Sum(ReadOnlySpan<byte> data);
+                   internal ISum ToSum(Generic4LongData data);
                }
                """;
     }

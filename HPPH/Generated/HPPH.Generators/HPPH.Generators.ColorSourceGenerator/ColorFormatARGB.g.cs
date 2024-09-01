@@ -21,4 +21,10 @@ public sealed partial class ColorFormatARGB : IColorFormat
     private ColorFormatARGB() {}
 
     #endregion
+    
+    #region Methods
+    
+    public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorARGB.Create(r, g, b, a);
+    
+    #endregion
 }

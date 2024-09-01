@@ -21,4 +21,18 @@ internal static class BenchmarkHelper
 
         return colors;
     }
+
+    public static List<IImage<T>> GetSampleDataImages<T>()
+        where T : struct, IColor
+    {
+        if (!Directory.Exists(SAMPLE_DATA_DIR)) throw new Exception("sample data not found!");
+
+        List<IImage<T>> colors = [];
+
+        IEnumerable<string> files = Directory.EnumerateFiles(SAMPLE_DATA_DIR, "*.png", SearchOption.AllDirectories);
+        foreach (string file in files)
+            colors.Add(ImageHelper.LoadImage(file).ConvertTo<T>());
+
+        return colors;
+    }
 }

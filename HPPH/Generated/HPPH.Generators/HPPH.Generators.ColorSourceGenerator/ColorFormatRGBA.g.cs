@@ -21,4 +21,10 @@ public sealed partial class ColorFormatRGBA : IColorFormat
     private ColorFormatRGBA() {}
 
     #endregion
+    
+    #region Methods
+    
+    public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorRGBA.Create(r, g, b, a);
+    
+    #endregion
 }
