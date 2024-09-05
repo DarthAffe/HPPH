@@ -62,10 +62,11 @@ public readonly ref struct ImageRow<T>
 
     public T[] ToArray()
     {
-        T[] array = new T[Length];
+        T[] array = GC.AllocateUninitializedArray<T>(Length);
         CopyTo(array);
         return array;
     }
+
     /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ImageRowEnumerator GetEnumerator() => new(this);

@@ -64,7 +64,7 @@ public readonly ref struct ImageColumn<T>
 
     public T[] ToArray()
     {
-        T[] array = new T[Length];
+        T[] array = GC.AllocateUninitializedArray<T>(Length);
         CopyTo(array);
         return array;
     }
