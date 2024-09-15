@@ -128,7 +128,7 @@ public readonly ref struct RefImage<T>
     /// <returns>The new array containing the data of this <see cref="RefImage{T}"/>.</returns>
     public T[] ToArray()
     {
-        T[] array = new T[Width * Height];
+        T[] array = GC.AllocateUninitializedArray<T>(Width * Height);
         CopyTo(array);
         return array;
     }

@@ -124,7 +124,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
         if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
 
-        byte[] data = new byte[buffer.Length];
+        byte[] data = GC.AllocateUninitializedArray<byte>(buffer.Length);
         buffer.CopyTo(data);
         return new Image<T>(data, 0, 0, width, height, stride);
     }
@@ -152,7 +152,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         else
         {
             byte[] data = ToRawArray();
-            byte[] target = new byte[Width * Height * targetBpp];
+            byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
             MemoryMarshal.Cast<byte, T>(data.AsSpan()).Convert(MemoryMarshal.Cast<byte, TColor>(target));
             return new Image<TColor>(target, 0, 0, Width, Height, Width * targetBpp);
         }
@@ -180,7 +180,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     public byte[] ToRawArray()
     {
-        byte[] array = new byte[SizeInBytes];
+        byte[] array = GC.AllocateUninitializedArray<byte>(SizeInBytes);
         CopyTo(array);
         return array;
     }
@@ -188,7 +188,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     public T[] ToArray()
     {
-        T[] colors = new T[Width * Height];
+        T[] colors = GC.AllocateUninitializedArray<T>(Width * Height);
         CopyTo(colors);
         return colors;
     }

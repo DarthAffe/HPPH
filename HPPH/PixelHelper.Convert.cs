@@ -38,7 +38,7 @@ public static unsafe partial class PixelHelper
     {
         if (colors == null) throw new ArgumentNullException(nameof(colors));
 
-        TTarget[] buffer = new TTarget[colors.Length];
+        TTarget[] buffer = GC.AllocateUninitializedArray<TTarget>(colors.Length);
         Convert(colors, buffer.AsSpan());
         return buffer;
     }
@@ -49,7 +49,7 @@ public static unsafe partial class PixelHelper
     {
         if (colors == null) throw new ArgumentNullException(nameof(colors));
 
-        TTarget[] buffer = new TTarget[colors.Length];
+        TTarget[] buffer = GC.AllocateUninitializedArray<TTarget>(colors.Length);
         Convert(colors, buffer.AsSpan());
         return buffer;
     }
