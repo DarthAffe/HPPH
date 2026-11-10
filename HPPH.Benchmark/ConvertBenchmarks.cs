@@ -3,7 +3,7 @@ using BenchmarkDotNet.Jobs;
 
 namespace HPPH.Benchmark;
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net10_0)]
 [HtmlExporter]
 [MemoryDiagnoser]
 public class ConvertBenchmarks

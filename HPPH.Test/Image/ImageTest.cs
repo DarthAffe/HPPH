@@ -691,53 +691,46 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void CreateWrongStride()
     {
-        Image<ColorRGB>.Create([], 10, 20, 9);
+        Assert.ThrowsExactly<ArgumentException>(() => Image<ColorRGB>.Create([], 10, 20, 9));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void CreateWrongBufferSize()
     {
-        Image<ColorRGB>.Create(new byte[299], 10, 10, 30);
+        Assert.ThrowsExactly<ArgumentException>(() => Image<ColorRGB>.Create(new byte[299], 10, 10, 30));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void CopyToByteNull()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<byte>)null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<byte>)null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void CopyToColorNull()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<ColorRGB>)null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<ColorRGB>)null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void CopyToByteWrongSize()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new byte[(10 * 10 * 3) - 1]);
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new byte[(10 * 10 * 3) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void CopyToColorWrongSize()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new ColorRGB[(10 * 10) - 1]);
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new ColorRGB[(10 * 10) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void AsRefImageWrongType()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
-        RefImage<ColorBGR> refImage = image.AsRefImage<ColorBGR>();
+        Assert.ThrowsExactly<ArgumentException>(() => _ = image.AsRefImage<ColorBGR>());
     }
 
     [TestMethod]
@@ -748,259 +741,227 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongXBig()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[10, 19];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[10, 19]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongYBig()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[9, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[9, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongXSmall()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[-1, 19];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[-1, 19]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongYSmall()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[9, -1];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[9, -1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongX()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[-1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[-1, 0, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongY()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, -1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, -1, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongWidth()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, 0, 0, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 0, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongHeight()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, 0, 10, 0];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 10, 0]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInvalidSizeWidth()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[1, 0, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInvalidSizeHeight()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, 1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 1, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongX()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[-1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[-1, 0, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongY()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, -1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, -1, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, 0, 0, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 0, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, 0, 10, 0];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 10, 0]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceInvalidSizeWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[1, 0, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceInvalidSizeHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, 1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 1, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnsIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageColumn test = image.Columns[20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnsIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageColumn test = image.Columns[-1];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowsIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageRow test = image.Rows[20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowsIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageRow test = image.Rows[-1];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Columns[1][20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[1][20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Columns[1][-1];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[1][-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowIndexerToBig()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Rows[1][10];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[1][10]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowIndexerToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Rows[1][-1];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[1][-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void ColumnCopyToByteNull()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo((Span<byte>)null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => image.Columns[1].CopyTo((Span<byte>)null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void ColumnCopyToColorNull()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo((Span<IColor>)null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => image.Columns[1].CopyTo((Span<IColor>)null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void ColumnCopyToByteToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo(new byte[(20 * 3) - 1]);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo(new byte[(20 * 3) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void ColumnCopyToColorToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo(new IColor[19]);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo(new IColor[19]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void RowCopyToByteNull()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo((Span<byte>)null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => image.Rows[1].CopyTo((Span<byte>)null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void RowCopyToColorNull()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo((Span<IColor>)null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => image.Rows[1].CopyTo((Span<IColor>)null));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void RowCopyToByteToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo(new byte[(10 * 3) - 1]);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo(new byte[(10 * 3) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void RowCopyToColorToSmall()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo(new IColor[9]);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo(new IColor[9]));
     }
 
     [TestMethod]

@@ -153,7 +153,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         {
             byte[] data = ToRawArray();
             byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
-            MemoryMarshal.Cast<byte, T>(data.AsSpan()).Convert(MemoryMarshal.Cast<byte, TColor>(target));
+            MemoryMarshal.Cast<byte, T>(data.AsSpan()).Convert(MemoryMarshal.Cast<byte, TColor>(target.AsSpan()));
             return new Image<TColor>(target, 0, 0, Width, Height, Width * targetBpp);
         }
     }

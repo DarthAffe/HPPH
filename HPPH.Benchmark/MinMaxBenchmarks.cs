@@ -4,7 +4,7 @@ using HPPH.Reference;
 
 namespace HPPH.Benchmark;
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net10_0)]
 [HtmlExporter]
 [MemoryDiagnoser]
 public class MinMaxBenchmarks
