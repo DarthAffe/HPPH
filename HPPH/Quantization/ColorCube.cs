@@ -12,6 +12,8 @@ internal struct ColorCube<T>
     private readonly int _length;
     private SortTarget _sortOrder;
 
+    internal readonly int Length => _length;
+
     #endregion
 
     #region Constructors

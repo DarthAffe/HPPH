@@ -6,6 +6,12 @@ namespace HPPH;
 
 public static partial class PixelHelper
 {
+    #region Constants
+
+    private const int MIN_PARALLEL_CUBE_SIZE = 64 * 1024;
+
+    #endregion
+
     #region Methods
 
     public static IColor[] CreateColorPalette(this IImage image, int paletteSize)
@@ -40,7 +46,7 @@ public static partial class PixelHelper
     public static T[] CreateColorPalette<T>(this IImage<T> image, int paletteSize)
         where T : unmanaged, IColor
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        ArgumentNullException.ThrowIfNull(image);
 
         return image.AsRefImage().CreateColorPalette(paletteSize);
     }
@@ -56,7 +62,7 @@ public static partial class PixelHelper
             Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
 
             image.CopyTo(buffer);
-            return CreateColorPalette(buffer, paletteSize);
+            return buffer.CreateColorPalette(paletteSize);
         }
         else
         {
@@ -65,7 +71,7 @@ public static partial class PixelHelper
             try
             {
                 image.CopyTo(buffer);
-                return CreateColorPalette(buffer, paletteSize);
+                return buffer.CreateColorPalette(paletteSize);
             }
             finally
             {
@@ -84,7 +90,7 @@ public static partial class PixelHelper
             Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
 
             colors.CopyTo(buffer);
-            return CreateColorPalette(buffer, paletteSize);
+            return buffer.CreateColorPalette(paletteSize);
         }
         else
         {
@@ -94,7 +100,7 @@ public static partial class PixelHelper
                 Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
                 colors.CopyTo(colorBuffer);
 
-                return CreateColorPalette(colorBuffer, paletteSize);
+                return colorBuffer.CreateColorPalette(paletteSize);
             }
             finally
             {
@@ -169,7 +175,7 @@ public static partial class PixelHelper
     public static T[] CreateSimpleColorPalette<T>(this IImage<T> image, int paletteSize)
         where T : unmanaged, IColor
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        ArgumentNullException.ThrowIfNull(image);
 
         return image.AsRefImage().CreateSimpleColorPalette(paletteSize);
     }
@@ -185,7 +191,7 @@ public static partial class PixelHelper
             Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
 
             image.CopyTo(buffer);
-            return CreateSimpleColorPalette(buffer, paletteSize);
+            return buffer.CreateSimpleColorPalette(paletteSize);
         }
         else
         {
@@ -194,7 +200,7 @@ public static partial class PixelHelper
             try
             {
                 image.CopyTo(buffer);
-                return CreateSimpleColorPalette(buffer, paletteSize);
+                return buffer.CreateSimpleColorPalette(paletteSize);
             }
             finally
             {
@@ -213,7 +219,7 @@ public static partial class PixelHelper
             Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
 
             colors.CopyTo(buffer);
-            return CreateSimpleColorPalette(buffer, paletteSize);
+            return buffer.CreateSimpleColorPalette(paletteSize);
         }
         else
         {
@@ -223,7 +229,7 @@ public static partial class PixelHelper
                 Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
                 colors.CopyTo(colorBuffer);
 
-                return CreateSimpleColorPalette(colorBuffer, paletteSize);
+                return colorBuffer.CreateSimpleColorPalette(paletteSize);
             }
             finally
             {
@@ -232,7 +238,14 @@ public static partial class PixelHelper
         }
     }
 
-    public static unsafe T[] CreateSimpleColorPalette<T>(this Span<T> colors, int paletteSize)
+    /// <summary>
+    /// Creates a palette of up to <paramref name="paletteSize"/> colors by median cut.
+    /// </summary>
+    /// <remarks>
+    /// This overload works in place: it reorders <paramref name="colors"/>. Use the <see cref="ReadOnlySpan{T}"/>
+    /// overload to keep the input unchanged. Fewer colors are returned if the input doesn't have enough distinct colors to fill the palette.
+    /// </remarks>
+    public static T[] CreateSimpleColorPalette<T>(this Span<T> colors, int paletteSize)
         where T : unmanaged, IColor
     {
         if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
@@ -245,32 +258,49 @@ public static partial class PixelHelper
         ColorCube<T>[] cubes = new ColorCube<T>[1 << splits];
         cubes[0] = new ColorCube<T>(0, colors.Length, SortTarget.None);
 
-        int colorsLength = colors.Length;
-        fixed (T* colorsPtr = colors)
+        for (int i = 0; i < splits; i++)
         {
-            //HACK DarthAffe 21.07.2024: This is dangerous and needs to be treated carefully! It's used in the anonymous method used to run the splits in parallel and absolutely can't be used outside this fixed block!
-            T* unsafeColorsPtr = colorsPtr;
+            int currentCubeCount = 1 << i;
 
-            for (int i = 0; i < splits; i++)
+            if ((currentCubeCount > 1) && ((colors.Length / currentCubeCount) >= MIN_PARALLEL_CUBE_SIZE))
+                SplitParallel(colors, cubes, currentCubeCount);
+            else
             {
-                int currentCubeCount = 1 << i;
-
-                Parallel.For(0, currentCubeCount, PARALLEL_OPTIONS, CreateCubes);
-
-                void CreateCubes(int index)
+                for (int index = 0; index < currentCubeCount; index++)
                 {
-                    cubes[index].Split(new Span<T>(unsafeColorsPtr, colorsLength), out ColorCube<T> a, out ColorCube<T> b);
+                    cubes[index].Split(colors, out ColorCube<T> a, out ColorCube<T> b);
                     cubes[index] = a;
                     cubes[currentCubeCount + index] = b;
                 }
             }
         }
 
-        T[] result = new T[cubes.Length];
-        for (int i = 0; i < cubes.Length; i++)
-            result[i] = Average(cubes[i].Slice(colors));
+        int resultCount = cubes.Count(cube => cube.Length > 0);
+
+        T[] result = new T[resultCount];
+        int resultIndex = 0;
+        foreach (ColorCube<T> cube in cubes)
+            if (cube.Length > 0)
+                result[resultIndex++] = cube.Slice(colors).Average();
 
         return result;
+    }
+
+    private static unsafe void SplitParallel<T>(Span<T> colors, ColorCube<T>[] cubes, int cubeCount)
+        where T : unmanaged, IColor
+    {
+        fixed (T* colorsPtr = colors)
+        {
+            nint colorsAddress = (nint)colorsPtr;
+            int colorsLength = colors.Length;
+
+            Parallel.For(0, cubeCount, index =>
+            {
+                cubes[index].Split(new Span<T>((T*)colorsAddress, colorsLength), out ColorCube<T> a, out ColorCube<T> b);
+                cubes[index] = a;
+                cubes[cubeCount + index] = b;
+            });
+        }
     }
 
     #endregion

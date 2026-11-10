@@ -39,7 +39,7 @@ public static partial class ReferencePixelHelper
             }
         }
 
-        return cubes.Select(c => c.GetAverageColor<T>()).ToArray();
+        return cubes.Where(c => c.Count > 0).Select(c => c.GetAverageColor<T>()).ToArray();
     }
 
     #endregion
@@ -50,6 +50,8 @@ internal class ColorCube
     #region Properties & Fields
 
     private readonly List<IColor> _colors;
+
+    internal int Count => _colors.Count;
 
     #endregion
 

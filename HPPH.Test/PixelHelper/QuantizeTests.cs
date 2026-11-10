@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using HPPH.Reference;
 
 namespace HPPH.Test.PixelHelper;
@@ -203,6 +204,39 @@ public class CreateSimpleColorPaletteTests
 
         for (int i = 0; i < reference.Length; i++)
             Assert.AreEqual(reference[i], test[i], $"Index {i} differs for image {image}, size {size}");
+    }
+
+    [TestMethod]
+    public void SimplePaletteHasNoPadding()
+    {
+        ColorRGB[] colors = [new(10, 0, 0), new(200, 0, 0)];
+
+        ColorRGB[] palette = new ReadOnlySpan<ColorRGB>(colors).CreateSimpleColorPalette(4);
+
+        Assert.AreSequenceEqual([new ColorRGB(10, 0, 0), new ColorRGB(200, 0, 0)], palette, SequenceOrder.InAnyOrder);
+    }
+
+    [TestMethod]
+    public void SimplePaletteKeepsReadOnlyInput()
+    {
+        ColorRGB[] colors = [new(200, 0, 0), new(10, 0, 0), new(100, 0, 0), new(50, 0, 0)];
+        ColorRGB[] original = [.. colors];
+
+        _ = new ReadOnlySpan<ColorRGB>(colors).CreateSimpleColorPalette(2);
+
+        Assert.AreSequenceEqual(original, colors);
+    }
+
+    [TestMethod]
+    public void LargePaletteSplitInParallelMatchesReference()
+    {
+        ColorRGBA[] colors = new ColorRGBA[1 << 20];
+        new Random(6).NextBytes(MemoryMarshal.AsBytes(colors.AsSpan()));
+
+        ColorRGBA[] expected = [.. ReferencePixelHelper.CreateSimpleColorPalette(colors, 16).OrderBy(c => c.R).ThenBy(c => c.G).ThenBy(c => c.B).ThenBy(c => c.A)];
+        ColorRGBA[] actual = [.. new ReadOnlySpan<ColorRGBA>(colors).CreateSimpleColorPalette(16).OrderBy(c => c.R).ThenBy(c => c.G).ThenBy(c => c.B).ThenBy(c => c.A)];
+
+        Assert.AreSequenceEqual(expected, actual);
     }
 
     //[TestMethod]
