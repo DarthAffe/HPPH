@@ -190,6 +190,21 @@ public readonly ref struct RefImage<T>
     }
 
     /// <summary>
+    /// Converts this image into a new image of the color format <typeparamref name="TColor"/>.
+    /// </summary>
+    /// <typeparam name="TColor">The color format to convert to.</typeparam>
+    public Image<TColor> ConvertTo<TColor>()
+        where TColor : struct, IColor
+    {
+        int targetBpp = TColor.ColorFormat.BytesPerPixel;
+        byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
+
+        ConvertTo(MemoryMarshal.Cast<byte, TColor>(target.AsSpan()));
+
+        return Image<TColor>.Wrap(target, Width, Height, Width * targetBpp);
+    }
+
+    /// <summary>
     /// Converts the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
     /// </summary>
     /// <param name="destination">The buffer to write to. Needs at least <c>Width * Height</c> elements.</param>

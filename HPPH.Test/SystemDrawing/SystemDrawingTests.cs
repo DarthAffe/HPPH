@@ -65,4 +65,55 @@ public class SystemDrawingTests
             Assert.AreEqual(img, img2);
         }
     }
+
+    [TestMethod]
+    public void ToImageAcceptsOtherPixelFormats()
+    {
+        foreach (global::System.Drawing.Imaging.PixelFormat format in new[] { global::System.Drawing.Imaging.PixelFormat.Format32bppRgb, global::System.Drawing.Imaging.PixelFormat.Format32bppPArgb, global::System.Drawing.Imaging.PixelFormat.Format16bppRgb565 })
+        {
+            using Bitmap bitmap = new(7, 5, format);
+            for (int y = 0; y < bitmap.Height; y++)
+                for (int x = 0; x < bitmap.Width; x++)
+                    bitmap.SetPixel(x, y, Color.FromArgb(255, x * 32, y * 48, 200));
+
+            IImage image = bitmap.ToImage();
+
+            Assert.AreEqual(IColorFormat.BGRA, image.ColorFormat, format.ToString());
+            for (int y = 0; y < bitmap.Height; y++)
+                for (int x = 0; x < bitmap.Width; x++)
+                {
+                    Color expected = bitmap.GetPixel(x, y);
+                    IColor actual = image[x, y];
+                    Assert.AreEqual(expected.R, actual.R, $"{format} R at {x},{y}");
+                    Assert.AreEqual(expected.G, actual.G, $"{format} G at {x},{y}");
+                    Assert.AreEqual(expected.B, actual.B, $"{format} B at {x},{y}");
+                    Assert.AreEqual(expected.A, actual.A, $"{format} A at {x},{y}");
+                }
+        }
+    }
+
+    [TestMethod]
+    public void LoadImageIntoEveryFormat()
+    {
+        foreach (string image in GetTestImages())
+        {
+            LoadImageInto<ColorRGB>(image);
+            LoadImageInto<ColorBGR>(image);
+            LoadImageInto<ColorRGBA>(image);
+            LoadImageInto<ColorBGRA>(image);
+            LoadImageInto<ColorARGB>(image);
+            LoadImageInto<ColorABGR>(image);
+        }
+    }
+
+    private static void LoadImageInto<T>(string image)
+        where T : struct, IColor
+    {
+        IImage<T> expected = System.Drawing.ImageHelper.LoadImage(image).ConvertTo<T>();
+
+        Assert.AreEqual(expected, System.Drawing.ImageHelper.LoadImage<T>(image), $"{T.ColorFormat.Name}: {image}");
+
+        using FileStream stream = File.OpenRead(image);
+        Assert.AreEqual(expected, System.Drawing.ImageHelper.LoadImage<T>(stream), $"{T.ColorFormat.Name}: {image} (stream)");
+    }
 }

@@ -7,9 +7,9 @@ namespace HPPH.SkiaSharp;
 
 public static class ImageExtension
 {
-    public static unsafe SKImage ToSKImage(this IImage image)
+    public static SKImage ToSKImage(this IImage image)
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        ArgumentNullException.ThrowIfNull(image);
 
         using SKBitmap bitmap = image.ToSKBitmap();
         return SKImage.FromBitmap(bitmap);
@@ -17,12 +17,25 @@ public static class ImageExtension
 
     public static unsafe SKBitmap ToSKBitmap(this IImage image)
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        ArgumentNullException.ThrowIfNull(image);
 
-        SKBitmap bitmap = new(image.Width, image.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-        nint pixelPtr = bitmap.GetPixels(out nint length);
+        bool rgba = image is IImage<ColorRGBA>;
 
-        (image as IImage<ColorBGRA> ?? image.ConvertTo<ColorBGRA>()).CopyTo(new Span<byte>((void*)pixelPtr, (int)length));
+        SKBitmap bitmap = new(image.Width, image.Height, rgba ? SKColorType.Rgba8888 : SKColorType.Bgra8888, SKAlphaType.Unpremul);
+
+        try
+        {
+            Span<byte> pixels = new((void*)bitmap.GetPixels(out nint length), (int)length);
+            if (rgba)
+                image.ConvertTo<ColorRGBA>(pixels, bitmap.RowBytes);
+            else
+                image.ConvertTo<ColorBGRA>(pixels, bitmap.RowBytes);
+        }
+        catch
+        {
+            bitmap.Dispose();
+            throw;
+        }
 
         return bitmap;
     }
@@ -30,15 +43,36 @@ public static class ImageExtension
     public static byte[] ToPng(this IImage image)
     {
         using SKImage skImage = image.ToSKImage();
-        return skImage.Encode(SKEncodedImageFormat.Png, 100).ToArray();
+        using SKData data = skImage.Encode(SKEncodedImageFormat.Png, 100);
+        return data.ToArray();
     }
 
-    public static IImage<ColorBGRA> ToImage(this SKImage skImage) => SKBitmap.FromImage(skImage).ToImage();
+    public static IImage<ColorBGRA> ToImage(this SKImage skImage) => skImage.ToImage<ColorBGRA>();
 
-    public static IImage<ColorBGRA> ToImage(this SKBitmap bitmap)
+    public static IImage<T> ToImage<T>(this SKImage skImage)
+        where T : struct, IColor
     {
-        ArgumentNullException.ThrowIfNull(bitmap, nameof(bitmap));
+        ArgumentNullException.ThrowIfNull(skImage);
 
-        return Image<ColorBGRA>.Create(MemoryMarshal.Cast<SKColor, ColorBGRA>(bitmap.Pixels), bitmap.Width, bitmap.Height);
+        using SKBitmap bitmap = SKBitmap.FromImage(skImage);
+        return bitmap.ToImage<T>();
+    }
+
+    public static IImage<ColorBGRA> ToImage(this SKBitmap bitmap) => bitmap.ToImage<ColorBGRA>();
+
+    public static IImage<T> ToImage<T>(this SKBitmap bitmap)
+        where T : struct, IColor
+    {
+        ArgumentNullException.ThrowIfNull(bitmap);
+
+        bool straightAlpha = bitmap.AlphaType is SKAlphaType.Unpremul or SKAlphaType.Opaque;
+
+        if (straightAlpha && (bitmap.ColorType == SKColorType.Bgra8888))
+            return RefImage<ColorBGRA>.Wrap(bitmap.GetPixelSpan(), bitmap.Width, bitmap.Height, bitmap.RowBytes).ConvertTo<T>();
+
+        if (straightAlpha && (bitmap.ColorType == SKColorType.Rgba8888))
+            return RefImage<ColorRGBA>.Wrap(bitmap.GetPixelSpan(), bitmap.Width, bitmap.Height, bitmap.RowBytes).ConvertTo<T>();
+
+        return RefImage<ColorBGRA>.Wrap(MemoryMarshal.Cast<SKColor, ColorBGRA>(bitmap.Pixels), bitmap.Width, bitmap.Height).ConvertTo<T>();
     }
 }

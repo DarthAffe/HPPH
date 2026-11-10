@@ -2,10 +2,6 @@ using System.Runtime.InteropServices;
 
 namespace HPPH.Test.Image;
 
-/// <summary>
-/// ConvertTo and CopyTo into caller buffers and the enumerators.
-/// Every test runs on a contiguous image, a padded image and regions of both.
-/// </summary>
 [TestClass]
 public class ImageConvertCopyTests
 {
@@ -44,6 +40,11 @@ public class ImageConvertCopyTests
             Assert.AreEqual(image.Width, converted.Width);
             Assert.AreEqual(image.Height, converted.Height);
             Assert.AreSequenceEqual(expected, converted.ToArray(), $"{name}: ConvertTo()");
+
+            Image<TTarget> convertedRef = image.AsRefImage().ConvertTo<TTarget>();
+            Assert.AreEqual(image.Width, convertedRef.Width);
+            Assert.AreEqual(image.Height, convertedRef.Height);
+            Assert.AreSequenceEqual(expected, convertedRef.ToArray(), $"{name}: RefImage.ConvertTo()");
         }
     }
 

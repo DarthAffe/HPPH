@@ -159,12 +159,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     public IImage<TColor> ConvertTo<TColor>()
         where TColor : struct, IColor
-    {
-        int targetBpp = TColor.ColorFormat.BytesPerPixel;
-        byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
-        AsRefImage().ConvertTo(MemoryMarshal.Cast<byte, TColor>(target.AsSpan()));
-        return new Image<TColor>(target, 0, 0, Width, Height, Width * targetBpp);
-    }
+        => AsRefImage().ConvertTo<TColor>();
 
     /// <inheritdoc />
     public void ConvertTo<TColor>(Span<TColor> destination)
