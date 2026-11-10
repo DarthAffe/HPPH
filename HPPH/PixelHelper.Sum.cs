@@ -9,27 +9,14 @@ public static unsafe partial class PixelHelper
 {
     #region Methods
 
-    public static ISum Sum(this IImage image)
+    public static ColorSum Sum(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        IColorFormat colorFormat = image.ColorFormat;
-
-        if (image.Height == 0) return colorFormat.ToSum(new Generic4LongData(0, 0, 0, 0));
-        if (image.Height == 1) return colorFormat.ToSum(colorFormat.Sum(image.Rows[0].AsByteSpan()));
-
-        Vector256<long> result = Vector256<long>.Zero;
-        for (int y = 0; y < image.Height; y++)
-        {
-            Generic4LongData rowSum = colorFormat.Sum(image.Rows[y].AsByteSpan());
-            Vector256<long> rowSumVector = Vector256.LoadUnsafe(ref Unsafe.As<Generic4LongData, long>(ref rowSum));
-            result = Vector256.Add(result, rowSumVector);
-        }
-
-        return colorFormat.ToSum(Unsafe.BitCast<Vector256<long>, Generic4LongData>(result));
+        return image.ColorFormat.Sum(image);
     }
 
-    public static ISum Sum<T>(this IImage<T> image)
+    public static ColorSum Sum<T>(this IImage<T> image)
         where T : struct, IColor
     {
         ArgumentNullException.ThrowIfNull(image, nameof(image));
@@ -37,39 +24,45 @@ public static unsafe partial class PixelHelper
         return image.AsRefImage().Sum();
     }
 
-    public static ISum Sum<T>(this RefImage<T> image)
+    public static ColorSum Sum<T>(this RefImage<T> image)
+        where T : struct, IColor
+        => T.ColorFormat.ToColorSum(SumBytes(image));
+
+    public static ColorSum Sum<T>(this ReadOnlySpan<T> colors)
+        where T : struct, IColor
+        => T.ColorFormat.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));
+
+    public static ColorSum Sum<T>(this Span<T> colors)
+        where T : struct, IColor
+        => T.ColorFormat.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));
+
+    internal static Generic4LongData SumBytes<T>(RefImage<T> image)
         where T : struct, IColor
     {
-        IColorFormat colorFormat = T.ColorFormat;
-
-        if (image.Height == 0) return colorFormat.ToSum(new Generic4LongData(0, 0, 0, 0));
-        if (image.Height == 1) return colorFormat.ToSum(colorFormat.Sum(image.Rows[0].AsByteSpan()));
+        if (image.Height == 0) return default;
+        if (image.Height == 1) return SumBytes<T>(image.GetRowBytes(0));
 
         Vector256<long> result = Vector256<long>.Zero;
         for (int y = 0; y < image.Height; y++)
         {
-            Generic4LongData rowSum = colorFormat.Sum(image.Rows[y].AsByteSpan());
+            Generic4LongData rowSum = SumBytes<T>(image.GetRowBytes(y));
             Vector256<long> rowSumVector = Vector256.LoadUnsafe(ref Unsafe.As<Generic4LongData, long>(ref rowSum));
             result = Vector256.Add(result, rowSumVector);
         }
 
-        return colorFormat.ToSum(Unsafe.BitCast<Vector256<long>, Generic4LongData>(result));
+        return Unsafe.BitCast<Vector256<long>, Generic4LongData>(result);
     }
 
-    public static ISum Sum<T>(this ReadOnlySpan<T> colors)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Generic4LongData SumBytes<T>(ReadOnlySpan<byte> data)
         where T : struct, IColor
-    {
-        IColorFormat colorFormat = T.ColorFormat;
-        return colorFormat.ToSum(colorFormat.Sum(MemoryMarshal.AsBytes(colors)));
-    }
+        => T.ColorFormat.BytesPerPixel switch
+        {
+            3 => Sum(MemoryMarshal.Cast<byte, Generic3ByteData>(data)),
+            4 => Sum(MemoryMarshal.Cast<byte, Generic4ByteData>(data)),
+            _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
+        };
 
-    public static ISum Sum<T>(this Span<T> colors)
-        where T : struct, IColor
-    {
-        IColorFormat colorFormat = T.ColorFormat;
-        return colorFormat.ToSum(colorFormat.Sum(MemoryMarshal.AsBytes(colors)));
-    }
-    
     internal static Generic4LongData Sum(ReadOnlySpan<Generic3ByteData> data)
     {
         long b1Sum = 0, b2Sum = 0, b3Sum = 0;
@@ -183,7 +176,7 @@ public static unsafe partial class PixelHelper
             }
         }
 
-        return new Generic4LongData(b1Sum, b2Sum, b3Sum, data.Length * 255);
+        return new Generic4LongData(b1Sum, b2Sum, b3Sum, (long)data.Length * 255);
     }
 
     internal static Generic4LongData Sum(ReadOnlySpan<Generic4ByteData> data)

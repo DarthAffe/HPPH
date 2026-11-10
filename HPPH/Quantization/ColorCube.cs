@@ -43,7 +43,7 @@ internal struct ColorCube<T>
     private void OrderColors(Span<T> colors, SortTarget preOrdered)
     {
         if (colors.Length < 2) return;
-        IMinMax colorRanges = colors.MinMax();
+        ColorMinMax colorRanges = colors.MinMax();
 
         if ((colorRanges.RedRange > colorRanges.GreenRange) && (colorRanges.RedRange > colorRanges.BlueRange))
         {

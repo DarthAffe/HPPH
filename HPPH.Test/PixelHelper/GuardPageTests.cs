@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using HPPH.Reference;
 using HPPH.Test.Infrastructure;
 
 namespace HPPH.Test.PixelHelper;
@@ -12,6 +13,93 @@ public class GuardPageTests
 {
     // Every length up to a few vectors, plus lengths around common image widths.
     private static readonly int[] LENGTHS = [.. Enumerable.Range(0, 131), 255, 256, 257, 1279, 1280, 1281, 1919, 1920, 1921, 3840, 4095, 4096, 4097];
+
+    [TestMethod]
+    public void SumStaysInBounds()
+    {
+        SumStaysInBounds<ColorRGB>();
+        SumStaysInBounds<ColorBGRA>();
+    }
+
+    private static void SumStaysInBounds<T>()
+        where T : struct, IColor
+    {
+        foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
+            using (buffer)
+            {
+                T[] copy = buffer.As<T>().ToArray();
+                Assert.AreEqual(ReferencePixelHelper.Sum(new ReadOnlySpan<T>(copy)), ((ReadOnlySpan<T>)buffer.As<T>()).Sum(), $"{T.ColorFormat.Name}, {length} px");
+            }
+    }
+
+    [TestMethod]
+    public void MinMaxStaysInBounds()
+    {
+        MinMaxStaysInBounds<ColorRGB>();
+        MinMaxStaysInBounds<ColorBGRA>();
+    }
+
+    private static void MinMaxStaysInBounds<T>()
+        where T : struct, IColor
+    {
+        foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
+            using (buffer)
+            {
+                if (length == 0) continue;
+
+                T[] copy = buffer.As<T>().ToArray();
+                Assert.AreEqual(ReferencePixelHelper.MinMax(new ReadOnlySpan<T>(copy)), ((ReadOnlySpan<T>)buffer.As<T>()).MinMax(), $"{T.ColorFormat.Name}, {length} px");
+            }
+    }
+
+    [TestMethod]
+    public void AverageStaysInBounds()
+    {
+        AverageStaysInBounds<ColorRGB>();
+        AverageStaysInBounds<ColorBGRA>();
+    }
+
+    private static void AverageStaysInBounds<T>()
+        where T : struct, IColor
+    {
+        foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
+            using (buffer)
+            {
+                T[] copy = buffer.As<T>().ToArray();
+                Assert.AreEqual(ReferencePixelHelper.Average(new ReadOnlySpan<T>(copy)), ((ReadOnlySpan<T>)buffer.As<T>()).Average(), $"{T.ColorFormat.Name}, {length} px");
+            }
+    }
+
+    [TestMethod]
+    public void ImageReductionsStayInBounds()
+    {
+        ImageReductionsStayInBounds<ColorRGB>();
+        ImageReductionsStayInBounds<ColorBGRA>();
+    }
+
+    private static void ImageReductionsStayInBounds<T>()
+        where T : struct, IColor
+    {
+        int bpp = T.ColorFormat.BytesPerPixel;
+
+        foreach (int width in (int[])[1, 2, 3, 7, 10, 16, 21, 32, 40, 64])
+            foreach (int height in (int[])[1, 2, 5])
+                foreach (int padding in (int[])[0, 5])
+                {
+                    int stride = (width * bpp) + padding;
+                    int length = ((height - 1) * stride) + (width * bpp);
+
+                    using GuardedBuffer buffer = GuardedBuffer.AtEnd(length);
+                    buffer.Fill(width * height);
+
+                    RefImage<T> image = RefImage<T>.Wrap(buffer.Bytes, width, height, stride);
+                    string message = $"{T.ColorFormat.Name} {width}x{height}, stride {stride}";
+
+                    Assert.AreEqual(ReferencePixelHelper.Sum(image), image.Sum(), message);
+                    Assert.AreEqual(ReferencePixelHelper.MinMax(image), image.MinMax(), message);
+                    Assert.AreEqual(ReferencePixelHelper.Average(image), image.Average(), message);
+                }
+    }
 
     [TestMethod]
     public void ConvertInPlaceStaysInBounds()

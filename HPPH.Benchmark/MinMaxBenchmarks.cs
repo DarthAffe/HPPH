@@ -34,9 +34,9 @@ public class MinMaxBenchmarks
     #region Methods
 
     [Benchmark]
-    public IMinMax[] PixelHelper_3BPP()
+    public ColorMinMax[] PixelHelper_3BPP()
     {
-        IMinMax[] minMax = new IMinMax[_colors3bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_colors3bpp.Count];
         for (int i = 0; i < _colors3bpp.Count; i++)
             minMax[i] = new ReadOnlySpan<ColorRGB>(_colors3bpp[i]).MinMax();
 
@@ -44,9 +44,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] PixelHelper_4BPP()
+    public ColorMinMax[] PixelHelper_4BPP()
     {
-        IMinMax[] minMax = new IMinMax[_colors4bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_colors4bpp.Count];
         for (int i = 0; i < _colors4bpp.Count; i++)
             minMax[i] = new ReadOnlySpan<ColorRGBA>(_colors4bpp[i]).MinMax();
 
@@ -54,9 +54,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] PixelHelper_3BPP_Image()
+    public ColorMinMax[] PixelHelper_3BPP_Image()
     {
-        IMinMax[] minMax = new IMinMax[_images3bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_images3bpp.Count];
         for (int i = 0; i < _images3bpp.Count; i++)
             minMax[i] = _images3bpp[i].MinMax();
 
@@ -64,9 +64,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] PixelHelper_4BPP_Image()
+    public ColorMinMax[] PixelHelper_4BPP_Image()
     {
-        IMinMax[] minMax = new IMinMax[_images4bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_images4bpp.Count];
         for (int i = 0; i < _images4bpp.Count; i++)
             minMax[i] = _images4bpp[i].MinMax();
 
@@ -74,9 +74,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] Reference_3BPP()
+    public ColorMinMax[] Reference_3BPP()
     {
-        IMinMax[] minMax = new IMinMax[_colors3bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_colors3bpp.Count];
         for (int i = 0; i < _colors3bpp.Count; i++)
             minMax[i] = ReferencePixelHelper.MinMax(new ReadOnlySpan<ColorRGB>(_colors3bpp[i]));
 
@@ -84,9 +84,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] Reference_4BPP()
+    public ColorMinMax[] Reference_4BPP()
     {
-        IMinMax[] minMax = new IMinMax[_colors4bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_colors4bpp.Count];
         for (int i = 0; i < _colors4bpp.Count; i++)
             minMax[i] = ReferencePixelHelper.MinMax(new ReadOnlySpan<ColorRGBA>(_colors4bpp[i]));
 

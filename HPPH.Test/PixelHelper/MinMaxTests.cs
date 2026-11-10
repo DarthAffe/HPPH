@@ -26,8 +26,8 @@ public class MinMaxTests
     {
         RefImage<T> data = ImageHelper.GetImage<T>(image).AsRefImage<T>();
 
-        IMinMax reference = ReferencePixelHelper.MinMax(data);
-        IMinMax test = data.MinMax();
+        ColorMinMax reference = ReferencePixelHelper.MinMax(data);
+        ColorMinMax test = data.MinMax();
 
         Assert.AreEqual(reference.RedMin, test.RedMin, $"RedMin differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.GreenMin, test.GreenMin, $"GreenMin differs in type '{T.ColorFormat.Name}'");
@@ -64,8 +64,8 @@ public class MinMaxTests
     {
         Image<T> data = ImageHelper.GetImage<T>(image);
 
-        IMinMax reference = ReferencePixelHelper.MinMax(data);
-        IMinMax test = data.MinMax();
+        ColorMinMax reference = ReferencePixelHelper.MinMax(data);
+        ColorMinMax test = data.MinMax();
 
         Assert.AreEqual(reference.RedMin, test.RedMin, $"RedMin differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.GreenMin, test.GreenMin, $"GreenMin differs in type '{T.ColorFormat.Name}'");
@@ -102,8 +102,8 @@ public class MinMaxTests
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
-        IMinMax reference = ReferencePixelHelper.MinMax(data);
-        IMinMax test = data.MinMax();
+        ColorMinMax reference = ReferencePixelHelper.MinMax(data);
+        ColorMinMax test = data.MinMax();
 
         Assert.AreEqual(reference.RedMin, test.RedMin, $"RedMin differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.GreenMin, test.GreenMin, $"GreenMin differs in type '{T.ColorFormat.Name}'");
@@ -141,8 +141,8 @@ public class MinMaxTests
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         Span<T> span = data;
 
-        IMinMax reference = ReferencePixelHelper.MinMax(span);
-        IMinMax test = span.MinMax();
+        ColorMinMax reference = ReferencePixelHelper.MinMax(span);
+        ColorMinMax test = span.MinMax();
 
         Assert.AreEqual(reference.RedMin, test.RedMin, $"RedMin differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.GreenMin, test.GreenMin, $"GreenMin differs in type '{T.ColorFormat.Name}'");
@@ -180,8 +180,8 @@ public class MinMaxTests
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         ReadOnlySpan<T> span = data;
 
-        IMinMax reference = ReferencePixelHelper.MinMax(span);
-        IMinMax test = span.MinMax();
+        ColorMinMax reference = ReferencePixelHelper.MinMax(span);
+        ColorMinMax test = span.MinMax();
 
         Assert.AreEqual(reference.RedMin, test.RedMin, $"RedMin differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.GreenMin, test.GreenMin, $"GreenMin differs in type '{T.ColorFormat.Name}'");

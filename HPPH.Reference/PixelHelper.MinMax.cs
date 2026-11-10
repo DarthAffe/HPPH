@@ -4,7 +4,7 @@ public static partial class ReferencePixelHelper
 {
     #region Methods
 
-    public static IMinMax MinMax(IImage image)
+    public static ColorMinMax MinMax(IImage image)
     {
         byte minR = byte.MaxValue, minG = byte.MaxValue, minB = byte.MaxValue, minA = byte.MaxValue;
         byte maxR = byte.MinValue, maxG = byte.MinValue, maxB = byte.MinValue, maxA = byte.MinValue;
@@ -22,10 +22,10 @@ public static partial class ReferencePixelHelper
             maxA = Math.Max(maxA, color.A);
         }
 
-        return new MinMaxRGBA(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
+        return new ColorMinMax(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
     }
 
-    public static IMinMax MinMax<T>(RefImage<T> image)
+    public static ColorMinMax MinMax<T>(RefImage<T> image)
         where T : struct, IColor
     {
         byte minR = byte.MaxValue, minG = byte.MaxValue, minB = byte.MaxValue, minA = byte.MaxValue;
@@ -44,10 +44,10 @@ public static partial class ReferencePixelHelper
             maxA = Math.Max(maxA, color.A);
         }
 
-        return new MinMaxRGBA(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
+        return new ColorMinMax(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
     }
 
-    public static IMinMax MinMax<T>(Span<T> colors)
+    public static ColorMinMax MinMax<T>(Span<T> colors)
         where T : struct, IColor
     {
         byte minR = byte.MaxValue, minG = byte.MaxValue, minB = byte.MaxValue, minA = byte.MaxValue;
@@ -66,10 +66,10 @@ public static partial class ReferencePixelHelper
             maxA = Math.Max(maxA, color.A);
         }
 
-        return new MinMaxRGBA(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
+        return new ColorMinMax(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
     }
 
-    public static IMinMax MinMax<T>(ReadOnlySpan<T> colors)
+    public static ColorMinMax MinMax<T>(ReadOnlySpan<T> colors)
         where T : struct, IColor
     {
         byte minR = byte.MaxValue, minG = byte.MaxValue, minB = byte.MaxValue, minA = byte.MaxValue;
@@ -88,7 +88,7 @@ public static partial class ReferencePixelHelper
             maxA = Math.Max(maxA, color.A);
         }
 
-        return new MinMaxRGBA(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
+        return new ColorMinMax(minR, maxR, minG, maxG, minB, maxB, minA, maxA);
     }
 
     #endregion

@@ -8,113 +8,67 @@ public static unsafe partial class PixelHelper
 {
     #region Methods
 
-    public static IMinMax MinMax(this IImage image)
+    public static ColorMinMax MinMax(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        IColorFormat colorFormat = image.ColorFormat;
-
-        if (colorFormat.BytesPerPixel == 3)
-        {
-            if (image.Height == 0) return colorFormat.ToMinMax(new Generic3ByteMinMax(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue));
-            if (image.Height == 1) return colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<byte, Generic3ByteData>(image.Rows[0].AsByteSpan())));
-
-            Generic3ByteMinMax result = new(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue);
-            for (int y = 0; y < image.Height; y++)
-                result = MinMax(MemoryMarshal.Cast<byte, Generic3ByteData>(image.Rows[y].AsByteSpan()),
-                                result.B1Min, result.B1Max,
-                                result.B2Min, result.B2Max,
-                                result.B3Min, result.B3Max);
-
-            return colorFormat.ToMinMax(result);
-        }
-
-        if (colorFormat.BytesPerPixel == 4)
-        {
-            if (image.Height == 0) return colorFormat.ToMinMax(new Generic4ByteMinMax(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue));
-            if (image.Height == 1) return colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<byte, Generic4ByteData>(image.Rows[0].AsByteSpan())));
-
-            Generic4ByteMinMax result = new(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue);
-            for (int y = 0; y < image.Height; y++)
-                result = MinMax(MemoryMarshal.Cast<byte, Generic4ByteData>(image.Rows[y].AsByteSpan()),
-                                result.B1Min, result.B1Max,
-                                result.B2Min, result.B2Max,
-                                result.B3Min, result.B3Max,
-                                result.B4Min, result.B4Max);
-
-            return colorFormat.ToMinMax(result);
-        }
-
-        throw new NotSupportedException("Data is not of a supported valid color-type.");
+        return image.ColorFormat.MinMax(image);
     }
 
-    public static IMinMax MinMax<T>(this IImage<T> image)
+    public static ColorMinMax MinMax<T>(this IImage<T> image)
         where T : struct, IColor
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        ArgumentNullException.ThrowIfNull(image);
 
         return image.AsRefImage().MinMax();
     }
 
-    public static IMinMax MinMax<T>(this RefImage<T> image)
+    public static ColorMinMax MinMax<T>(this RefImage<T> image)
         where T : struct, IColor
     {
         IColorFormat colorFormat = T.ColorFormat;
 
         if (colorFormat.BytesPerPixel == 3)
         {
-            if (image.Height == 0) return colorFormat.ToMinMax(new Generic3ByteMinMax(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue));
-            if (image.Height == 1) return colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<byte, Generic3ByteData>(image.Rows[0].AsByteSpan())));
-
             Generic3ByteMinMax result = new(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue);
             for (int y = 0; y < image.Height; y++)
-                result = MinMax(MemoryMarshal.Cast<byte, Generic3ByteData>(image.Rows[y].AsByteSpan()),
+                result = MinMax(MemoryMarshal.Cast<byte, Generic3ByteData>(image.GetRowBytes(y)),
                                 result.B1Min, result.B1Max,
                                 result.B2Min, result.B2Max,
                                 result.B3Min, result.B3Max);
 
-            return colorFormat.ToMinMax(result);
+            return colorFormat.ToColorMinMax(result);
         }
 
         if (colorFormat.BytesPerPixel == 4)
         {
-            if (image.Height == 0) return colorFormat.ToMinMax(new Generic4ByteMinMax(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue));
-            if (image.Height == 1) return colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<byte, Generic4ByteData>(image.Rows[0].AsByteSpan())));
-
             Generic4ByteMinMax result = new(byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue, byte.MaxValue, byte.MinValue);
             for (int y = 0; y < image.Height; y++)
-                result = MinMax(MemoryMarshal.Cast<byte, Generic4ByteData>(image.Rows[y].AsByteSpan()),
+                result = MinMax(MemoryMarshal.Cast<byte, Generic4ByteData>(image.GetRowBytes(y)),
                                 result.B1Min, result.B1Max,
                                 result.B2Min, result.B2Max,
                                 result.B3Min, result.B3Max,
                                 result.B4Min, result.B4Max);
 
-            return colorFormat.ToMinMax(result);
+            return colorFormat.ToColorMinMax(result);
         }
 
         throw new NotSupportedException("Data is not of a supported valid color-type.");
     }
 
-    public static IMinMax MinMax<T>(this Span<T> colors)
+    public static ColorMinMax MinMax<T>(this Span<T> colors)
         where T : struct, IColor
-    {
-        IColorFormat colorFormat = T.ColorFormat;
-        return colorFormat.BytesPerPixel switch
-        {
-            3 => colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
-            4 => colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<T, Generic4ByteData>(colors))),
-            _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
-        };
-    }
+        =>
+            ((ReadOnlySpan<T>)colors).MinMax();
 
-    public static IMinMax MinMax<T>(this ReadOnlySpan<T> colors)
+    public static ColorMinMax MinMax<T>(this ReadOnlySpan<T> colors)
         where T : struct, IColor
     {
         IColorFormat colorFormat = T.ColorFormat;
         return colorFormat.BytesPerPixel switch
         {
-            3 => colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
-            4 => colorFormat.ToMinMax(MinMax(MemoryMarshal.Cast<T, Generic4ByteData>(colors))),
+            3 => colorFormat.ToColorMinMax(MinMax(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
+            4 => colorFormat.ToColorMinMax(MinMax(MemoryMarshal.Cast<T, Generic4ByteData>(colors))),
             _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
         };
     }
@@ -128,7 +82,7 @@ public static unsafe partial class PixelHelper
         int elementsPerVector = Vector<byte>.Count / BYTES_PER_COLOR;
 
         int chunks;
-        if (Vector.IsHardwareAccelerated && ((chunks = data.Length / elementsPerVector) > 1))
+        if (Vector.IsHardwareAccelerated && ((chunks = (data.Length - 1) / elementsPerVector) > 1))
         {
             int bytesPerVector = elementsPerVector * BYTES_PER_COLOR;
             int missingElements = data.Length - (chunks * elementsPerVector);

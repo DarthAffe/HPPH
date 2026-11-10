@@ -4,6 +4,8 @@ namespace HPPH;
 
 public partial interface IColorFormat
 {
-    internal IMinMax ToMinMax(Generic3ByteMinMax data);
-    internal IMinMax ToMinMax(Generic4ByteMinMax data);
+    internal ColorMinMax MinMax(IImage image);
+
+    internal ColorMinMax ToColorMinMax(Generic3ByteMinMax data);
+    internal ColorMinMax ToColorMinMax(Generic4ByteMinMax data);
 }

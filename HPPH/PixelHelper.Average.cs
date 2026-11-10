@@ -11,20 +11,13 @@ public static partial class PixelHelper
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        float count = image.Width * image.Height;
-
-        ISum sum = Sum(image);
-
-        return image.ColorFormat.CreateColor((byte)MathF.Round(sum.R / count),
-                                             (byte)MathF.Round(sum.G / count),
-                                             (byte)MathF.Round(sum.B / count),
-                                             (byte)MathF.Round(sum.A / count));
+        return image.ColorFormat.Average(image);
     }
 
     public static T Average<T>(this IImage<T> image)
         where T : struct, IColor
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        ArgumentNullException.ThrowIfNull(image);
 
         return image.AsRefImage().Average();
     }
@@ -34,7 +27,7 @@ public static partial class PixelHelper
     {
         float count = image.Width * image.Height;
 
-        ISum sum = Sum(image);
+        ColorSum sum = image.Sum();
         return (T)T.Create((byte)MathF.Round(sum.R / count),
                            (byte)MathF.Round(sum.G / count),
                            (byte)MathF.Round(sum.B / count),

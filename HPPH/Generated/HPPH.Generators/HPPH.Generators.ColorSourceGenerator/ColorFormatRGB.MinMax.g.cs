@@ -1,16 +1,15 @@
 ﻿#nullable enable
 
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
 namespace HPPH;
 
 public sealed partial class ColorFormatRGB
 {
     #region Methods
 
-    unsafe IMinMax IColorFormat.ToMinMax(Generic3ByteMinMax data) => Unsafe.BitCast<Generic3ByteMinMax, MinMaxRGB>(data);
-    unsafe IMinMax IColorFormat.ToMinMax(Generic4ByteMinMax data) => throw new NotSupportedException();
+    ColorMinMax IColorFormat.MinMax(IImage image) => PixelHelper.MinMax(image.AsRefImage<ColorRGB>());
+
+    ColorMinMax IColorFormat.ToColorMinMax(Generic3ByteMinMax data) => new(data.B1Min, data.B1Max, data.B2Min, data.B2Max, data.B3Min, data.B3Max, byte.MaxValue, byte.MaxValue);
+    ColorMinMax IColorFormat.ToColorMinMax(Generic4ByteMinMax data) => throw new NotSupportedException();
 
     #endregion
 }

@@ -1,16 +1,15 @@
 ﻿#nullable enable
 
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
 namespace HPPH;
 
 public sealed partial class ColorFormatRGB
 {
     #region Methods
 
-    unsafe Generic4LongData IColorFormat.Sum(ReadOnlySpan<byte> data) => PixelHelper.Sum(MemoryMarshal.Cast<byte, Generic3ByteData>(data));
-    unsafe ISum IColorFormat.ToSum(Generic4LongData data) => Unsafe.BitCast<Generic4LongData, SumRGB>(data);
+    ColorSum IColorFormat.Sum(IImage image) => PixelHelper.Sum(image.AsRefImage<ColorRGB>());
+    IColor IColorFormat.Average(IImage image) => PixelHelper.Average(image.AsRefImage<ColorRGB>());
+
+    ColorSum IColorFormat.ToColorSum(Generic4LongData data) => new(data.L1, data.L2, data.L3, data.L4);
 
     #endregion
 }

@@ -4,7 +4,7 @@ public static partial class ReferencePixelHelper
 {
     #region Methods
 
-    public static ISum Sum(IImage image)
+    public static ColorSum Sum(IImage image)
     {
         long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
 
@@ -16,10 +16,10 @@ public static partial class ReferencePixelHelper
             sumA += color.A;
         }
 
-        return new SumRGBA(sumR, sumG, sumB, sumA);
+        return new ColorSum(sumR, sumG, sumB, sumA);
     }
 
-    public static ISum Sum<T>(RefImage<T> image)
+    public static ColorSum Sum<T>(RefImage<T> image)
         where T : struct, IColor
     {
         long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
@@ -32,10 +32,10 @@ public static partial class ReferencePixelHelper
             sumA += color.A;
         }
 
-        return new SumRGBA(sumR, sumG, sumB, sumA);
+        return new ColorSum(sumR, sumG, sumB, sumA);
     }
 
-    public static ISum Sum<T>(Span<T> colors)
+    public static ColorSum Sum<T>(Span<T> colors)
         where T : struct, IColor
     {
         long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
@@ -48,10 +48,10 @@ public static partial class ReferencePixelHelper
             sumA += color.A;
         }
 
-        return new SumRGBA(sumR, sumG, sumB, sumA);
+        return new ColorSum(sumR, sumG, sumB, sumA);
     }
 
-    public static ISum Sum<T>(ReadOnlySpan<T> colors)
+    public static ColorSum Sum<T>(ReadOnlySpan<T> colors)
         where T : struct, IColor
     {
         long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
@@ -64,7 +64,7 @@ public static partial class ReferencePixelHelper
             sumA += color.A;
         }
 
-        return new SumRGBA(sumR, sumG, sumB, sumA);
+        return new ColorSum(sumR, sumG, sumB, sumA);
     }
 
     #endregion

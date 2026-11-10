@@ -8,7 +8,7 @@ public static partial class ReferencePixelHelper
     {
         float count = image.Width * image.Height;
 
-        ISum sum = Sum(image);
+        ColorSum sum = Sum(image);
         return new ColorRGBA((byte)MathF.Round(sum.R / count),
                              (byte)MathF.Round(sum.G / count),
                              (byte)MathF.Round(sum.B / count),
@@ -20,7 +20,7 @@ public static partial class ReferencePixelHelper
     {
         float count = image.Width * image.Height;
 
-        ISum sum = Sum(image);
+        ColorSum sum = Sum(image);
         return (T)T.Create((byte)MathF.Round(sum.R / count),
                            (byte)MathF.Round(sum.G / count),
                            (byte)MathF.Round(sum.B / count),
@@ -32,7 +32,7 @@ public static partial class ReferencePixelHelper
     {
         float count = image.Width * image.Height;
 
-        ISum sum = Sum(image);
+        ColorSum sum = Sum(image);
         return (T)T.Create((byte)MathF.Round(sum.R / count),
                            (byte)MathF.Round(sum.G / count),
                            (byte)MathF.Round(sum.B / count),
@@ -44,7 +44,7 @@ public static partial class ReferencePixelHelper
     {
         float count = colors.Length;
 
-        ISum sum = Sum(colors);
+        ColorSum sum = Sum(colors);
         return (T)T.Create((byte)MathF.Round(sum.R / count),
                            (byte)MathF.Round(sum.G / count),
                            (byte)MathF.Round(sum.B / count),
@@ -56,7 +56,7 @@ public static partial class ReferencePixelHelper
     {
         float count = colors.Length;
 
-        ISum sum = Sum(colors);
+        ColorSum sum = Sum(colors);
         return (T)T.Create((byte)MathF.Round(sum.R / count),
                            (byte)MathF.Round(sum.G / count),
                            (byte)MathF.Round(sum.B / count),

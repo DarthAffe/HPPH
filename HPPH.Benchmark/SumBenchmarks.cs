@@ -34,9 +34,9 @@ public class SumBenchmarks
     #region Methods
 
     [Benchmark]
-    public ISum[] PixelHelper_3BPP()
+    public ColorSum[] PixelHelper_3BPP()
     {
-        ISum[] sums = new ISum[_colors3bpp.Count];
+        ColorSum[] sums = new ColorSum[_colors3bpp.Count];
         for (int i = 0; i < _colors3bpp.Count; i++)
             sums[i] = new ReadOnlySpan<ColorRGB>(_colors3bpp[i]).Sum();
 
@@ -44,9 +44,9 @@ public class SumBenchmarks
     }
 
     [Benchmark]
-    public ISum[] PixelHelper_4BPP()
+    public ColorSum[] PixelHelper_4BPP()
     {
-        ISum[] sums = new ISum[_colors4bpp.Count];
+        ColorSum[] sums = new ColorSum[_colors4bpp.Count];
         for (int i = 0; i < _colors4bpp.Count; i++)
             sums[i] = new ReadOnlySpan<ColorRGBA>(_colors4bpp[i]).Sum();
 
@@ -54,9 +54,9 @@ public class SumBenchmarks
     }
 
     [Benchmark]
-    public ISum[] PixelHelper_3BPP_Image()
+    public ColorSum[] PixelHelper_3BPP_Image()
     {
-        ISum[] sums = new ISum[_colors3bpp.Count];
+        ColorSum[] sums = new ColorSum[_colors3bpp.Count];
         for (int i = 0; i < _images3bpp.Count; i++)
             sums[i] = _images3bpp[i].Sum();
 
@@ -64,9 +64,9 @@ public class SumBenchmarks
     }
 
     [Benchmark]
-    public ISum[] PixelHelper_4BPP_Image()
+    public ColorSum[] PixelHelper_4BPP_Image()
     {
-        ISum[] sums = new ISum[_images4bpp.Count];
+        ColorSum[] sums = new ColorSum[_images4bpp.Count];
         for (int i = 0; i < _images4bpp.Count; i++)
             sums[i] = _images4bpp[i].Sum();
 
@@ -74,9 +74,9 @@ public class SumBenchmarks
     }
 
     [Benchmark]
-    public ISum[] Reference_3BPP()
+    public ColorSum[] Reference_3BPP()
     {
-        ISum[] sums = new ISum[_colors3bpp.Count];
+        ColorSum[] sums = new ColorSum[_colors3bpp.Count];
         for (int i = 0; i < _colors3bpp.Count; i++)
             sums[i] = ReferencePixelHelper.Sum(new ReadOnlySpan<ColorRGB>(_colors3bpp[i]));
 
@@ -84,9 +84,9 @@ public class SumBenchmarks
     }
 
     [Benchmark]
-    public ISum[] Reference_4BPP()
+    public ColorSum[] Reference_4BPP()
     {
-        ISum[] sums = new ISum[_colors4bpp.Count];
+        ColorSum[] sums = new ColorSum[_colors4bpp.Count];
         for (int i = 0; i < _colors4bpp.Count; i++)
             sums[i] = ReferencePixelHelper.Sum(new ReadOnlySpan<ColorRGBA>(_colors4bpp[i]));
 

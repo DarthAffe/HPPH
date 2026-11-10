@@ -4,6 +4,8 @@ namespace HPPH;
 
 public partial interface IColorFormat
 {
-    internal Generic4LongData Sum(ReadOnlySpan<byte> data);
-    internal ISum ToSum(Generic4LongData data);
+    internal ColorSum Sum(IImage image);
+    internal IColor Average(IImage image);
+
+    internal ColorSum ToColorSum(Generic4LongData data);
 }
