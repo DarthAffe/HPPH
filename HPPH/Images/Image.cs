@@ -161,38 +161,26 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         where TColor : struct, IColor
     {
         int targetBpp = TColor.ColorFormat.BytesPerPixel;
-        if (targetBpp == ColorFormat.BytesPerPixel)
-        {
-            byte[] data = ToRawArray();
-            MemoryMarshal.Cast<byte, T>(data.AsSpan()).ConvertInPlace<T, TColor>();
-            return new Image<TColor>(data, 0, 0, Width, Height, Width * targetBpp);
-        }
-        else
-        {
-            byte[] data = ToRawArray();
-            byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
-            MemoryMarshal.Cast<byte, T>(data.AsSpan()).Convert(MemoryMarshal.Cast<byte, TColor>(target.AsSpan()));
-            return new Image<TColor>(target, 0, 0, Width, Height, Width * targetBpp);
-        }
+        byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
+        AsRefImage().ConvertTo(MemoryMarshal.Cast<byte, TColor>(target.AsSpan()));
+        return new Image<TColor>(target, 0, 0, Width, Height, Width * targetBpp);
     }
 
     /// <inheritdoc />
-    public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
+    public void ConvertTo<TColor>(Span<TColor> destination)
+        where TColor : struct, IColor
+        => AsRefImage().ConvertTo(destination);
 
     /// <inheritdoc />
-    public void CopyTo(Span<byte> destination)
-    {
-        if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
+    public void ConvertTo<TColor>(Span<byte> destination, int stride)
+        where TColor : struct, IColor
+        => AsRefImage().ConvertTo<TColor>(destination, stride);
 
-        int targetStride = Width * ColorFormat.BytesPerPixel;
-        ImageRows<T> rows = Rows;
-        Span<byte> target = destination;
-        foreach (ImageRow<T> row in rows)
-        {
-            row.CopyTo(target);
-            target = target[targetStride..];
-        }
-    }
+    /// <inheritdoc />
+    public void CopyTo(Span<T> destination) => AsRefImage().CopyTo(destination);
+
+    /// <inheritdoc />
+    public void CopyTo(Span<byte> destination) => AsRefImage().CopyTo(destination);
 
     /// <inheritdoc />
     public byte[] ToRawArray()
@@ -250,17 +238,25 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     public IEnumerator<T> GetEnumerator()
     {
+        int bpp = T.ColorFormat.BytesPerPixel;
         for (int y = 0; y < Height; y++)
+        {
+            int rowOffset = ((_y + y) * _stride) + (_x * bpp);
             for (int x = 0; x < Width; x++)
-                yield return this[x, y];
+                yield return Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_buffer), (nint)(uint)rowOffset)), (nint)(uint)x);
+        }
     }
 
     /// <inheritdoc />
     IEnumerator<IColor> IEnumerable<IColor>.GetEnumerator()
     {
+        int bpp = T.ColorFormat.BytesPerPixel;
         for (int y = 0; y < Height; y++)
+        {
+            int rowOffset = ((_y + y) * _stride) + (_x * bpp);
             for (int x = 0; x < Width; x++)
-                yield return this[x, y];
+                yield return Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_buffer), (nint)(uint)rowOffset)), (nint)(uint)x);
+        }
     }
 
     /// <inheritdoc />

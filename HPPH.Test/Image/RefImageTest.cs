@@ -284,7 +284,7 @@ public class RefImageTest
     [TestMethod]
     public void CopyToColorEmpty()
     {
-        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).AsRefImage().CopyTo(default));
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).AsRefImage().CopyTo(default(Span<ColorRGB>)));
     }
 
     [TestMethod]

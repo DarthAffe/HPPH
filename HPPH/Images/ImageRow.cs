@@ -68,45 +68,9 @@ public readonly ref struct ImageRow<T>
 
     /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ImageRowEnumerator GetEnumerator() => new(this);
+    public ReadOnlySpan<T>.Enumerator GetEnumerator() => AsSpan().GetEnumerator();
 
     #endregion
-
-    public ref struct ImageRowEnumerator
-    {
-        #region Properties & Fields
-
-        private readonly ImageRow<T> _column;
-        private int _position;
-
-        /// <inheritdoc cref="System.Collections.Generic.IEnumerator{T}.Current"/>
-        public readonly T Current
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _column[_position];
-        }
-
-        #endregion
-
-        #region Constructors
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ImageRowEnumerator(ImageRow<T> column)
-        {
-            this._column = column;
-            this._position = -1;
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <inheritdoc cref="System.Collections.IEnumerator.MoveNext"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MoveNext() => ++_position < _column.Length;
-
-        #endregion
-    }
 }
 
 //HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
