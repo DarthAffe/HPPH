@@ -97,6 +97,8 @@ All of the included formats can freely be converted between each other.
 
 Allocation-free in-place conversion is only supported for formats of same size (both 24 or 32 bit).
 
+Since conversions are mostly limited by memory bandwidth make sure to reuse buffers if possible (`source.Convert(target)`) instead of using the overloads that allocate a new array every time. Writing to freshly allocated memory often costs more than the conversion itself.
+
 | Method             | Mean     | Error     | StdDev    | Allocated   |
 |------------------- |---------:|----------:|----------:|------------:|
 | RGBToBGR           | 1.487 ms | 0.0221 ms | 0.0196 ms |  9073.58 KB |

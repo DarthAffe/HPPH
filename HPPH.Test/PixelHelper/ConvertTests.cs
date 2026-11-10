@@ -396,4 +396,53 @@ public class ConvertTests
             for (int x = 0; x < converted.Width; x++)
                 Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorBGR>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
     }
+
+    [TestMethod]
+    public void ConvertBetweenAllFormatsKeepsChannels()
+    {
+        ConvertFrom<ColorRGB>();
+        ConvertFrom<ColorBGR>();
+        ConvertFrom<ColorRGBA>();
+        ConvertFrom<ColorBGRA>();
+        ConvertFrom<ColorARGB>();
+        ConvertFrom<ColorABGR>();
+    }
+
+    private static void ConvertFrom<TSource>()
+        where TSource : struct, IColor
+    {
+        ConvertBetween<TSource, ColorRGB>();
+        ConvertBetween<TSource, ColorBGR>();
+        ConvertBetween<TSource, ColorRGBA>();
+        ConvertBetween<TSource, ColorBGRA>();
+        ConvertBetween<TSource, ColorARGB>();
+        ConvertBetween<TSource, ColorABGR>();
+    }
+
+    private static void ConvertBetween<TSource, TTarget>()
+        where TSource : struct, IColor
+        where TTarget : struct, IColor
+    {
+        TSource[] source = new TSource[40];
+        for (int i = 0; i < source.Length; i++)
+            source[i] = (TSource)TSource.Create(10, 20, 30, 40);
+
+        TTarget[] converted = new ReadOnlySpan<TSource>(source).Convert<TSource, TTarget>();
+
+        byte expectedAlpha = (TSource.ColorFormat.BytesPerPixel == 3) || (TTarget.ColorFormat.BytesPerPixel == 3) ? byte.MaxValue : (byte)40;
+        foreach (TTarget color in converted)
+        {
+            string message = $"{TSource.ColorFormat.Name} -> {TTarget.ColorFormat.Name}";
+            Assert.AreEqual(10, color.R, message);
+            Assert.AreEqual(20, color.G, message);
+            Assert.AreEqual(30, color.B, message);
+            Assert.AreEqual(expectedAlpha, color.A, message);
+        }
+
+        if (TSource.ColorFormat.BytesPerPixel == TTarget.ColorFormat.BytesPerPixel)
+        {
+            Span<TTarget> inPlace = source.AsSpan().ConvertInPlace<TSource, TTarget>();
+            Assert.AreSequenceEqual(converted, inPlace.ToArray(), $"{TSource.ColorFormat.Name} -> {TTarget.ColorFormat.Name} in place");
+        }
+    }
 }
