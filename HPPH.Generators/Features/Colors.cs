@@ -90,10 +90,15 @@ internal class Colors : IGeneratorFeature
                     public bool Equals({{colorFormat.TypeName}} other) => (_{{colorFormat.FirstEntry}} == other._{{colorFormat.FirstEntry}}) && (_{{colorFormat.SecondEntry}} == other._{{colorFormat.SecondEntry}}) && (_{{colorFormat.ThirdEntry}} == other._{{colorFormat.ThirdEntry}});
                     
                     /// <inheritdoc />
-                    public override bool Equals(object? obj) => obj is {{colorFormat.TypeName}} other && Equals(other);
+                    public override bool Equals(object? obj) => obj switch
+                    {
+                        {{colorFormat.TypeName}} other => Equals(other),
+                        IColor other => Equals(other),
+                        _ => false
+                    };
                     
                     /// <inheritdoc />
-                    public override int GetHashCode() => HashCode.Combine(_{{colorFormat.FirstEntry}}, _{{colorFormat.SecondEntry}}, _{{colorFormat.ThirdEntry}});
+                    public override int GetHashCode() => R | (G << 8) | (B << 16) | (byte.MaxValue << 24);
                 
                     /// <inheritdoc />
                     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
@@ -171,13 +176,18 @@ internal class Colors : IGeneratorFeature
                     public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
                 
                     /// <inheritdoc />
-                    public bool Equals({{colorFormat.TypeName}} other) => (_{{colorFormat.FirstEntry}} == other._{{colorFormat.FirstEntry}}) && (_{{colorFormat.SecondEntry}} == other._{{colorFormat.SecondEntry}}) && (_{{colorFormat.ThirdEntry}} == other._{{colorFormat.ThirdEntry}})&& (_{{colorFormat.FourthEntry}}== other._{{colorFormat.FourthEntry}});
+                    public bool Equals({{colorFormat.TypeName}} other) => Unsafe.BitCast<{{colorFormat.TypeName}}, uint>(this) == Unsafe.BitCast<{{colorFormat.TypeName}}, uint>(other);
                     
                     /// <inheritdoc />
-                    public override bool Equals(object? obj) => obj is {{colorFormat.TypeName}} other && Equals(other);
+                    public override bool Equals(object? obj) => obj switch
+                    {
+                        {{colorFormat.TypeName}} other => Equals(other),
+                        IColor other => Equals(other),
+                        _ => false
+                    };
                     
                     /// <inheritdoc />
-                    public override int GetHashCode() => HashCode.Combine(_{{colorFormat.FirstEntry}}, _{{colorFormat.SecondEntry}}, _{{colorFormat.ThirdEntry}}, _{{colorFormat.FourthEntry}});
+                    public override int GetHashCode() => R | (G << 8) | (B << 16) | (A << 24);
                 
                     /// <inheritdoc />
                     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";

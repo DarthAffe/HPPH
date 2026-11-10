@@ -62,13 +62,18 @@ public readonly partial struct ColorBGRA(byte b, byte g, byte r, byte a) : IColo
     public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
 
     /// <inheritdoc />
-    public bool Equals(ColorBGRA other) => (_b == other._b) && (_g == other._g) && (_r == other._r)&& (_a== other._a);
+    public bool Equals(ColorBGRA other) => Unsafe.BitCast<ColorBGRA, uint>(this) == Unsafe.BitCast<ColorBGRA, uint>(other);
     
     /// <inheritdoc />
-    public override bool Equals(object? obj) => obj is ColorBGRA other && Equals(other);
+    public override bool Equals(object? obj) => obj switch
+    {
+        ColorBGRA other => Equals(other),
+        IColor other => Equals(other),
+        _ => false
+    };
     
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(_b, _g, _r, _a);
+    public override int GetHashCode() => R | (G << 8) | (B << 16) | (A << 24);
 
     /// <inheritdoc />
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";

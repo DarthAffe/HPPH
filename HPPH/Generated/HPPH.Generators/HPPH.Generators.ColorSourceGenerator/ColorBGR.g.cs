@@ -63,10 +63,15 @@ public readonly partial struct ColorBGR(byte b, byte g, byte r): IColor, IEquata
     public bool Equals(ColorBGR other) => (_b == other._b) && (_g == other._g) && (_r == other._r);
     
     /// <inheritdoc />
-    public override bool Equals(object? obj) => obj is ColorBGR other && Equals(other);
+    public override bool Equals(object? obj) => obj switch
+    {
+        ColorBGR other => Equals(other),
+        IColor other => Equals(other),
+        _ => false
+    };
     
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(_b, _g, _r);
+    public override int GetHashCode() => R | (G << 8) | (B << 16) | (byte.MaxValue << 24);
 
     /// <inheritdoc />
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
