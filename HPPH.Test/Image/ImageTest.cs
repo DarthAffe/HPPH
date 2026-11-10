@@ -703,15 +703,15 @@ public class ImageTest
     }
 
     [TestMethod]
-    public void CopyToByteNull()
+    public void CopyToByteEmpty()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<byte>)null));
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<byte>)default));
     }
 
     [TestMethod]
-    public void CopyToColorNull()
+    public void CopyToColorEmpty()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<ColorRGB>)null));
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<ColorRGB>)default));
     }
 
     [TestMethod]
@@ -909,17 +909,17 @@ public class ImageTest
     }
 
     [TestMethod]
-    public void ColumnCopyToByteNull()
+    public void ColumnCopyToByteEmpty()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentNullException>(() => image.Columns[1].CopyTo((Span<byte>)null));
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo((Span<byte>)default));
     }
 
     [TestMethod]
-    public void ColumnCopyToColorNull()
+    public void ColumnCopyToColorEmpty()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentNullException>(() => image.Columns[1].CopyTo((Span<IColor>)null));
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo((Span<IColor>)default));
     }
 
     [TestMethod]
@@ -937,17 +937,17 @@ public class ImageTest
     }
 
     [TestMethod]
-    public void RowCopyToByteNull()
+    public void RowCopyToByteEmpty()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentNullException>(() => image.Rows[1].CopyTo((Span<byte>)null));
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo((Span<byte>)default));
     }
 
     [TestMethod]
-    public void RowCopyToColorNull()
+    public void RowCopyToColorEmpty()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentNullException>(() => image.Rows[1].CopyTo((Span<IColor>)null));
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo((Span<IColor>)default));
     }
 
     [TestMethod]
@@ -1076,6 +1076,18 @@ public class ImageTest
         IImage image2 = TestDataHelper.CreateTestImage<ColorBGR>(10, 20);
 
         Assert.AreNotEqual(image, image2);
+    }
+
+    [TestMethod]
+    public void EqualImagesHaveEqualHashes()
+    {
+        ColorRGBA[] pixels = [new(1, 2, 3, 4), new(5, 6, 7, 8), new(9, 10, 11, 12), new(13, 14, 15, 16)];
+        Image<ColorRGBA> a = Image<ColorRGBA>.Create(pixels, 2, 2);
+        Image<ColorRGBA> b = Image<ColorRGBA>.Create(pixels, 2, 2);
+
+        Assert.IsTrue(a.Equals(b));
+        Assert.AreEqual(a.GetHashCode(), b.GetHashCode());
+        Assert.Contains(b, new HashSet<Image<ColorRGBA>> { a });
     }
 
     #endregion

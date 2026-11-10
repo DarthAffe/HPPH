@@ -54,7 +54,6 @@ public readonly ref struct ImageRow<T>
 
     public void CopyTo(Span<byte> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         AsByteSpan().CopyTo(destination);
@@ -163,7 +162,6 @@ internal sealed class IColorImageRow<T> : IImageRow
     /// <inheritdoc />
     public void CopyTo(Span<IColor> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < _length) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         for (int i = 0; i < _length; i++)
@@ -173,7 +171,6 @@ internal sealed class IColorImageRow<T> : IImageRow
     /// <inheritdoc />
     public void CopyTo(Span<byte> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         _buffer.AsSpan().Slice(_start, SizeInBytes).CopyTo(destination);

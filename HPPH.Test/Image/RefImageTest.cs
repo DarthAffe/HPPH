@@ -282,9 +282,9 @@ public class RefImageTest
     }
 
     [TestMethod]
-    public void CopyToColorNull()
+    public void CopyToColorEmpty()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).AsRefImage().CopyTo(null));
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).AsRefImage().CopyTo(default));
     }
 
     [TestMethod]
@@ -474,22 +474,22 @@ public class RefImageTest
     }
 
     [TestMethod]
-    public void ColumnCopyToByteNull()
+    public void ColumnCopyToByteEmpty()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             RefImage<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage();
-            image.Columns[1].CopyTo((Span<byte>)null);
+            image.Columns[1].CopyTo((Span<byte>)default);
         });
     }
 
     [TestMethod]
-    public void ColumnCopyToColorNull()
+    public void ColumnCopyToColorEmpty()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             RefImage<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage();
-            image.Rows[1].CopyTo((Span<ColorRGB>)null);
+            image.Rows[1].CopyTo((Span<ColorRGB>)default);
         });
     }
 
@@ -514,22 +514,22 @@ public class RefImageTest
     }
 
     [TestMethod]
-    public void RowCopyToByteNull()
+    public void RowCopyToByteEmpty()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             RefImage<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage();
-            image.Rows[1].CopyTo((Span<byte>)null);
+            image.Rows[1].CopyTo((Span<byte>)default);
         });
     }
 
     [TestMethod]
-    public void RowCopyToColorNull()
+    public void RowCopyToColorEmpty()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             RefImage<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage();
-            image.Rows[1].CopyTo((Span<ColorRGB>)null);
+            image.Rows[1].CopyTo((Span<ColorRGB>)default);
         });
     }
 

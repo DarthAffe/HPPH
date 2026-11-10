@@ -53,7 +53,6 @@ public readonly ref struct ImageColumn<T>
 
     public void CopyTo(Span<byte> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), _start);
@@ -164,7 +163,6 @@ internal sealed class IColorImageColumn<T> : IImageColumn
     /// <inheritdoc />
     public void CopyTo(Span<IColor> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < _length) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         for (int i = 0; i < _length; i++)
@@ -174,7 +172,6 @@ internal sealed class IColorImageColumn<T> : IImageColumn
     /// <inheritdoc />
     public void CopyTo(Span<byte> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), _start);

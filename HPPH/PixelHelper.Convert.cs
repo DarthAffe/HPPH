@@ -17,7 +17,6 @@ public static unsafe partial class PixelHelper
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
         if (colors.Length == 0) return MemoryMarshal.Cast<TSource, TTarget>(colors);
 
         IColorFormat sourceFormat = TSource.ColorFormat;
@@ -36,8 +35,6 @@ public static unsafe partial class PixelHelper
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
         TTarget[] buffer = GC.AllocateUninitializedArray<TTarget>(colors.Length);
         Convert(colors, buffer.AsSpan());
         return buffer;
@@ -47,8 +44,6 @@ public static unsafe partial class PixelHelper
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
         TTarget[] buffer = GC.AllocateUninitializedArray<TTarget>(colors.Length);
         Convert(colors, buffer.AsSpan());
         return buffer;
@@ -58,8 +53,6 @@ public static unsafe partial class PixelHelper
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
-        if (source == null) throw new ArgumentNullException(nameof(source));
-        if (target == null) throw new ArgumentNullException(nameof(target));
         if (target.Length < source.Length) throw new ArgumentException($"Target-buffer is not big enough. {target.Length} < {source.Length}", nameof(target));
 
         Convert(MemoryMarshal.AsBytes(source), MemoryMarshal.AsBytes(target), TSource.ColorFormat, TTarget.ColorFormat);
@@ -69,8 +62,6 @@ public static unsafe partial class PixelHelper
         where TSource : struct, IColor
         where TTarget : struct, IColor
     {
-        if (source == null) throw new ArgumentNullException(nameof(source));
-        if (target == null) throw new ArgumentNullException(nameof(target));
         if (target.Length < source.Length) throw new ArgumentException($"Target-buffer is not big enough. {target.Length} < {source.Length}", nameof(target));
 
         Convert(MemoryMarshal.AsBytes(source), MemoryMarshal.AsBytes(target), TSource.ColorFormat, TTarget.ColorFormat);

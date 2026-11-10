@@ -98,8 +98,6 @@ public static unsafe partial class PixelHelper
     public static IMinMax MinMax<T>(this Span<T> colors)
         where T : struct, IColor
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
         IColorFormat colorFormat = T.ColorFormat;
         return colorFormat.BytesPerPixel switch
         {
@@ -112,8 +110,6 @@ public static unsafe partial class PixelHelper
     public static IMinMax MinMax<T>(this ReadOnlySpan<T> colors)
         where T : struct, IColor
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
         IColorFormat colorFormat = T.ColorFormat;
         return colorFormat.BytesPerPixel switch
         {

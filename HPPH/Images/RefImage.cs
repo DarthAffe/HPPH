@@ -25,7 +25,7 @@ public readonly ref struct RefImage<T>
     public int Height { get; }
 
     /// <summary>
-    /// Gets the stride (entries per row) of the underlying buffer.
+    /// Gets the stride (bytes per row) of the underlying buffer.
     /// Only useful if you want to work with a pinned buffer.
     /// </summary>
     public int RawStride { get; }
@@ -90,13 +90,25 @@ public readonly ref struct RefImage<T>
 
     #region Methods
 
+    /// <summary>
+    /// Wraps a buffer without copying it.
+    /// </summary>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
     public static RefImage<T> Wrap(ReadOnlySpan<T> buffer, int width, int height)
         => Wrap(MemoryMarshal.AsBytes(buffer), width, height, width * T.ColorFormat.BytesPerPixel);
 
+    /// <summary>
+    /// Wraps a buffer without copying it.
+    /// </summary>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
+    /// <param name="stride">The distance between the starts of two rows, in bytes. The last row needs no padding.</param>
     public static RefImage<T> Wrap(ReadOnlySpan<byte> buffer, int width, int height, int stride)
     {
-        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
-        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+        ImageValidation.ValidateLayout(buffer.Length, width, height, stride, T.ColorFormat.BytesPerPixel);
 
         return new RefImage<T>(buffer, 0, 0, width, height, stride);
     }
@@ -110,7 +122,6 @@ public readonly ref struct RefImage<T>
     /// </exception>
     public void CopyTo(Span<T> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < (Width * Height)) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         ImageRows<T> rows = Rows;

@@ -44,8 +44,6 @@ public static partial class PixelHelper
     public static T Average<T>(this Span<T> colors)
         where T : struct, IColor
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
         return T.ColorFormat.BytesPerPixel switch
         {
             3 => Unsafe.BitCast<Generic3ByteData, T>(Average(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
@@ -57,8 +55,6 @@ public static partial class PixelHelper
     public static T Average<T>(this ReadOnlySpan<T> colors)
         where T : struct, IColor
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
         return T.ColorFormat.BytesPerPixel switch
         {
             3 => Unsafe.BitCast<Generic3ByteData, T>(Average(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
@@ -69,7 +65,6 @@ public static partial class PixelHelper
 
     private static Generic3ByteData Average(ReadOnlySpan<Generic3ByteData> data)
     {
-        if (data == null) throw new ArgumentNullException(nameof(data));
         if (data.Length == 0) return default;
         if (data.Length == 1) return data[0];
 
@@ -83,7 +78,6 @@ public static partial class PixelHelper
 
     private static Generic4ByteData Average(ReadOnlySpan<Generic4ByteData> data)
     {
-        if (data == null) throw new ArgumentNullException(nameof(data));
         if (data.Length == 0) return default;
         if (data.Length == 1) return data[0];
 

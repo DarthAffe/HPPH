@@ -116,24 +116,42 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     #region Methods
 
+    /// <summary>
+    /// Creates an image from a copy of <paramref name="buffer"/>.
+    /// </summary>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
     public static Image<T> Create(ReadOnlySpan<T> buffer, int width, int height)
         => Create(MemoryMarshal.AsBytes(buffer), width, height, width * T.ColorFormat.BytesPerPixel);
 
+    /// <summary>
+    /// Creates an image from a copy of <paramref name="buffer"/>.
+    /// </summary>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
+    /// <param name="stride">The distance between the starts of two rows, in bytes. The last row needs no padding.</param>
     public static Image<T> Create(ReadOnlySpan<byte> buffer, int width, int height, int stride)
     {
-        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
-        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+        ImageValidation.ValidateLayout(buffer.Length, width, height, stride, T.ColorFormat.BytesPerPixel);
 
         byte[] data = GC.AllocateUninitializedArray<byte>(buffer.Length);
         buffer.CopyTo(data);
         return new Image<T>(data, 0, 0, width, height, stride);
     }
 
+    /// <summary>
+    /// Creates an image on top of <paramref name="buffer"/> without copying it. Changes to the buffer show up in the image.
+    /// </summary>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
+    /// <param name="stride">The distance between the starts of two rows, in bytes. The last row needs no padding.</param>
     public static Image<T> Wrap(byte[] buffer, int width, int height, int stride)
     {
-        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
-        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
-        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+        ArgumentNullException.ThrowIfNull(buffer);
+        ImageValidation.ValidateLayout(buffer.Length, width, height, stride, T.ColorFormat.BytesPerPixel);
 
         return new Image<T>(buffer, 0, 0, width, height, stride);
     }
@@ -164,7 +182,6 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     public void CopyTo(Span<byte> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         int targetStride = Width * ColorFormat.BytesPerPixel;
@@ -292,7 +309,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     public override bool Equals(object? obj) => Equals(obj as Image<T>);
 
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(ColorFormat, Width, Height, _buffer.GetHashCode());
+    public override int GetHashCode() => HashCode.Combine(ColorFormat, Width, Height);
 
     #endregion
 }
