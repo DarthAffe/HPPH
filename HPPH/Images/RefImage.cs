@@ -252,12 +252,12 @@ public readonly ref struct RefImage<T>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<byte> GetRowBytes(int y)
+    private ReadOnlySpan<byte> GetRowBytes(int y)
     {
         int bpp = T.ColorFormat.BytesPerPixel;
         return _data.Slice(((_y + y) * RawStride) + (_x * bpp), Width * bpp);
     }
-
+    
     #endregion
 
     public ref struct ImageEnumerator
