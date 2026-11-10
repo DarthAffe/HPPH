@@ -10,23 +10,23 @@ public class ConvertBenchmarks
 {
     #region Properties & Fields
 
-    private readonly List<ColorRGB[]> _colors3bpp;
-    private readonly List<ColorRGBA[]> _colors4bpp;
+    [Params(DataSet.Samples, DataSet.FullHD, DataSet.UHD)]
+    public DataSet Data { get; set; }
 
-    #endregion
-
-    #region Constructors
-
-    public ConvertBenchmarks()
-    {
-        _colors3bpp = BenchmarkHelper.GetSampleData<ColorRGB>();
-        _colors4bpp = BenchmarkHelper.GetSampleData<ColorRGBA>();
-    }
+    private List<ColorRGB[]> _colors3bpp = [];
+    private List<ColorRGBA[]> _colors4bpp = [];
 
     #endregion
 
     #region Methods
 
+    [GlobalSetup]
+    public void Setup()
+    {
+        _colors3bpp = BenchmarkHelper.GetSampleData<ColorRGB>(Data);
+        _colors4bpp = BenchmarkHelper.GetSampleData<ColorRGBA>(Data);
+    }
+    
     [Benchmark]
     public ColorBGR[] RGBToBGR()
     {
