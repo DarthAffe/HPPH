@@ -36,8 +36,6 @@ internal class MinMax : IGeneratorFeature
                  {
                      #region Methods
 
-                     ColorMinMax IColorFormat.MinMax(IImage image) => PixelHelper.MinMax(image.AsRefImage<Color{{colorFormat.Format}}>());
-
                      ColorMinMax IColorFormat.ToColorMinMax(Generic3ByteMinMax data) => {{create3Byte}};
                      ColorMinMax IColorFormat.ToColorMinMax(Generic4ByteMinMax data) => {{create4Byte}};
 
@@ -55,8 +53,6 @@ internal class MinMax : IGeneratorFeature
 
                public partial interface IColorFormat
                {
-                   internal ColorMinMax MinMax(IImage image);
-
                    internal ColorMinMax ToColorMinMax(Generic3ByteMinMax data);
                    internal ColorMinMax ToColorMinMax(Generic4ByteMinMax data);
                }

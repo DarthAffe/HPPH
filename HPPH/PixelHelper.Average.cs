@@ -11,7 +11,7 @@ public static partial class PixelHelper
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        return image.ColorFormat.Average(image);
+        return image.Execute<AverageOperation, IColor>(default);
     }
 
     public static T Average<T>(this IImage<T> image)
@@ -73,4 +73,9 @@ public static partial class PixelHelper
     }
 
     #endregion
+
+    private readonly struct AverageOperation : IImageOperation<IColor>
+    {
+        public IColor Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => image.Average();
+    }
 }

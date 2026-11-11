@@ -243,6 +243,23 @@ public readonly ref struct RefImage<T>
                 MemoryMarshal.Cast<byte, T>(GetRowBytes(y)).Convert(MemoryMarshal.Cast<byte, TColor>(destination.Slice(y * stride, targetRowSize)));
     }
 
+    /// <inheritdoc cref="IImage.Execute{TOperation, TResult}(TOperation)"/>
+    public TResult Execute<TOperation, TResult>(TOperation operation)
+        where TOperation : IImageOperation<TResult>, allows ref struct
+    {
+        if (operation is null) throw new ArgumentNullException(nameof(operation));
+
+        return operation.Execute(this);
+    }
+
+    /// <inheritdoc cref="IImage.Execute{TResult}(IImageOperation{TResult})"/>
+    public TResult Execute<TResult>(IImageOperation<TResult> operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        return operation.Execute(this);
+    }
+
     /// <summary>
     /// Returns a reference to the first element of this image inside the full image buffer.
     /// </summary>

@@ -26,7 +26,7 @@ public static partial class PixelHelper
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        return image.ColorFormat.CreateMedianCutColorPalette(image, paletteSize);
+        return image.Execute<MedianCutPaletteOperation, IColor[]>(new MedianCutPaletteOperation(paletteSize));
     }
 
     /// <inheritdoc cref="CreateMedianCutColorPalette(IImage, int)"/>
@@ -142,4 +142,9 @@ public static partial class PixelHelper
     }
 
     #endregion
+    
+    private readonly struct MedianCutPaletteOperation(int paletteSize) : IImageOperation<IColor[]>
+    {
+        public IColor[] Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => ToIColors(image.CreateMedianCutColorPalette(paletteSize));
+    }
 }

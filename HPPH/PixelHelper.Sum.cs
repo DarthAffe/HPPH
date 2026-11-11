@@ -34,7 +34,7 @@ public static partial class PixelHelper
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        return image.ColorFormat.Sum(image);
+        return image.Execute<SumOperation, ColorSum>(default);
     }
 
     public static ColorSum Sum<T>(this IImage<T> image)
@@ -574,4 +574,9 @@ public static partial class PixelHelper
         => Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(TailMask), (nuint)(64 - Math.Clamp(cleared, 0, 64)));
 
     #endregion
+
+    private readonly struct SumOperation : IImageOperation<ColorSum>
+    {
+        public ColorSum Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => image.Sum();
+    }
 }

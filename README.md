@@ -28,6 +28,28 @@ An abstraction layer for handling pixel-grids.
 
 Supports all of the operations below and things like allocation-free region selection, iteration and copying of rows, colums or whole images/regions.
 
+#### Custom operations
+To work with an `IImage` whose color format is only known at runtime (e.g. a loaded file), implement `IImageOperation<TResult>` and pass it to `Execute`.   
+
+```csharp
+readonly struct MaxRed : IImageOperation<byte>
+{
+    public byte Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T>
+    {
+        byte max = 0;
+        foreach (T color in image)
+            max = Math.Max(max, color.R);
+
+        return max;
+    }
+}
+
+byte maxRed = image.Execute<MaxRed, byte>(default); // no allocations
+byte maxRed2 = image.Execute(new MaxRed());         // shorter, but boxes struct operations
+```
+
+`RefImage<T>` offers the same `Execute` methods, so an operation can be used on both kinds of images.
+
 
 ### Sum
 

@@ -39,7 +39,7 @@ public static partial class PixelHelper
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        return image.ColorFormat.MinMax(image);
+        return image.Execute<MinMaxOperation, ColorMinMax>(default);
     }
 
     public static ColorMinMax MinMax<T>(this IImage<T> image)
@@ -471,4 +471,9 @@ public static partial class PixelHelper
         => Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(FillTable), (nuint)(16 - count));
 
     #endregion
+
+    private readonly struct MinMaxOperation : IImageOperation<ColorMinMax>
+    {
+        public ColorMinMax Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => image.MinMax();
+    }
 }

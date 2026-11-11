@@ -67,6 +67,29 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     RefImage<TColor> AsRefImage<TColor>() where TColor : unmanaged, IColor<TColor>;
 
     /// <summary>
+    /// Executes <paramref name="operation"/> on this image.
+    /// </summary>
+    /// <param name="operation">The operation to execute.</param>
+    /// <typeparam name="TOperation">The type of the operation.</typeparam>
+    /// <typeparam name="TResult">The type of the result of the operation.</typeparam>
+    /// <returns>The result of the operation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="operation"/> is <see langword="null"/>.</exception>
+    TResult Execute<TOperation, TResult>(TOperation operation)
+        where TOperation : IImageOperation<TResult>, allows ref struct;
+
+    /// <summary>
+    /// Executes <paramref name="operation"/> on this image.
+    /// </summary>
+    /// <remarks>
+    /// Struct operations are boxed. Use <see cref="Execute{TOperation, TResult}(TOperation)"/> to avoid that.
+    /// </remarks>
+    /// <param name="operation">The operation to execute.</param>
+    /// <typeparam name="TResult">The type of the result of the operation.</typeparam>
+    /// <returns>The result of the operation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="operation"/> is <see langword="null"/>.</exception>
+    TResult Execute<TResult>(IImageOperation<TResult> operation);
+
+    /// <summary>
     /// Converts this image into a new image of the color format <typeparamref name="TColor"/>.
     /// </summary>
     IImage<TColor> ConvertTo<TColor>() where TColor : unmanaged, IColor<TColor>;

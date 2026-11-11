@@ -15,7 +15,7 @@ public static partial class PixelHelper
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        return image.ColorFormat.CreateWuColorPalette(image, paletteSize);
+        return image.Execute<WuPaletteOperation, IColor[]>(new WuPaletteOperation(paletteSize));
     }
 
     /// <inheritdoc cref="CreateWuColorPalette(IImage, int)"/>
@@ -58,4 +58,9 @@ public static partial class PixelHelper
     }
 
     #endregion
+
+    private readonly struct WuPaletteOperation(int paletteSize) : IImageOperation<IColor[]>
+    {
+        public IColor[] Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => ToIColors(image.CreateWuColorPalette(paletteSize));
+    }
 }

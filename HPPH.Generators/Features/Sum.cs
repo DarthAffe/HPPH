@@ -32,9 +32,6 @@ internal class Sum : IGeneratorFeature
                  {
                      #region Methods
 
-                     ColorSum IColorFormat.Sum(IImage image) => PixelHelper.Sum(image.AsRefImage<Color{{colorFormat.Format}}>());
-                     IColor IColorFormat.Average(IImage image) => PixelHelper.Average(image.AsRefImage<Color{{colorFormat.Format}}>());
-
                      ColorSum IColorFormat.ToColorSum(Generic4LongData data) => new(data.L{{r}}, data.L{{g}}, data.L{{b}}, data.L{{a}});
 
                      #endregion
@@ -51,9 +48,6 @@ internal class Sum : IGeneratorFeature
 
                public partial interface IColorFormat
                {
-                   internal ColorSum Sum(IImage image);
-                   internal IColor Average(IImage image);
-
                    internal ColorSum ToColorSum(Generic4LongData data);
                }
                """;
