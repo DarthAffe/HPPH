@@ -23,7 +23,7 @@ namespace HPPH;
 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
 [SkipLocalsInit]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct ColorRGBA(byte r, byte g, byte b, byte a) : IColor, IEquatable<ColorRGBA>
+public readonly partial struct ColorRGBA(byte r, byte g, byte b, byte a) : IColor<ColorRGBA>, IEquatable<ColorRGBA>
 {
     #region Properties & Fields
 
@@ -79,7 +79,7 @@ public readonly partial struct ColorRGBA(byte r, byte g, byte b, byte a) : IColo
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
 
     /// <inheritdoc />
-    public static IColor Create(byte r, byte g, byte b, byte a) => new ColorRGBA(r, g, b, a);
+    public static ColorRGBA Create(byte r, byte g, byte b, byte a) => new ColorRGBA(r, g, b, a);
 
     #endregion
 }

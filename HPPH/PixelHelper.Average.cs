@@ -15,7 +15,7 @@ public static partial class PixelHelper
     }
 
     public static T Average<T>(this IImage<T> image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -23,19 +23,19 @@ public static partial class PixelHelper
     }
 
     public static T Average<T>(this RefImage<T> image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         float count = image.Width * image.Height;
 
         ColorSum sum = image.Sum();
-        return (T)T.Create((byte)MathF.Round(sum.R / count),
-                           (byte)MathF.Round(sum.G / count),
-                           (byte)MathF.Round(sum.B / count),
-                           (byte)MathF.Round(sum.A / count));
+        return T.Create((byte)MathF.Round(sum.R / count),
+                        (byte)MathF.Round(sum.G / count),
+                        (byte)MathF.Round(sum.B / count),
+                        (byte)MathF.Round(sum.A / count));
     }
 
     public static T Average<T>(this ReadOnlySpan<T> colors)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         return T.ColorFormat.BytesPerPixel switch
         {

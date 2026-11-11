@@ -18,25 +18,25 @@ public static partial class PixelHelper
 
     /// <inheritdoc cref="CreateColorPalette(IImage, int)"/>
     public static T[] CreateColorPalette<T>(this IImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => image.CreateWuColorPalette(paletteSize);
 
     /// <inheritdoc cref="CreateColorPalette(IImage, int)"/>
     public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => image.CreateWuColorPalette(paletteSize);
 
     /// <inheritdoc cref="CreateColorPalette(IImage, int)"/>
     public static T[] CreateColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => colors.CreateWuColorPalette(paletteSize);
     
     private static T[] GetDistinctColors<T>(ReadOnlySpan<T> colors)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => ToPalette(colors, []);
 
     internal static T[] ToPalette<T>(ReadOnlySpan<T> colors, ReadOnlySpan<long> populations)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] distinct = new T[colors.Length];
         long[] distinctPopulations = new long[colors.Length];

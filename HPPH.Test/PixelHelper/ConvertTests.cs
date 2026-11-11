@@ -409,7 +409,7 @@ public class ConvertTests
     }
 
     private static void ConvertFrom<TSource>()
-        where TSource : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
     {
         ConvertBetween<TSource, ColorRGB>();
         ConvertBetween<TSource, ColorBGR>();
@@ -420,12 +420,12 @@ public class ConvertTests
     }
 
     private static void ConvertBetween<TSource, TTarget>()
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         TSource[] source = new TSource[40];
         for (int i = 0; i < source.Length; i++)
-            source[i] = (TSource)TSource.Create(10, 20, 30, 40);
+            source[i] = TSource.Create(10, 20, 30, 40);
 
         TTarget[] converted = new ReadOnlySpan<TSource>(source).Convert<TSource, TTarget>();
 

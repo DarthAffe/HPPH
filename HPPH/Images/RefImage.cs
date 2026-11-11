@@ -5,7 +5,7 @@ namespace HPPH;
 
 [SkipLocalsInit]
 public readonly ref struct RefImage<T>
-    where T : unmanaged, IColor
+    where T : unmanaged, IColor<T>
 {
     #region Constants
 
@@ -194,7 +194,7 @@ public readonly ref struct RefImage<T>
     /// </summary>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
     public Image<TColor> ConvertTo<TColor>()
-        where TColor : unmanaged, IColor
+        where TColor : unmanaged, IColor<TColor>
     {
         int targetBpp = TColor.ColorFormat.BytesPerPixel;
         byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
@@ -210,7 +210,7 @@ public readonly ref struct RefImage<T>
     /// <param name="destination">The buffer to write to. Needs at least <c>Width * Height</c> elements.</param>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
     public void ConvertTo<TColor>(Span<TColor> destination)
-        where TColor : unmanaged, IColor
+        where TColor : unmanaged, IColor<TColor>
     {
         if (destination.Length < (Width * Height))
             throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
@@ -230,7 +230,7 @@ public readonly ref struct RefImage<T>
     /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row is not padding.</param>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
     public void ConvertTo<TColor>(Span<byte> destination, int stride)
-        where TColor : unmanaged, IColor
+        where TColor : unmanaged, IColor<TColor>
     {
         int targetBpp = TColor.ColorFormat.BytesPerPixel;
         ImageValidation.ValidateLayout(destination.Length, Width, Height, stride, targetBpp);

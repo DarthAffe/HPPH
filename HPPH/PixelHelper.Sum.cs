@@ -38,7 +38,7 @@ public static partial class PixelHelper
     }
 
     public static ColorSum Sum<T>(this IImage<T> image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -46,15 +46,15 @@ public static partial class PixelHelper
     }
 
     public static ColorSum Sum<T>(this RefImage<T> image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => T.ColorFormat.ToColorSum(SumBytes(image));
 
     public static ColorSum Sum<T>(this ReadOnlySpan<T> colors)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => T.ColorFormat.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));
 
     internal static Generic4LongData SumBytes<T>(RefImage<T> image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         if ((image.Width == 0) || (image.Height == 0)) return default;
 
@@ -69,7 +69,7 @@ public static partial class PixelHelper
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Generic4LongData SumBytes<T>(ReadOnlySpan<byte> data)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => T.ColorFormat.BytesPerPixel switch
         {
             3 => Sum(MemoryMarshal.Cast<byte, Generic3ByteData>(data)),
@@ -79,7 +79,7 @@ public static partial class PixelHelper
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GetRows<T>(RefImage<T> image, out nuint rowBytes, out nuint stride, out nuint rows)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         rowBytes = (nuint)image.Width * (nuint)T.ColorFormat.BytesPerPixel;
         stride = (nuint)image.Stride;

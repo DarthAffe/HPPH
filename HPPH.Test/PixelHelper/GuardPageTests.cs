@@ -22,7 +22,7 @@ public class GuardPageTests
     }
 
     private static void SumStaysInBounds<T>()
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
             using (buffer)
@@ -40,7 +40,7 @@ public class GuardPageTests
     }
 
     private static void MinMaxStaysInBounds<T>()
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
             using (buffer)
@@ -60,7 +60,7 @@ public class GuardPageTests
     }
 
     private static void AverageStaysInBounds<T>()
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
             using (buffer)
@@ -78,7 +78,7 @@ public class GuardPageTests
     }
 
     private static void ImageReductionsStayInBounds<T>()
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         int bpp = T.ColorFormat.BytesPerPixel;
 
@@ -110,8 +110,8 @@ public class GuardPageTests
     }
 
     private static void ConvertInPlaceStaysInBounds<TSource, TTarget>()
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<TSource>())
             using (buffer)
@@ -135,8 +135,8 @@ public class GuardPageTests
     }
 
     private static void ConvertStaysInBounds<TSource, TTarget>()
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         int targetBpp = TTarget.ColorFormat.BytesPerPixel;
 
@@ -154,7 +154,7 @@ public class GuardPageTests
     }
 
     private static IEnumerable<(int Length, GuardedBuffer Buffer)> Buffers<T>()
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         int bpp = T.ColorFormat.BytesPerPixel;
 
@@ -171,14 +171,14 @@ public class GuardPageTests
     }
 
     private static TTarget[] ConvertScalar<TSource, TTarget>(ReadOnlySpan<TSource> source)
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         TTarget[] result = new TTarget[source.Length];
         for (int i = 0; i < source.Length; i++)
         {
             TSource color = source[i];
-            result[i] = (TTarget)TTarget.Create(color.R, color.G, color.B, color.A);
+            result[i] = TTarget.Create(color.R, color.G, color.B, color.A);
         }
 
         return result;

@@ -44,7 +44,7 @@ public class ReductionFuzzTests
     }
 
     private static void Check<T>(Random random)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         int bpp = T.ColorFormat.BytesPerPixel;
 

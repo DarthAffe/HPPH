@@ -6,7 +6,7 @@ namespace HPPH;
 
 [SkipLocalsInit]
 public readonly ref struct ImageColumn<T>
-    where T : unmanaged, IColor
+    where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
 
@@ -114,7 +114,7 @@ public readonly ref struct ImageColumn<T>
 //HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
 [SkipLocalsInit]
 internal sealed class IColorImageColumn<T> : IImageColumn
-    where T : unmanaged, IColor
+    where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
 

@@ -22,11 +22,11 @@ internal static class BenchmarkHelper
     private const string SAMPLE_DATA_DIR = @"..\..\..\..\..\..\..\..\sample_data";
 
     public static List<T[]> GetSampleData<T>(DataSet dataSet)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => [.. GetSampleDataImages<T>(dataSet).Select(image => image.ToArray())];
 
     public static List<IImage<T>> GetSampleDataImages<T>(DataSet dataSet)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => dataSet switch
         {
             DataSet.Samples => [.. GetSampleFiles().Select(ImageHelper.LoadImage<T>)],
@@ -36,7 +36,7 @@ internal static class BenchmarkHelper
         };
 
     private static IImage<T> CreateScaledImage<T>(int width, int height)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         using Bitmap source = new(GetSampleFiles().First());
         using Bitmap scaled = new(source, width, height);

@@ -49,7 +49,7 @@ internal class Colors : IGeneratorFeature
                 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
                 [SkipLocalsInit]
                 [StructLayout(LayoutKind.Sequential)]
-                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}): IColor, IEquatable<{{colorFormat.TypeName}}>
+                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}) : IColor<{{colorFormat.TypeName}}>, IEquatable<{{colorFormat.TypeName}}>
                 {
                     #region Properties & Fields
                 
@@ -104,7 +104,7 @@ internal class Colors : IGeneratorFeature
                     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
                 
                     /// <inheritdoc />
-                    public static IColor Create(byte r, byte g, byte b, byte a) => new {{colorFormat.TypeName}}({{colorFormat.FirstEntry}}, {{colorFormat.SecondEntry}}, {{colorFormat.ThirdEntry}});
+                    public static {{colorFormat.TypeName}} Create(byte r, byte g, byte b, byte a) => new {{colorFormat.TypeName}}({{colorFormat.FirstEntry}}, {{colorFormat.SecondEntry}}, {{colorFormat.ThirdEntry}});
                 
                     #endregion
                 }
@@ -137,7 +137,7 @@ internal class Colors : IGeneratorFeature
                 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
                 [SkipLocalsInit]
                 [StructLayout(LayoutKind.Sequential)]
-                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}, byte {{colorFormat.FourthEntry}}) : IColor, IEquatable<{{colorFormat.TypeName}}>
+                public readonly partial struct {{colorFormat.TypeName}}(byte {{colorFormat.FirstEntry}}, byte {{colorFormat.SecondEntry}}, byte {{colorFormat.ThirdEntry}}, byte {{colorFormat.FourthEntry}}) : IColor<{{colorFormat.TypeName}}>, IEquatable<{{colorFormat.TypeName}}>
                 {
                     #region Properties & Fields
                 
@@ -193,7 +193,7 @@ internal class Colors : IGeneratorFeature
                     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
                 
                     /// <inheritdoc />
-                    public static IColor Create(byte r, byte g, byte b, byte a) => new {{colorFormat.TypeName}}({{colorFormat.FirstEntry}}, {{colorFormat.SecondEntry}}, {{colorFormat.ThirdEntry}}, {{colorFormat.FourthEntry}});
+                    public static {{colorFormat.TypeName}} Create(byte r, byte g, byte b, byte a) => new {{colorFormat.TypeName}}({{colorFormat.FirstEntry}}, {{colorFormat.SecondEntry}}, {{colorFormat.ThirdEntry}}, {{colorFormat.FourthEntry}});
                 
                     #endregion
                 }

@@ -7,7 +7,7 @@ internal static class ImageHelper
     #region Methods
 
     public static T[] GetColorsFromImage<T>(string file)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         using FileStream stream = File.OpenRead(file);
         using Bitmap bmp = new(stream);
@@ -16,7 +16,7 @@ internal static class ImageHelper
     }
 
     public static Image<T> GetImage<T>(string file)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         using FileStream stream = File.OpenRead(file);
         using Bitmap bmp = new(stream);
@@ -27,14 +27,14 @@ internal static class ImageHelper
             for (int y = 0; y < bmp.Height; y++)
             {
                 Color color = bmp.GetPixel(x, y);
-                colors[i++] = (T)T.Create(color.R, color.G, color.B, color.A);
+                colors[i++] = T.Create(color.R, color.G, color.B, color.A);
             }
 
         return Image<T>.Create(GetColors<T>(bmp), bmp.Width, bmp.Height);
     }
 
     private static T[] GetColors<T>(Bitmap bmp)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] colors = new T[bmp.Width * bmp.Height];
         int i = 0;
@@ -42,7 +42,7 @@ internal static class ImageHelper
             for (int y = 0; y < bmp.Height; y++)
             {
                 Color color = bmp.GetPixel(x, y);
-                colors[i++] = (T)T.Create(color.R, color.G, color.B, color.A);
+                colors[i++] = T.Create(color.R, color.G, color.B, color.A);
             }
 
         return colors;

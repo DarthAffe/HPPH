@@ -20,7 +20,7 @@ public static partial class PixelHelper
 
     /// <inheritdoc cref="CreateWuColorPalette(IImage, int)"/>
     public static T[] CreateWuColorPalette<T>(this IImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -29,7 +29,7 @@ public static partial class PixelHelper
 
     /// <inheritdoc cref="CreateWuColorPalette(IImage, int)"/>
     public static unsafe T[] CreateWuColorPalette<T>(this RefImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
         if ((paletteSize == 0) || (image.Width == 0) || (image.Height == 0)) return [];
@@ -44,7 +44,7 @@ public static partial class PixelHelper
 
     /// <inheritdoc cref="CreateWuColorPalette(IImage, int)"/>
     public static unsafe T[] CreateWuColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
         if ((paletteSize == 0) || colors.IsEmpty) return [];

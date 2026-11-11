@@ -31,7 +31,7 @@ public static partial class PixelHelper
 
     /// <inheritdoc cref="CreateMedianCutColorPalette(IImage, int)"/>
     public static T[] CreateMedianCutColorPalette<T>(this IImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -40,12 +40,12 @@ public static partial class PixelHelper
 
     /// <inheritdoc cref="CreateMedianCutColorPalette(IImage, int)"/>
     public static T[] CreateMedianCutColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
         => RefImage<T>.Wrap(colors, colors.Length, 1).CreateMedianCutColorPalette(paletteSize);
 
     /// <inheritdoc cref="CreateMedianCutColorPalette(IImage, int)"/>
     public static T[] CreateMedianCutColorPalette<T>(this RefImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
         if (paletteSize == 0) return [];
@@ -84,7 +84,7 @@ public static partial class PixelHelper
     }
 
     private static T[] MedianCut<T>(Span<T> colors, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         int splits = BitOperations.Log2((uint)paletteSize);
 
@@ -125,7 +125,7 @@ public static partial class PixelHelper
     }
 
     private static unsafe void SplitParallel<T>(Span<T> colors, ColorCube<T>[] cubes, int cubeCount)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         fixed (T* colorsPtr = colors)
         {

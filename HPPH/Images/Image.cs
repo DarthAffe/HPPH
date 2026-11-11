@@ -7,7 +7,7 @@ namespace HPPH;
 /// <inheritdoc cref="IImage{T}" />
 [SkipLocalsInit]
 public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
-    where T : unmanaged, IColor
+    where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
 
@@ -171,17 +171,17 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     /// <inheritdoc />
     public IImage<TColor> ConvertTo<TColor>()
-        where TColor : unmanaged, IColor
+        where TColor : unmanaged, IColor<TColor>
         => AsRefImage().ConvertTo<TColor>();
 
     /// <inheritdoc />
     public void ConvertTo<TColor>(Span<TColor> destination)
-        where TColor : unmanaged, IColor
+        where TColor : unmanaged, IColor<TColor>
         => AsRefImage().ConvertTo(destination);
 
     /// <inheritdoc />
     public void ConvertTo<TColor>(Span<byte> destination, int stride)
-        where TColor : unmanaged, IColor
+        where TColor : unmanaged, IColor<TColor>
         => AsRefImage().ConvertTo<TColor>(destination, stride);
 
     /// <inheritdoc />
@@ -225,7 +225,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     /// <inheritdoc />
     public RefImage<TColor> AsRefImage<TColor>()
-        where TColor : unmanaged, IColor
+        where TColor : unmanaged, IColor<TColor>
     {
         if (typeof(TColor) != typeof(T)) throw new ArgumentException("The requested color format does not fit this image.", nameof(TColor));
 

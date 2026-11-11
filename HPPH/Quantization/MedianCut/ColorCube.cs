@@ -4,7 +4,7 @@ namespace HPPH;
 
 [SkipLocalsInit]
 internal struct ColorCube<T>
-    where T : unmanaged, IColor
+    where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
 

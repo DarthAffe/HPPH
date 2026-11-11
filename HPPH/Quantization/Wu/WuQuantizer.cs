@@ -29,7 +29,7 @@ internal static unsafe class WuQuantizer
     #region Methods
 
     internal static T[] CreateColorPalette<T>(byte* data, nuint rowPixels, nuint stride, nuint rows, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         WuMoment[] moments = ArrayPool<WuMoment>.Shared.Rent(TABLE_SIZE);
         try
@@ -46,7 +46,7 @@ internal static unsafe class WuQuantizer
     }
 
     private static void BuildHistogram<T>(byte* data, nuint rowPixels, nuint stride, nuint rows, WuMoment[] moments)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         nuint pixels = rowPixels * rows;
 
@@ -90,7 +90,7 @@ internal static unsafe class WuQuantizer
     }
 
     private static void AddColors<T>(byte* data, nuint rowPixels, nuint stride, nuint rows, WuMoment[] moments)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         moments.AsSpan(0, TABLE_SIZE).Clear();
         ref WuMoment table = ref MemoryMarshal.GetArrayDataReference(moments);
@@ -181,7 +181,7 @@ internal static unsafe class WuQuantizer
     }
 
     private static T[] BuildPalette<T>(WuMoment[] moments, int paletteSize)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         int capacity = Math.Min(paletteSize, MAX_BOXES);
 
@@ -195,10 +195,10 @@ internal static unsafe class WuQuantizer
         for (int i = 0; i < count; i++)
         {
             WuMoment moment = GetVolume(moments, boxes[i]);
-            colors[i] = (T)T.Create(Average(moment.R, moment.Weight),
-                                    Average(moment.G, moment.Weight),
-                                    Average(moment.B, moment.Weight),
-                                    Average(moment.A, moment.Weight));
+            colors[i] = T.Create(Average(moment.R, moment.Weight),
+                                 Average(moment.G, moment.Weight),
+                                 Average(moment.B, moment.Weight),
+                                 Average(moment.A, moment.Weight));
             populations[i] = moment.Weight;
         }
 

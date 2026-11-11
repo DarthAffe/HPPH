@@ -22,7 +22,7 @@ namespace HPPH;
 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
 [SkipLocalsInit]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct ColorRGB(byte r, byte g, byte b): IColor, IEquatable<ColorRGB>
+public readonly partial struct ColorRGB(byte r, byte g, byte b) : IColor<ColorRGB>, IEquatable<ColorRGB>
 {
     #region Properties & Fields
 
@@ -77,7 +77,7 @@ public readonly partial struct ColorRGB(byte r, byte g, byte b): IColor, IEquata
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
 
     /// <inheritdoc />
-    public static IColor Create(byte r, byte g, byte b, byte a) => new ColorRGB(r, g, b);
+    public static ColorRGB Create(byte r, byte g, byte b, byte a) => new ColorRGB(r, g, b);
 
     #endregion
 }

@@ -50,7 +50,7 @@ public static class ImageExtension
     public static IImage<ColorBGRA> ToImage(this SKImage skImage) => skImage.ToImage<ColorBGRA>();
 
     public static IImage<T> ToImage<T>(this SKImage skImage)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(skImage);
 
@@ -61,7 +61,7 @@ public static class ImageExtension
     public static IImage<ColorBGRA> ToImage(this SKBitmap bitmap) => bitmap.ToImage<ColorBGRA>();
 
     public static IImage<T> ToImage<T>(this SKBitmap bitmap)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(bitmap);
 

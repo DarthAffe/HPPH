@@ -14,7 +14,7 @@ public static class ImageHelper
 
     [SupportedOSPlatform("windows")]
     public static IImage<T> LoadImage<T>(string path)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         using Bitmap bmp = new(path);
         return bmp.ToImage<T>();
@@ -29,7 +29,7 @@ public static class ImageHelper
 
     [SupportedOSPlatform("windows")]
     public static IImage<T> LoadImage<T>(Stream stream)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         using Bitmap bmp = new(stream);
         return bmp.ToImage<T>();

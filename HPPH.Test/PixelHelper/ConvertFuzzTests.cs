@@ -28,7 +28,7 @@ public class ConvertFuzzTests
     }
 
     private static void ConvertFrom<TSource>(Random random)
-        where TSource : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
     {
         ConvertBetween<TSource, ColorRGB>(random);
         ConvertBetween<TSource, ColorBGR>(random);
@@ -39,8 +39,8 @@ public class ConvertFuzzTests
     }
 
     private static void ConvertBetween<TSource, TTarget>(Random random)
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         int sourceBpp = TSource.ColorFormat.BytesPerPixel;
         int targetBpp = TTarget.ColorFormat.BytesPerPixel;
@@ -81,14 +81,14 @@ public class ConvertFuzzTests
     }
 
     private static TTarget[] ConvertScalar<TSource, TTarget>(ReadOnlySpan<TSource> source)
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         TTarget[] result = new TTarget[source.Length];
         for (int i = 0; i < source.Length; i++)
         {
             TSource color = source[i];
-            result[i] = (TTarget)TTarget.Create(color.R, color.G, color.B, TSource.ColorFormat.BytesPerPixel == 3 ? byte.MaxValue : color.A);
+            result[i] = TTarget.Create(color.R, color.G, color.B, TSource.ColorFormat.BytesPerPixel == 3 ? byte.MaxValue : color.A);
         }
 
         return result;

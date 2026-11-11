@@ -22,7 +22,7 @@ public class AverageTests
     }
 
     private static void AverageRefImage<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         RefImage<T> data = ImageHelper.GetImage<T>(image).AsRefImage<T>();
 
@@ -50,7 +50,7 @@ public class AverageTests
     }
 
     private static void AverageGenericImage<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         Image<T> data = ImageHelper.GetImage<T>(image);
 
@@ -78,7 +78,7 @@ public class AverageTests
     }
 
     private static void AverageImage<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
@@ -106,7 +106,7 @@ public class AverageTests
     }
 
     private static void AverageSpan<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         Span<T> span = data;
@@ -135,7 +135,7 @@ public class AverageTests
     }
 
     private static void AverageReadOnlySpan<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         ReadOnlySpan<T> span = data;

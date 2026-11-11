@@ -19,12 +19,12 @@ public class ResultChannelTests
     }
 
     private static void Check<T>()
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         string name = T.ColorFormat.Name;
         bool hasAlpha = T.ColorFormat.BytesPerPixel == 4;
 
-        T[] pixels = [(T)T.Create(10, 20, 30, 40), (T)T.Create(11, 22, 33, 44)];
+        T[] pixels = [T.Create(10, 20, 30, 40), T.Create(11, 22, 33, 44)];
         byte alphaMin = hasAlpha ? (byte)40 : byte.MaxValue;
         byte alphaMax = hasAlpha ? (byte)44 : byte.MaxValue;
 

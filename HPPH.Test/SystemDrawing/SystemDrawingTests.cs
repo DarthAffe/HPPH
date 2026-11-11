@@ -107,7 +107,7 @@ public class SystemDrawingTests
     }
 
     private static void LoadImageInto<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         IImage<T> expected = System.Drawing.ImageHelper.LoadImage(image).ConvertTo<T>();
 

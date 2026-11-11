@@ -32,7 +32,7 @@ public class QuantizeTests
     }
 
     private static void Initialize<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         _medianCutReference[image][typeof(T)] = [];
         _wuReference[image][typeof(T)] = [];
@@ -65,7 +65,7 @@ public class QuantizeTests
     }
 
     private void CreateMedianCutColorPaletteReadOnlySpan<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         ReadOnlySpan<T> span = data;
@@ -98,7 +98,7 @@ public class QuantizeTests
     }
 
     private void CreateMedianCutColorPaletteSpan<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         Span<T> span = data;
@@ -131,7 +131,7 @@ public class QuantizeTests
     }
 
     private void CreateMedianCutColorPaletteImage<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
@@ -163,7 +163,7 @@ public class QuantizeTests
     }
 
     private void CreateMedianCutColorPaletteGenericImage<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         Image<T> data = ImageHelper.GetImage<T>(image);
 
@@ -195,7 +195,7 @@ public class QuantizeTests
     }
 
     private void CreateMedianCutColorPaletteRefImage<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         RefImage<T> data = ImageHelper.GetImage<T>(image).AsRefImage();
 
@@ -291,7 +291,7 @@ public class QuantizeTests
     }
 
     private void CreateWuColorPaletteReadOnlySpan<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         ReadOnlySpan<T> span = data;
@@ -324,7 +324,7 @@ public class QuantizeTests
     }
 
     private void CreateWuColorPaletteSpan<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         Span<T> span = data;
@@ -357,7 +357,7 @@ public class QuantizeTests
     }
 
     private void CreateWuColorPaletteImage<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
@@ -389,7 +389,7 @@ public class QuantizeTests
     }
 
     private void CreateWuColorPaletteGenericImage<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         Image<T> data = ImageHelper.GetImage<T>(image);
 
@@ -421,7 +421,7 @@ public class QuantizeTests
     }
 
     private void CreateWuColorPaletteRefImage<T>(string image, int size)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         RefImage<T> data = ImageHelper.GetImage<T>(image).AsRefImage();
 
@@ -652,7 +652,7 @@ public class QuantizeTests
     }
 
     private static void FuzzPalette<T>(Random random)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         int bpp = T.ColorFormat.BytesPerPixel;
 

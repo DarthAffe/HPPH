@@ -33,8 +33,8 @@ public static partial class PixelHelper
     #region Methods
 
     public static Span<TTarget> ConvertInPlace<TSource, TTarget>(this Span<TSource> colors)
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         if (colors.Length == 0) return MemoryMarshal.Cast<TSource, TTarget>(colors);
 
@@ -51,8 +51,8 @@ public static partial class PixelHelper
     }
 
     public static TTarget[] Convert<TSource, TTarget>(this ReadOnlySpan<TSource> colors)
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         TTarget[] buffer = GC.AllocateUninitializedArray<TTarget>(colors.Length);
         colors.Convert(buffer.AsSpan());
@@ -60,8 +60,8 @@ public static partial class PixelHelper
     }
 
     public static void Convert<TSource, TTarget>(this ReadOnlySpan<TSource> source, Span<TTarget> target)
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         if (target.Length < source.Length) throw new ArgumentException($"Target-buffer is not big enough. {target.Length} < {source.Length}", nameof(target));
 
@@ -69,8 +69,8 @@ public static partial class PixelHelper
     }
 
     private static void Convert<TSource, TTarget>(ReadOnlySpan<byte> source, Span<byte> target)
-        where TSource : unmanaged, IColor
-        where TTarget : unmanaged, IColor
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
     {
         if (source.Length == 0) return;
 
@@ -454,8 +454,8 @@ public static partial class PixelHelper
     #region Masks
 
     private static class ConvertMasks<TSource, TTarget>
-    where TSource : unmanaged, IColor
-    where TTarget : unmanaged, IColor
+    where TSource : unmanaged, IColor<TSource>
+    where TTarget : unmanaged, IColor<TTarget>
     {
         // ReSharper disable once StaticMemberInGenericType - that's exactly what we want here
         public static readonly byte[] Masks = CreateMasks(TSource.ColorFormat, TTarget.ColorFormat);

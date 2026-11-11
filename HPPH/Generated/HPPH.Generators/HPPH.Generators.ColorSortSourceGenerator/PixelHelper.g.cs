@@ -6,7 +6,7 @@ namespace HPPH;
 
 public static unsafe partial class PixelHelper
 {
-    public static partial void SortByRed<T>(this Span<T> colors) where T : unmanaged, IColor
+    public static partial void SortByRed<T>(this Span<T> colors) where T : unmanaged, IColor<T>
     {
         fixed (T* ptr = colors)
         {
@@ -41,7 +41,7 @@ public static unsafe partial class PixelHelper
             }
         }
     }
-    public static partial void SortByGreen<T>(this Span<T> colors) where T : unmanaged, IColor
+    public static partial void SortByGreen<T>(this Span<T> colors) where T : unmanaged, IColor<T>
     {
         fixed (T* ptr = colors)
         {
@@ -76,7 +76,7 @@ public static unsafe partial class PixelHelper
             }
         }
     }
-    public static partial void SortByBlue<T>(this Span<T> colors) where T : unmanaged, IColor
+    public static partial void SortByBlue<T>(this Span<T> colors) where T : unmanaged, IColor<T>
     {
         fixed (T* ptr = colors)
         {
@@ -111,7 +111,7 @@ public static unsafe partial class PixelHelper
             }
         }
     }
-    public static partial void SortByAlpha<T>(this Span<T> colors) where T : unmanaged, IColor
+    public static partial void SortByAlpha<T>(this Span<T> colors) where T : unmanaged, IColor<T>
     {
         fixed (T* ptr = colors)
         {

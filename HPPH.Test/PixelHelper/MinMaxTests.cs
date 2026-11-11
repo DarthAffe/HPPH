@@ -22,7 +22,7 @@ public class MinMaxTests
     }
 
     private static void MinMaxRefImage<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         RefImage<T> data = ImageHelper.GetImage<T>(image).AsRefImage<T>();
 
@@ -60,7 +60,7 @@ public class MinMaxTests
     }
 
     private static void MinMaxGenericImage<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         Image<T> data = ImageHelper.GetImage<T>(image);
 
@@ -98,7 +98,7 @@ public class MinMaxTests
     }
 
     private static void MinMaxImage<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
@@ -136,7 +136,7 @@ public class MinMaxTests
     }
 
     private static void MinMaxSpan<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         Span<T> span = data;
@@ -175,7 +175,7 @@ public class MinMaxTests
     }
 
     private static void MinMaxReadOnlySpan<T>(string image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         ReadOnlySpan<T> span = data;

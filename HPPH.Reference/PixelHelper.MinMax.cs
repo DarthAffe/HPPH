@@ -26,7 +26,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static ColorMinMax MinMax<T>(RefImage<T> image)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         byte minR = byte.MaxValue, minG = byte.MaxValue, minB = byte.MaxValue, minA = byte.MaxValue;
         byte maxR = byte.MinValue, maxG = byte.MinValue, maxB = byte.MinValue, maxA = byte.MinValue;
@@ -48,7 +48,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static ColorMinMax MinMax<T>(Span<T> colors)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         byte minR = byte.MaxValue, minG = byte.MaxValue, minB = byte.MaxValue, minA = byte.MaxValue;
         byte maxR = byte.MinValue, maxG = byte.MinValue, maxB = byte.MinValue, maxA = byte.MinValue;
@@ -70,7 +70,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static ColorMinMax MinMax<T>(ReadOnlySpan<T> colors)
-        where T : unmanaged, IColor
+        where T : unmanaged, IColor<T>
     {
         byte minR = byte.MaxValue, minG = byte.MaxValue, minB = byte.MaxValue, minA = byte.MaxValue;
         byte maxR = byte.MinValue, maxG = byte.MinValue, maxB = byte.MinValue, maxA = byte.MinValue;
