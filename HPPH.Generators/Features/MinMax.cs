@@ -7,15 +7,15 @@ internal class MinMax : IGeneratorFeature
 {
     public IEnumerable<(string name, string source)> GenerateFor(ColorFormatData colorFormat)
     {
-        yield return ($"ColorFormat{colorFormat.Format}.MinMax", GenerateColorFormatMinMax(colorFormat));
+        yield return ($"{colorFormat.TypeName}.MinMax", GenerateColorMinMax(colorFormat));
     }
 
     public IEnumerable<(string name, string source)> GenerateFor(ImmutableArray<ColorFormatData> colorFormats)
     {
-        yield return ("IColorFormat.MinMax", GenerateColorFormatInterfaceMinMax());
+        yield return ("IColor.MinMax", GenerateColorInterfaceMinMax());
     }
 
-    private static string GenerateColorFormatMinMax(ColorFormatData colorFormat)
+    private static string GenerateColorMinMax(ColorFormatData colorFormat)
     {
         string Channel(string entry)
         {
@@ -32,29 +32,29 @@ internal class MinMax : IGeneratorFeature
 
                  namespace HPPH;
 
-                 public sealed partial class ColorFormat{{colorFormat.Format}}
+                 public readonly partial struct {{colorFormat.TypeName}}
                  {
                      #region Methods
 
-                     ColorMinMax IColorFormat.ToColorMinMax(Generic3ByteMinMax data) => {{create3Byte}};
-                     ColorMinMax IColorFormat.ToColorMinMax(Generic4ByteMinMax data) => {{create4Byte}};
+                     static ColorMinMax IColor<{{colorFormat.TypeName}}>.ToColorMinMax(Generic3ByteMinMax data) => {{create3Byte}};
+                     static ColorMinMax IColor<{{colorFormat.TypeName}}>.ToColorMinMax(Generic4ByteMinMax data) => {{create4Byte}};
 
                      #endregion
                  }
                  """;
     }
 
-    private static string GenerateColorFormatInterfaceMinMax()
+    private static string GenerateColorInterfaceMinMax()
     {
         return """
                #nullable enable
 
                namespace HPPH;
 
-               public partial interface IColorFormat
+               public partial interface IColor<out TSelf>
                {
-                   internal ColorMinMax ToColorMinMax(Generic3ByteMinMax data);
-                   internal ColorMinMax ToColorMinMax(Generic4ByteMinMax data);
+                   internal static abstract ColorMinMax ToColorMinMax(Generic3ByteMinMax data);
+                   internal static abstract ColorMinMax ToColorMinMax(Generic4ByteMinMax data);
                }
                """;
     }

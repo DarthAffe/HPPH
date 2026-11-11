@@ -30,7 +30,7 @@ public interface IColor : IEquatable<IColor>
 /// Represents a color of the concrete type <typeparamref name="TSelf"/>.
 /// </summary>
 /// <typeparam name="TSelf">The implementing color type itself.</typeparam>
-public interface IColor<out TSelf> : IColor
+public partial interface IColor<out TSelf> : IColor
     where TSelf : unmanaged, IColor<TSelf>
 {
     /// <summary>

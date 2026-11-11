@@ -7,15 +7,15 @@ internal class Sum : IGeneratorFeature
 {
     public IEnumerable<(string name, string source)> GenerateFor(ColorFormatData colorFormat)
     {
-        yield return ($"ColorFormat{colorFormat.Format}.Sum", GenerateColorFormatSum(colorFormat));
+        yield return ($"{colorFormat.TypeName}.Sum", GenerateColorSum(colorFormat));
     }
 
     public IEnumerable<(string name, string source)> GenerateFor(ImmutableArray<ColorFormatData> colorFormats)
     {
-        yield return ("IColorFormat.Sum", GenerateColorFormatInterfaceSum());
+        yield return ("IColor.Sum", GenerateColorInterfaceSum());
     }
 
-    private static string GenerateColorFormatSum(ColorFormatData colorFormat)
+    private static string GenerateColorSum(ColorFormatData colorFormat)
     {
         // The kernels return the sums in byte order. For 3-byte formats L4 holds the alpha sum (255 per pixel).
         int r = colorFormat.GetBytePosition("r");
@@ -28,27 +28,27 @@ internal class Sum : IGeneratorFeature
 
                  namespace HPPH;
 
-                 public sealed partial class ColorFormat{{colorFormat.Format}}
+                 public readonly partial struct {{colorFormat.TypeName}}
                  {
                      #region Methods
 
-                     ColorSum IColorFormat.ToColorSum(Generic4LongData data) => new(data.L{{r}}, data.L{{g}}, data.L{{b}}, data.L{{a}});
+                     static ColorSum IColor<{{colorFormat.TypeName}}>.ToColorSum(Generic4LongData data) => new(data.L{{r}}, data.L{{g}}, data.L{{b}}, data.L{{a}});
 
                      #endregion
                  }
                  """;
     }
 
-    private static string GenerateColorFormatInterfaceSum()
+    private static string GenerateColorInterfaceSum()
     {
         return """
                #nullable enable
 
                namespace HPPH;
 
-               public partial interface IColorFormat
+               public partial interface IColor<out TSelf>
                {
-                   internal ColorSum ToColorSum(Generic4LongData data);
+                   internal static abstract ColorSum ToColorSum(Generic4LongData data);
                }
                """;
     }

@@ -53,14 +53,13 @@ public static partial class PixelHelper
     public static ColorMinMax MinMax<T>(this RefImage<T> image)
         where T : unmanaged, IColor<T>
     {
-        IColorFormat colorFormat = T.ColorFormat;
         bool empty = (image.Width == 0) || (image.Height == 0);
 
         GetRows(image, out nuint rowBytes, out nuint stride, out nuint rows);
-        return colorFormat.BytesPerPixel switch
+        return T.ColorFormat.BytesPerPixel switch
         {
-            3 => colorFormat.ToColorMinMax(empty ? EMPTY_3 : MinMax3Bytes(ref Unsafe.AsRef(in image.GetPinnableReference()), rowBytes, stride, rows)),
-            4 => colorFormat.ToColorMinMax(empty ? EMPTY_4 : MinMax4Bytes(ref Unsafe.AsRef(in image.GetPinnableReference()), rowBytes, stride, rows)),
+            3 => T.ToColorMinMax(empty ? EMPTY_3 : MinMax3Bytes(ref Unsafe.AsRef(in image.GetPinnableReference()), rowBytes, stride, rows)),
+            4 => T.ToColorMinMax(empty ? EMPTY_4 : MinMax4Bytes(ref Unsafe.AsRef(in image.GetPinnableReference()), rowBytes, stride, rows)),
             _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
         };
     }
@@ -68,14 +67,13 @@ public static partial class PixelHelper
     public static ColorMinMax MinMax<T>(this ReadOnlySpan<T> colors)
         where T : unmanaged, IColor<T>
     {
-        IColorFormat colorFormat = T.ColorFormat;
         ReadOnlySpan<byte> data = MemoryMarshal.AsBytes(colors);
         nuint length = (nuint)data.Length;
 
-        return colorFormat.BytesPerPixel switch
+        return T.ColorFormat.BytesPerPixel switch
         {
-            3 => colorFormat.ToColorMinMax(length == 0 ? EMPTY_3 : MinMax3Bytes(ref MemoryMarshal.GetReference(data), length, length, 1)),
-            4 => colorFormat.ToColorMinMax(length == 0 ? EMPTY_4 : MinMax4Bytes(ref MemoryMarshal.GetReference(data), length, length, 1)),
+            3 => T.ToColorMinMax(length == 0 ? EMPTY_3 : MinMax3Bytes(ref MemoryMarshal.GetReference(data), length, length, 1)),
+            4 => T.ToColorMinMax(length == 0 ? EMPTY_4 : MinMax4Bytes(ref MemoryMarshal.GetReference(data), length, length, 1)),
             _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
         };
     }

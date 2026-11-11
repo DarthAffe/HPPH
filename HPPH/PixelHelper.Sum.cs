@@ -47,11 +47,11 @@ public static partial class PixelHelper
 
     public static ColorSum Sum<T>(this RefImage<T> image)
         where T : unmanaged, IColor<T>
-        => T.ColorFormat.ToColorSum(SumBytes(image));
+        => T.ToColorSum(SumBytes(image));
 
     public static ColorSum Sum<T>(this ReadOnlySpan<T> colors)
         where T : unmanaged, IColor<T>
-        => T.ColorFormat.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));
+        => T.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));
 
     internal static Generic4LongData SumBytes<T>(RefImage<T> image)
         where T : unmanaged, IColor<T>
