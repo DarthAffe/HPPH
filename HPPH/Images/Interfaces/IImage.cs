@@ -7,7 +7,7 @@
 /// <see cref="Image{T}"/> is the only implementation. Cast to it, or use <see cref="Execute{TOperation, TResult}(TOperation)"/>, to work with the pixels without boxing.
 /// Implementing this interface outside of HPPH is not needed and not supported - it's signature might change at any time without prior warning.
 /// </remarks>
-public interface IImage : IEquatable<IImage>
+public interface IImage
 {
     /// <summary>
     /// Gets the color format used in this image.
@@ -134,4 +134,15 @@ public interface IImage : IEquatable<IImage>
     /// </summary>
     /// <returns>The new array containing the data of this <see cref="IImage"/>.</returns>
     byte[] ToRawArray();
+
+    /// <summary>
+    /// Checks if <paramref name="other"/> has the same color format, size and pixels as this image.
+    /// </summary>
+    /// <remarks>
+    /// Row padding is ignored, so a sub-image and a compact copy of it have equal content.
+    /// This compares pixel data and is therefore an expensive operation. <see cref="object.Equals(object)"/> checks for reference equality.
+    /// </remarks>
+    /// <param name="other">The image to compare with.</param>
+    /// <returns><see langword="true"/> if both images contain the same pixels; otherwise <see langword="false"/>.</returns>
+    bool ContentEquals(IImage? other);
 }

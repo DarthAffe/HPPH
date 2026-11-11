@@ -27,7 +27,7 @@ public class SystemDrawingTests
 
         image2 = image2.ConvertTo<ColorRGB>();
 
-        Assert.AreEqual(image, image2);
+        Assert.IsTrue(image.ContentEquals(image2));
     }
 
     [TestMethod]
@@ -49,7 +49,7 @@ public class SystemDrawingTests
 
         image2 = image2.ConvertTo<ColorRGBA>();
 
-        Assert.AreEqual(image, image2);
+        Assert.IsTrue(image.ContentEquals(image2));
     }
 
     [TestMethod]
@@ -62,7 +62,7 @@ public class SystemDrawingTests
             using MemoryStream ms = new(png);
             IImage img2 = System.Drawing.ImageHelper.LoadImage(ms);
 
-            Assert.AreEqual(img, img2);
+            Assert.IsTrue(img.ContentEquals(img2), image);
         }
     }
 
@@ -111,9 +111,9 @@ public class SystemDrawingTests
     {
         Image<T> expected = System.Drawing.ImageHelper.LoadImage(image).ConvertTo<T>();
 
-        Assert.AreEqual(expected, System.Drawing.ImageHelper.LoadImage<T>(image), $"{T.ColorFormat.Name}: {image}");
+        Assert.IsTrue(expected.ContentEquals(System.Drawing.ImageHelper.LoadImage<T>(image)), $"{T.ColorFormat.Name}: {image}");
 
         using FileStream stream = File.OpenRead(image);
-        Assert.AreEqual(expected, System.Drawing.ImageHelper.LoadImage<T>(stream), $"{T.ColorFormat.Name}: {image} (stream)");
+        Assert.IsTrue(expected.ContentEquals(System.Drawing.ImageHelper.LoadImage<T>(stream)), $"{T.ColorFormat.Name}: {image} (stream)");
     }
 }

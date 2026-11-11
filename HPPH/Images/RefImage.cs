@@ -304,6 +304,28 @@ public readonly ref struct RefImage<T>
     }
 
     /// <summary>
+    /// Checks if <paramref name="other"/> has the same size and pixels as this image.
+    /// </summary>
+    /// <remarks>
+    /// Row padding is ignored, so a sub-image and a compact copy of it have equal content.
+    /// </remarks>
+    /// <param name="other">The image to compare with.</param>
+    /// <returns><see langword="true"/> if both images contain the same pixels; otherwise <see langword="false"/>.</returns>
+    public bool ContentEquals(RefImage<T> other)
+    {
+        if ((other.Width != Width) || (other.Height != Height)) return false;
+
+        if (IsContiguous && other.IsContiguous)
+            return GetBytes().SequenceEqual(other.GetBytes());
+
+        for (int y = 0; y < Height; y++)
+            if (!GetRowBytes(y).SequenceEqual(other.GetRowBytes(y)))
+                return false;
+
+        return true;
+    }
+
+    /// <summary>
     /// Returns a reference to the first element of this image inside the full image buffer.
     /// </summary>
     public ref readonly byte GetPinnableReference()

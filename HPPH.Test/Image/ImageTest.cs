@@ -574,7 +574,7 @@ public class ImageTest
 
         Assert.AreEqual(WIDTH * 3, image.Stride);
         Assert.AreEqual(WIDTH * HEIGHT * 3, image.SizeInBytes);
-        Assert.IsTrue(image.Equals(expected));
+        Assert.IsTrue(image.ContentEquals(expected));
         Assert.AreSequenceEqual(expected.ToRawArray(), image.ToRawArray());
         Assert.AreEqual(expected.Sum(), image.Sum());
     }
@@ -865,53 +865,69 @@ public class ImageTest
     }
 
     [TestMethod]
-    public void EqualsIImage()
+    public void ContentEqualsIImage()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         IImage image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.AreEqual(image, image2);
+        Assert.IsTrue(image.ContentEquals(image2));
+        Assert.IsTrue(image2.ContentEquals(image));
 
-        Assert.IsFalse(image.Equals((IImage?)null));
+        Assert.IsFalse(image.ContentEquals((IImage?)null));
     }
 
     [TestMethod]
-    public void EqualsImage()
+    public void ContentEqualsImage()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         Image<ColorRGB> image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.AreEqual(image, image2);
+        Assert.IsTrue(image.ContentEquals(image2));
 
-        Assert.IsFalse(image.Equals((Image<ColorRGB>?)null));
+        Assert.IsFalse(image.ContentEquals((Image<ColorRGB>?)null));
     }
 
     [TestMethod]
-    public void EqualsIImageWrongSize()
+    public void ContentEqualsIgnoresPadding()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Image<ColorRGB> slice = image.Slice(2, 3, 5, 7);
+        Image<ColorRGB> compact = Image<ColorRGB>.Create(slice.ToArray(), 5, 7);
+
+        Assert.AreNotEqual(slice.Stride, compact.Stride);
+        Assert.IsTrue(slice.ContentEquals(compact));
+        Assert.IsTrue(compact.ContentEquals(slice));
+        Assert.IsTrue(compact.ContentEquals(image[2, 3, 5, 7]));
+        Assert.IsTrue(image[2, 3, 5, 7].ContentEquals(compact.AsRefImage()));
+        Assert.IsFalse(image[2, 3, 5, 7].ContentEquals(image[3, 3, 5, 7]));
+    }
+
+    [TestMethod]
+    public void ContentEqualsIImageWrongSize()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         IImage image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
 
         IImage image3 = TestDataHelper.CreateTestImage<ColorRGB>(20, 20);
-        Assert.AreNotEqual(image, image3);
+        Assert.IsFalse(image.ContentEquals(image3));
     }
 
     [TestMethod]
-    public void EqualsImageWrongSize()
+    public void ContentEqualsImageWrongSize()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         Image<ColorRGB> image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
 
         Image<ColorRGB> image3 = TestDataHelper.CreateTestImage<ColorRGB>(20, 20);
-        Assert.AreNotEqual(image, image3);
+        Assert.IsFalse(image.ContentEquals(image3));
     }
 
     [TestMethod]
-    public void EqualsIImageWrongPixel()
+    public void ContentEqualsIImageWrongPixel()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
@@ -919,11 +935,11 @@ public class ImageTest
         array[1] = new ColorRGB(255, 255, 255);
         IImage image2 = Image<ColorRGB>.Create(array, 10, 20);
 
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
     }
 
     [TestMethod]
-    public void EqualsImageWrongPixel()
+    public void ContentEqualsImageWrongPixel()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
@@ -931,28 +947,34 @@ public class ImageTest
         array[1] = new ColorRGB(255, 255, 255);
         Image<ColorRGB> image2 = Image<ColorRGB>.Create(array, 10, 20);
 
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
     }
 
     [TestMethod]
-    public void EqualsIImageWrongFormat()
+    public void ContentEqualsIImageWrongFormat()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
         IImage image2 = TestDataHelper.CreateTestImage<ColorBGR>(10, 20);
 
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
     }
 
     [TestMethod]
-    public void EqualImagesHaveEqualHashes()
+    public void EqualsIsReferenceEquality()
     {
         ColorRGBA[] pixels = [new(1, 2, 3, 4), new(5, 6, 7, 8), new(9, 10, 11, 12), new(13, 14, 15, 16)];
         Image<ColorRGBA> a = Image<ColorRGBA>.Create(pixels, 2, 2);
         Image<ColorRGBA> b = Image<ColorRGBA>.Create(pixels, 2, 2);
 
-        Assert.IsTrue(a.Equals(b));
-        Assert.AreEqual(a.GetHashCode(), b.GetHashCode());
-        Assert.Contains(b, new HashSet<Image<ColorRGBA>> { a });
+        Assert.IsTrue(a.ContentEquals(b));
+        Assert.IsFalse(a.Equals(b));
+        Assert.IsTrue(a.Equals(a));
+
+        // Instances with the same content stay distinct in collections.
+        List<Image<ColorRGBA>> list = [a, b];
+        list.Remove(b);
+        Assert.AreSame(a, list[0]);
+        Assert.HasCount(2, new HashSet<Image<ColorRGBA>> { a, b });
     }
 
     #endregion

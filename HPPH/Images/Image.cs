@@ -9,7 +9,7 @@ namespace HPPH;
 /// </summary>
 /// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
-public sealed class Image<T> : IImage, IEnumerable<T>, IEquatable<Image<T>>
+public sealed class Image<T> : IImage, IEnumerable<T>
     where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
@@ -287,41 +287,26 @@ public sealed class Image<T> : IImage, IEnumerable<T>, IEquatable<Image<T>>
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
     
     /// <inheritdoc />
-    public bool Equals(IImage? other)
+    public bool ContentEquals(IImage? other)
     {
-        if (other == null) return false;
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
         if (other.ColorFormat != ColorFormat) return false;
 
-        return Equals(other.AsRefImage<T>());
+        return ContentEquals(other.AsRefImage<T>());
     }
 
-    /// <inheritdoc />
-    public bool Equals(Image<T>? other)
+    /// <inheritdoc cref="ContentEquals(IImage)" />
+    public bool ContentEquals(Image<T>? other)
     {
-        if (other == null) return false;
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
 
-        return Equals(other.AsRefImage());
+        return ContentEquals(other.AsRefImage());
     }
 
-    public bool Equals(RefImage<T> other)
-    {
-        if (other.Width != Width) return false;
-        if (other.Height != Height) return false;
-
-        RefImage<T> thisRef = AsRefImage();
-
-        for (int y = 0; y < Height; y++)
-            if (!thisRef.Rows[y].AsByteSpan().SequenceEqual(other.Rows[y].AsByteSpan()))
-                return false;
-
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override bool Equals(object? obj) => Equals(obj as Image<T>);
-
-    /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(ColorFormat, Width, Height);
+    /// <inheritdoc cref="RefImage{T}.ContentEquals(RefImage{T})" />
+    public bool ContentEquals(RefImage<T> other) => AsRefImage().ContentEquals(other);
 
     #endregion
 }
