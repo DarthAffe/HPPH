@@ -320,6 +320,64 @@ public class ImageTest
     }
 
     [TestMethod]
+    public void Slice()
+    {
+        (int width, int height) = SIZES[0];
+
+        IImage<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+        IImage<ColorARGB> slice = image.Slice(163, 280, 720, 13).Slice(15, 2, 47, 8);
+
+        Assert.AreEqual(47, slice.Width);
+        Assert.AreEqual(8, slice.Height);
+        Assert.AreEqual(image.Stride, slice.Stride);
+
+        for (int y = 0; y < slice.Height; y++)
+            for (int x = 0; x < slice.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(178 + x, 282 + y), slice[x, y]);
+
+        Assert.AreSequenceEqual(image.AsRefImage()[178, 282, 47, 8].ToArray(), slice.ToArray());
+    }
+
+    [TestMethod]
+    public void SliceSharesData()
+    {
+        byte[] buffer = new byte[4 * 4 * 3];
+        Image<ColorRGB> image = Image<ColorRGB>.Wrap(buffer, 4, 4, 4 * 3);
+        Image<ColorRGB> slice = image.Slice(1, 2, 2, 2);
+
+        buffer[(2 * 4 * 3) + (1 * 3)] = 42;
+
+        Assert.AreEqual(42, slice[0, 0].R);
+    }
+
+    [TestMethod]
+    public void SliceOutOfRange()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(-1, 0, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, -1, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 0, 0, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 0, 5, 0));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(6, 0, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 6, 5, 5));
+    }
+
+    [TestMethod]
+    public void Stride()
+    {
+        const int STRIDE = (10 * 4) + 12;
+
+        Image<ColorBGRA> image = Image<ColorBGRA>.Wrap(new byte[STRIDE * 5], 10, 5, STRIDE);
+
+        Assert.AreEqual(STRIDE, image.Stride);
+        Assert.AreEqual(STRIDE, ((IImage)image).Stride);
+        Assert.AreEqual(STRIDE, image.Slice(2, 1, 3, 3).Stride);
+        Assert.AreEqual(STRIDE, image.AsRefImage().Stride);
+        Assert.AreEqual(10 * 3, TestDataHelper.CreateTestImage<ColorRGB>(10, 5).Stride);
+    }
+
+    [TestMethod]
     public void GenericRowsIterate()
     {
         foreach ((int width, int height) in SIZES)

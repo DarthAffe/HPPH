@@ -34,7 +34,7 @@ public readonly ref struct RefImage<T>
     /// Gets the stride (bytes per row) of the underlying buffer.
     /// Only useful if you want to work with a pinned buffer.
     /// </summary>
-    public int RawStride { get; }
+    public int Stride { get; }
 
     /// <summary>
     /// Gets the size in bytes of the pixels of this image without row padding.
@@ -44,7 +44,7 @@ public readonly ref struct RefImage<T>
     /// <summary>
     /// Gets a value indicating whether the rows of this image follow each other without padding.
     /// </summary>
-    internal bool IsContiguous => RawStride == (Width * T.ColorFormat.BytesPerPixel);
+    internal bool IsContiguous => Stride == (Width * T.ColorFormat.BytesPerPixel);
 
     #endregion
 
@@ -59,7 +59,7 @@ public readonly ref struct RefImage<T>
         {
             if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new ArgumentOutOfRangeException();
 
-            return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (nint)(uint)((_y + y) * RawStride))), (nint)(uint)(_x + x));
+            return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (nint)(uint)((_y + y) * Stride))), (nint)(uint)(_x + x));
         }
     }
 
@@ -70,7 +70,7 @@ public readonly ref struct RefImage<T>
         {
             if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
 
-            return new RefImage<T>(_data, _x + x, _y + y, width, height, RawStride);
+            return new RefImage<T>(_data, _x + x, _y + y, width, height, Stride);
         }
     }
 
@@ -79,13 +79,13 @@ public readonly ref struct RefImage<T>
     public ImageRows<T> Rows
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new(_data, _x, _y, Width, Height, RawStride);
+        get => new(_data, _x, _y, Width, Height, Stride);
     }
 
     public ImageColumns<T> Columns
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new(_data, _x, _y, Width, Height, RawStride);
+        get => new(_data, _x, _y, Width, Height, Stride);
     }
 
     #endregion
@@ -99,7 +99,7 @@ public readonly ref struct RefImage<T>
         this._y = y;
         this.Width = width;
         this.Height = height;
-        this.RawStride = stride;
+        this.Stride = stride;
     }
 
     #endregion
@@ -251,26 +251,26 @@ public readonly ref struct RefImage<T>
         if (_data.Length == 0)
             return ref Unsafe.NullRef<byte>();
 
-        return ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (_y * RawStride) + (_x * T.ColorFormat.BytesPerPixel));
+        return ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (_y * Stride) + (_x * T.ColorFormat.BytesPerPixel));
     }
 
     /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ImageEnumerator GetEnumerator() => new(_data, _x, _y, Width, Height, RawStride);
+    public ImageEnumerator GetEnumerator() => new(_data, _x, _y, Width, Height, Stride);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ReadOnlySpan<byte> GetBytes()
     {
         if (Height == 0) return [];
 
-        return _data.Slice((_y * RawStride) + (_x * T.ColorFormat.BytesPerPixel), SizeInBytes);
+        return _data.Slice((_y * Stride) + (_x * T.ColorFormat.BytesPerPixel), SizeInBytes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ReadOnlySpan<byte> GetRowBytes(int y)
     {
         int bpp = T.ColorFormat.BytesPerPixel;
-        return _data.Slice(((_y + y) * RawStride) + (_x * bpp), Width * bpp);
+        return _data.Slice(((_y + y) * Stride) + (_x * bpp), Width * bpp);
     }
     
     #endregion

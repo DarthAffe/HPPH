@@ -33,6 +33,9 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     public int SizeInBytes => Width * Height * ColorFormat.BytesPerPixel;
 
+    /// <inheritdoc />
+    public int Stride => _stride;
+
     #endregion
 
     #region Indexer
@@ -58,12 +61,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     IImage IImage.this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
-
-            return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
-        }
+        get => Slice(x, y, width, height);
     }
 
     /// <inheritdoc />
@@ -156,19 +154,34 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return new Image<T>(buffer, 0, 0, width, height, stride);
     }
 
+    /// <inheritdoc cref="IImage{T}.Slice" />
+    public Image<T> Slice(int x, int y, int width, int height)
+    {
+#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
+
+        if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
+
+#pragma warning restore CA2208
+
+        return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
+    }
+
+    /// <inheritdoc />
+    IImage<T> IImage<T>.Slice(int x, int y, int width, int height) => Slice(x, y, width, height);
+
     /// <inheritdoc />
     public IImage<TColor> ConvertTo<TColor>()
-        where TColor : struct, IColor
+        where TColor : unmanaged, IColor
         => AsRefImage().ConvertTo<TColor>();
 
     /// <inheritdoc />
     public void ConvertTo<TColor>(Span<TColor> destination)
-        where TColor : struct, IColor
+        where TColor : unmanaged, IColor
         => AsRefImage().ConvertTo(destination);
 
     /// <inheritdoc />
     public void ConvertTo<TColor>(Span<byte> destination, int stride)
-        where TColor : struct, IColor
+        where TColor : unmanaged, IColor
         => AsRefImage().ConvertTo<TColor>(destination, stride);
 
     /// <inheritdoc />
