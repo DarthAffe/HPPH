@@ -119,7 +119,15 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     /// </exception>
     void CopyTo(Span<byte> destination);
 
-    IColor[] ToArray();
+    /// <summary>
+    /// Copies the pixels of this <see cref="IImage"/> into a destination buffer whose rows are <paramref name="stride"/> bytes apart.
+    /// </summary>
+    /// <param name="destination">The buffer to write to. The bytes between rows are left as they are.</param>
+    /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row needs no padding.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="stride"/> is smaller than a row or <paramref name="destination"/> is too small.
+    /// </exception>
+    void CopyTo(Span<byte> destination, int stride);
 
     /// <summary>
     /// Allocates a new array and copies this <see cref="IImage"/> into it.
