@@ -2,6 +2,9 @@
 
 namespace HPPH;
 
+/// <summary>
+/// Contains extension methods to process images and colors.
+/// </summary>
 [SkipLocalsInit]
 public static partial class PixelHelper
 {

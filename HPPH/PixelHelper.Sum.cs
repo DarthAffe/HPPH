@@ -30,6 +30,11 @@ public static partial class PixelHelper
 
     #region Methods
 
+    /// <summary>
+    /// Calculates the per-channel sums of the pixels of <paramref name="image"/>.
+    /// </summary>
+    /// <param name="image">The image to calculate the sums for.</param>
+    /// <returns>The sum of each channel.</returns>
     public static ColorSum Sum(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
@@ -37,6 +42,7 @@ public static partial class PixelHelper
         return image.Execute<SumOperation, ColorSum>(default);
     }
 
+    /// <inheritdoc cref="Sum(IImage)"/>
     public static ColorSum Sum<T>(this Image<T> image)
         where T : unmanaged, IColor<T>
     {
@@ -45,10 +51,16 @@ public static partial class PixelHelper
         return image.AsRefImage().Sum();
     }
 
+    /// <inheritdoc cref="Sum(IImage)"/>
     public static ColorSum Sum<T>(this RefImage<T> image)
         where T : unmanaged, IColor<T>
         => T.ToColorSum(SumBytes(image));
 
+    /// <summary>
+    /// Calculates the per-channel sums of <paramref name="colors"/>.
+    /// </summary>
+    /// <param name="colors">The colors to calculate the sums for.</param>
+    /// <returns>The sum of each channel.</returns>
     public static ColorSum Sum<T>(this ReadOnlySpan<T> colors)
         where T : unmanaged, IColor<T>
         => T.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));

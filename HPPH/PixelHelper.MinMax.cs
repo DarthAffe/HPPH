@@ -35,6 +35,11 @@ public static partial class PixelHelper
 
     #region Methods
 
+    /// <summary>
+    /// Calculates the per-channel minimum and maximum of the pixels of <paramref name="image"/>.
+    /// </summary>
+    /// <param name="image">The image to calculate the minimum and maximum for.</param>
+    /// <returns>The minimum and maximum of each channel.</returns>
     public static ColorMinMax MinMax(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
@@ -42,6 +47,7 @@ public static partial class PixelHelper
         return image.Execute<MinMaxOperation, ColorMinMax>(default);
     }
 
+    /// <inheritdoc cref="MinMax(IImage)"/>
     public static ColorMinMax MinMax<T>(this Image<T> image)
         where T : unmanaged, IColor<T>
     {
@@ -50,6 +56,7 @@ public static partial class PixelHelper
         return image.AsRefImage().MinMax();
     }
 
+    /// <inheritdoc cref="MinMax(IImage)"/>
     public static ColorMinMax MinMax<T>(this RefImage<T> image)
         where T : unmanaged, IColor<T>
     {
@@ -64,6 +71,11 @@ public static partial class PixelHelper
         };
     }
 
+    /// <summary>
+    /// Calculates the per-channel minimum and maximum of <paramref name="colors"/>.
+    /// </summary>
+    /// <param name="colors">The colors to calculate the minimum and maximum for.</param>
+    /// <returns>The minimum and maximum of each channel.</returns>
     public static ColorMinMax MinMax<T>(this ReadOnlySpan<T> colors)
         where T : unmanaged, IColor<T>
     {

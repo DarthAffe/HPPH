@@ -2,14 +2,22 @@
 
 namespace HPPH;
 
+/// <summary>
+/// Represents the RGBA color-format.
+/// </summary>
 public sealed partial class ColorFormatRGBA : IColorFormat
 {
     #region Properties & Fields
 
+    /// <summary>
+    /// Gets the instance of the RGBA color-format.
+    /// </summary>
     public static ColorFormatRGBA Instance { get; } = new();
 
+    /// <inheritdoc />
     public int BytesPerPixel => 4;
     
+    /// <inheritdoc />
     public string Name => "RGBA";
 
     ReadOnlySpan<byte> IColorFormat.ByteMapping => [Color.R, Color.G, Color.B, Color.A];
@@ -24,6 +32,7 @@ public sealed partial class ColorFormatRGBA : IColorFormat
     
     #region Methods
     
+    /// <inheritdoc />
     public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorRGBA.Create(r, g, b, a);
 
     /// <inheritdoc cref="IColorFormat.CreateImage" />

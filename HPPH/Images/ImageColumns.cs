@@ -2,6 +2,10 @@
 
 namespace HPPH;
 
+/// <summary>
+/// Represents the list of all columns of an image.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
 public readonly ref struct ImageColumns<T>
     where T : unmanaged, IColor<T>
@@ -16,12 +20,20 @@ public readonly ref struct ImageColumns<T>
     private readonly int _stride;
     private readonly int _bpp;
 
+    /// <summary>
+    /// Gets the number of columns.
+    /// </summary>
     public int Count => _width;
 
     #endregion
 
     #region Indexer
 
+    /// <summary>
+    /// Gets the column at the specified index.
+    /// </summary>
+    /// <param name="column">The index of the column.</param>
+    /// <returns>The column at the specified index.</returns>
     public ImageColumn<T> this[int column]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,6 +72,9 @@ public readonly ref struct ImageColumns<T>
 
     #endregion
 
+    /// <summary>
+    /// Enumerates the columns of an <see cref="ImageColumns{T}"/>.
+    /// </summary>
     public ref struct ImageColumnsEnumerator
     {
         #region Properties & Fields

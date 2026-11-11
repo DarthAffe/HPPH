@@ -14,7 +14,7 @@ namespace HPPH;
 /// Represents a color in 32 bit ARGB-format.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ColorARGB"/> class.
+/// Initializes a new instance of the <see cref="ColorARGB"/> struct.
 /// </remarks>
 /// <param name="a">The Alpha-component of the color.</param>
 /// <param name="r">The Red-component of the color.</param>
@@ -51,7 +51,20 @@ public readonly partial struct ColorARGB(byte a, byte r, byte g, byte b) : IColo
 
     #region Operators
     
+    /// <summary>
+    /// Checks if two colors are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
     public static bool operator ==(ColorARGB left, ColorARGB right) => left.Equals(right);
+
+    /// <summary>
+    /// Checks if two colors are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(ColorARGB left, ColorARGB right) => !left.Equals(right);
     
     #endregion

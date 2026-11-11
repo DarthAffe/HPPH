@@ -2,14 +2,22 @@
 
 namespace HPPH;
 
+/// <summary>
+/// Represents the ABGR color-format.
+/// </summary>
 public sealed partial class ColorFormatABGR : IColorFormat
 {
     #region Properties & Fields
 
+    /// <summary>
+    /// Gets the instance of the ABGR color-format.
+    /// </summary>
     public static ColorFormatABGR Instance { get; } = new();
 
+    /// <inheritdoc />
     public int BytesPerPixel => 4;
     
+    /// <inheritdoc />
     public string Name => "ABGR";
 
     ReadOnlySpan<byte> IColorFormat.ByteMapping => [Color.A, Color.B, Color.G, Color.R];
@@ -24,6 +32,7 @@ public sealed partial class ColorFormatABGR : IColorFormat
     
     #region Methods
     
+    /// <inheritdoc />
     public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorABGR.Create(r, g, b, a);
 
     /// <inheritdoc cref="IColorFormat.CreateImage" />

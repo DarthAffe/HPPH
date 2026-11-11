@@ -41,7 +41,7 @@ internal class Colors : IGeneratorFeature
                 /// Represents a color in 24 bit {{colorFormat.Format}}-format.
                 /// </summary>
                 /// <remarks>
-                /// Initializes a new instance of the <see cref="{{colorFormat.TypeName}}"/> class.
+                /// Initializes a new instance of the <see cref="{{colorFormat.TypeName}}"/> struct.
                 /// </remarks>
                 /// <param name="{{colorFormat.FirstEntry}}">The {{colorFormat.FirstEntryName}}-component of the color.</param>
                 /// <param name="{{colorFormat.SecondEntry}}">The {{colorFormat.SecondEntryName}}-component of the color.</param>
@@ -76,7 +76,20 @@ internal class Colors : IGeneratorFeature
                 
                     #region Operators
                     
+                    /// <summary>
+                    /// Checks if two colors are equal.
+                    /// </summary>
+                    /// <param name="left">The first color.</param>
+                    /// <param name="right">The second color.</param>
+                    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
                     public static bool operator ==({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => left.Equals(right);
+
+                    /// <summary>
+                    /// Checks if two colors are not equal.
+                    /// </summary>
+                    /// <param name="left">The first color.</param>
+                    /// <param name="right">The second color.</param>
+                    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
                     public static bool operator !=({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => !left.Equals(right);
                     
                     #endregion
@@ -128,7 +141,7 @@ internal class Colors : IGeneratorFeature
                 /// Represents a color in 32 bit {{colorFormat.Format}}-format.
                 /// </summary>
                 /// <remarks>
-                /// Initializes a new instance of the <see cref="{{colorFormat.TypeName}}"/> class.
+                /// Initializes a new instance of the <see cref="{{colorFormat.TypeName}}"/> struct.
                 /// </remarks>
                 /// <param name="{{colorFormat.FirstEntry}}">The {{colorFormat.FirstEntryName}}-component of the color.</param>
                 /// <param name="{{colorFormat.SecondEntry}}">The {{colorFormat.SecondEntryName}}-component of the color.</param>
@@ -165,7 +178,20 @@ internal class Colors : IGeneratorFeature
                 
                     #region Operators
                     
+                    /// <summary>
+                    /// Checks if two colors are equal.
+                    /// </summary>
+                    /// <param name="left">The first color.</param>
+                    /// <param name="right">The second color.</param>
+                    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
                     public static bool operator ==({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => left.Equals(right);
+
+                    /// <summary>
+                    /// Checks if two colors are not equal.
+                    /// </summary>
+                    /// <param name="left">The first color.</param>
+                    /// <param name="right">The second color.</param>
+                    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
                     public static bool operator !=({{colorFormat.TypeName}} left, {{colorFormat.TypeName}} right) => !left.Equals(right);
                     
                     #endregion
@@ -209,14 +235,22 @@ internal class Colors : IGeneratorFeature
                  
                  namespace HPPH;
 
+                 /// <summary>
+                 /// Represents the {{colorFormat.Format}} color-format.
+                 /// </summary>
                  public sealed partial class ColorFormat{{colorFormat.Format}} : IColorFormat
                  {
                      #region Properties & Fields
                  
+                     /// <summary>
+                     /// Gets the instance of the {{colorFormat.Format}} color-format.
+                     /// </summary>
                      public static ColorFormat{{colorFormat.Format}} Instance { get; } = new();
                  
+                     /// <inheritdoc />
                      public int BytesPerPixel => {{colorFormat.Bpp}};
                      
+                     /// <inheritdoc />
                      public string Name => "{{colorFormat.Format}}";
                  
                      ReadOnlySpan<byte> IColorFormat.ByteMapping => [{{colorFormat.ByteMapping}}];
@@ -231,6 +265,7 @@ internal class Colors : IGeneratorFeature
                      
                      #region Methods
                      
+                     /// <inheritdoc />
                      public IColor CreateColor(byte r, byte g, byte b, byte a) => Color{{colorFormat.Format}}.Create(r, g, b, a);
 
                      /// <inheritdoc cref="IColorFormat.CreateImage" />
@@ -266,11 +301,24 @@ internal class Colors : IGeneratorFeature
         sb.AppendLine();
 
         foreach (ColorFormatData colorFormat in colorFormats)
+        {
+            sb.AppendLine("    /// <summary>");
+            sb.AppendLine($"    /// Gets the {colorFormat.Format} color-format.");
+            sb.AppendLine("    /// </summary>");
             sb.AppendLine($"    public static ColorFormat{colorFormat.Format} {colorFormat.Format} => ColorFormat{colorFormat.Format}.Instance;");
-
-        sb.AppendLine();
+            sb.AppendLine();
+        }
 
         sb.AppendLine("""
+                          /// <summary>
+                          /// Creates a color of this color-format from the given components.
+                          /// Components this color-format doesn't contain are ignored.
+                          /// </summary>
+                          /// <param name="r">The red-component of the color.</param>
+                          /// <param name="g">The green-component of the color.</param>
+                          /// <param name="b">The blue-component of the color.</param>
+                          /// <param name="a">The alpha-component of the color.</param>
+                          /// <returns>The created color.</returns>
                           IColor CreateColor(byte r, byte g, byte b, byte a);
                       
                           #endregion

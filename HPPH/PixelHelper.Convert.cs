@@ -32,6 +32,14 @@ public static partial class PixelHelper
 
     #region Methods
 
+    /// <summary>
+    /// Converts <paramref name="colors"/> to the color format <typeparamref name="TTarget"/> in place.
+    /// </summary>
+    /// <param name="colors">The colors to convert.</param>
+    /// <typeparam name="TSource">The color format to convert from.</typeparam>
+    /// <typeparam name="TTarget">The color format to convert to. Needs the same bytes per pixel as <typeparamref name="TSource"/>.</typeparam>
+    /// <returns>The converted colors, sharing the memory of <paramref name="colors"/>.</returns>
+    /// <exception cref="NotSupportedException"><typeparamref name="TSource"/> and <typeparamref name="TTarget"/> have different bytes per pixel.</exception>
     public static Span<TTarget> ConvertInPlace<TSource, TTarget>(this Span<TSource> colors)
         where TSource : unmanaged, IColor<TSource>
         where TTarget : unmanaged, IColor<TTarget>
@@ -50,6 +58,13 @@ public static partial class PixelHelper
         return MemoryMarshal.Cast<byte, TTarget>(data);
     }
 
+    /// <summary>
+    /// Allocates a new array and converts <paramref name="colors"/> into it.
+    /// </summary>
+    /// <param name="colors">The colors to convert.</param>
+    /// <typeparam name="TSource">The color format to convert from.</typeparam>
+    /// <typeparam name="TTarget">The color format to convert to.</typeparam>
+    /// <returns>The new array containing the converted colors.</returns>
     public static TTarget[] Convert<TSource, TTarget>(this ReadOnlySpan<TSource> colors)
         where TSource : unmanaged, IColor<TSource>
         where TTarget : unmanaged, IColor<TTarget>
@@ -59,6 +74,14 @@ public static partial class PixelHelper
         return buffer;
     }
 
+    /// <summary>
+    /// Converts <paramref name="source"/> into <paramref name="target"/>.
+    /// </summary>
+    /// <param name="source">The colors to convert.</param>
+    /// <param name="target">The buffer to write to. Needs at least as many elements as <paramref name="source"/>.</param>
+    /// <typeparam name="TSource">The color format to convert from.</typeparam>
+    /// <typeparam name="TTarget">The color format to convert to.</typeparam>
+    /// <exception cref="ArgumentException"><paramref name="target"/> is shorter than <paramref name="source"/>.</exception>
     public static void Convert<TSource, TTarget>(this ReadOnlySpan<TSource> source, Span<TTarget> target)
         where TSource : unmanaged, IColor<TSource>
         where TTarget : unmanaged, IColor<TTarget>

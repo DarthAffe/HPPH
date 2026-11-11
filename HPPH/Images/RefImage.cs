@@ -3,6 +3,10 @@ using System.Runtime.InteropServices;
 
 namespace HPPH;
 
+/// <summary>
+/// Represents a view on the pixels of an image with the color type <typeparamref name="T"/>.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
 public readonly ref struct RefImage<T>
     where T : unmanaged, IColor<T>
@@ -52,6 +56,12 @@ public readonly ref struct RefImage<T>
 
 #pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
 
+    /// <summary>
+    /// Gets the color at the specified location.
+    /// </summary>
+    /// <param name="x">The X-location to read.</param>
+    /// <param name="y">The Y-location to read.</param>
+    /// <returns>The color at the specified location.</returns>
     public ref readonly T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,12 +89,18 @@ public readonly ref struct RefImage<T>
 
 #pragma warning restore CA2208
 
+    /// <summary>
+    /// Gets a list of all rows of this image.
+    /// </summary>
     public ImageRows<T> Rows
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => new(_data, _x, _y, Width, Height, Stride);
     }
 
+    /// <summary>
+    /// Gets a list of all columns of this image.
+    /// </summary>
     public ImageColumns<T> Columns
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -258,7 +274,7 @@ public readonly ref struct RefImage<T>
     }
 
     /// <summary>
-    /// Converts the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
+    /// Converts the contents of this <see cref="RefImage{T}"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
     /// </summary>
     /// <param name="destination">The buffer to write to. Needs at least <c>Width * Height</c> elements.</param>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
@@ -276,11 +292,11 @@ public readonly ref struct RefImage<T>
     }
 
     /// <summary>
-    /// Converts the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
-    /// Padds each row to <paramref name="stride"/>-length
+    /// Converts the contents of this <see cref="RefImage{T}"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
+    /// Pads each row to <paramref name="stride"/>-length.
     /// </summary>
     /// <param name="destination">The buffer to write to. The bytes between rows are left as they are.</param>
-    /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row is not padding.</param>
+    /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row needs no padding.</param>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
     public void ConvertTo<TColor>(Span<byte> destination, int stride)
         where TColor : unmanaged, IColor<TColor>
@@ -367,6 +383,9 @@ public readonly ref struct RefImage<T>
     
     #endregion
 
+    /// <summary>
+    /// Enumerates the pixels of a <see cref="RefImage{T}"/> row by row.
+    /// </summary>
     public ref struct ImageEnumerator
     {
         #region Properties & Fields

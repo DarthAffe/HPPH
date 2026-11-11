@@ -4,8 +4,19 @@ using System.Runtime.Versioning;
 
 namespace HPPH.System.Drawing;
 
+/// <summary>
+/// Contains extension methods to convert between HPPH images and System.Drawing bitmaps.
+/// </summary>
 public static class ImageExtension
 {
+    /// <summary>
+    /// Copies the pixels of <paramref name="image"/> into a new <see cref="Bitmap"/>.
+    /// </summary>
+    /// <remarks>
+    /// The bitmap is <see cref="PixelFormat.Format24bppRgb"/> for 3-byte color formats and <see cref="PixelFormat.Format32bppArgb"/> for 4-byte color formats.
+    /// </remarks>
+    /// <param name="image">The image to convert.</param>
+    /// <returns>The new <see cref="Bitmap"/>.</returns>
     [SupportedOSPlatform("windows")]
     public static Bitmap ToBitmap(this IImage image)
     {
@@ -44,6 +55,11 @@ public static class ImageExtension
         return bitmap;
     }
 
+    /// <summary>
+    /// Encodes <paramref name="image"/> as PNG.
+    /// </summary>
+    /// <param name="image">The image to encode.</param>
+    /// <returns>The PNG-encoded data.</returns>
     [SupportedOSPlatform("windows")]
     public static byte[] ToPng(this IImage image)
     {
@@ -56,6 +72,14 @@ public static class ImageExtension
         return ms.ToArray();
     }
 
+    /// <summary>
+    /// Copies the pixels of <paramref name="bitmap"/> into a new image.
+    /// </summary>
+    /// <remarks>
+    /// The image is <see cref="ColorBGR"/> for <see cref="PixelFormat.Format24bppRgb"/>-bitmaps and <see cref="ColorBGRA"/> otherwise.
+    /// </remarks>
+    /// <param name="bitmap">The bitmap to convert.</param>
+    /// <returns>The new image.</returns>
     [SupportedOSPlatform("windows")]
     public static IImage ToImage(this Bitmap bitmap)
     {
@@ -64,6 +88,12 @@ public static class ImageExtension
         return bitmap.PixelFormat == PixelFormat.Format24bppRgb ? bitmap.ToImage<ColorBGR>() : bitmap.ToImage<ColorBGRA>();
     }
 
+    /// <summary>
+    /// Copies the pixels of <paramref name="bitmap"/> into a new <see cref="Image{T}"/> of the color format <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="bitmap">The bitmap to convert.</param>
+    /// <typeparam name="T">The color format of the new image.</typeparam>
+    /// <returns>The new image.</returns>
     [SupportedOSPlatform("windows")]
     public static Image<T> ToImage<T>(this Bitmap bitmap)
         where T : unmanaged, IColor<T>

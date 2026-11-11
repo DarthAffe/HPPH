@@ -14,7 +14,7 @@ namespace HPPH;
 /// Represents a color in 24 bit BGR-format.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ColorBGR"/> class.
+/// Initializes a new instance of the <see cref="ColorBGR"/> struct.
 /// </remarks>
 /// <param name="b">The Blue-component of the color.</param>
 /// <param name="g">The Green-component of the color.</param>
@@ -49,7 +49,20 @@ public readonly partial struct ColorBGR(byte b, byte g, byte r) : IColor<ColorBG
 
     #region Operators
     
+    /// <summary>
+    /// Checks if two colors are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
     public static bool operator ==(ColorBGR left, ColorBGR right) => left.Equals(right);
+
+    /// <summary>
+    /// Checks if two colors are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(ColorBGR left, ColorBGR right) => !left.Equals(right);
     
     #endregion

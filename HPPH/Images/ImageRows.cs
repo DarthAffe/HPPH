@@ -2,6 +2,10 @@
 
 namespace HPPH;
 
+/// <summary>
+/// Represents the list of all rows of an image.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
 public readonly ref struct ImageRows<T>
     where T : unmanaged, IColor<T>
@@ -16,12 +20,20 @@ public readonly ref struct ImageRows<T>
     private readonly int _stride;
     private readonly int _bpp;
 
+    /// <summary>
+    /// Gets the number of rows.
+    /// </summary>
     public int Count => _height;
 
     #endregion
 
     #region Indexer
 
+    /// <summary>
+    /// Gets the row at the specified index.
+    /// </summary>
+    /// <param name="row">The index of the row.</param>
+    /// <returns>The row at the specified index.</returns>
     public ImageRow<T> this[int row]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,6 +72,9 @@ public readonly ref struct ImageRows<T>
 
     #endregion
 
+    /// <summary>
+    /// Enumerates the rows of an <see cref="ImageRows{T}"/>.
+    /// </summary>
     public ref struct ImageRowsEnumerator
     {
         #region Properties & Fields

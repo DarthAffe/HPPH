@@ -2,14 +2,22 @@
 
 namespace HPPH;
 
+/// <summary>
+/// Represents the ARGB color-format.
+/// </summary>
 public sealed partial class ColorFormatARGB : IColorFormat
 {
     #region Properties & Fields
 
+    /// <summary>
+    /// Gets the instance of the ARGB color-format.
+    /// </summary>
     public static ColorFormatARGB Instance { get; } = new();
 
+    /// <inheritdoc />
     public int BytesPerPixel => 4;
     
+    /// <inheritdoc />
     public string Name => "ARGB";
 
     ReadOnlySpan<byte> IColorFormat.ByteMapping => [Color.A, Color.R, Color.G, Color.B];
@@ -24,6 +32,7 @@ public sealed partial class ColorFormatARGB : IColorFormat
     
     #region Methods
     
+    /// <inheritdoc />
     public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorARGB.Create(r, g, b, a);
 
     /// <inheritdoc cref="IColorFormat.CreateImage" />

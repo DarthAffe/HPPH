@@ -138,7 +138,7 @@ public sealed class Image<T> : IImage, IEnumerable<T>
     /// Creates an image from a copy of <paramref name="buffer"/>.
     /// </summary>
     /// <remarks>
-    /// Only the pixels are copied. Row padding and data after the last row are dropped,
+    /// Only the pixels are copied. Row padding and data after the last row are dropped.
     /// After creation its <see cref="Stride"/> is <c>width * BytesPerPixel</c>.
     /// </remarks>
     /// <param name="buffer">The pixel data.</param>
@@ -264,6 +264,7 @@ public sealed class Image<T> : IImage, IEnumerable<T>
         return ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (_y * _stride) + (_x * ColorFormat.BytesPerPixel));
     }
 
+    /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RefImage<T>.ImageEnumerator GetEnumerator() => AsRefImage().GetEnumerator();
 

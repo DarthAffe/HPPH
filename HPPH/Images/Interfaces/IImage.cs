@@ -5,7 +5,7 @@
 /// </summary>
 /// <remarks>
 /// <see cref="Image{T}"/> is the only implementation. Cast to it, or use <see cref="Execute{TOperation, TResult}(TOperation)"/>, to work with the pixels without boxing.
-/// Implementing this interface outside of HPPH is not needed and not supported - it's signature might change at any time without prior warning.
+/// Implementing this interface outside of HPPH is not needed and not supported - its signature might change at any time without prior warning.
 /// </remarks>
 public interface IImage
 {
@@ -49,7 +49,7 @@ public interface IImage
     /// <summary>
     /// Gets an <see cref="RefImage{TColor}"/> representing this <see cref="IImage"/>.
     /// </summary>
-    /// <typeparam name="TColor">The color-type of the iamge.</typeparam>
+    /// <typeparam name="TColor">The color-type of the image.</typeparam>
     /// <returns>The <inheritdoc cref="RefImage{TColor}"/>.</returns>
     /// <exception cref="ArgumentException"><typeparamref name="TColor"/> is not the color type of this image.</exception>
     RefImage<TColor> AsRefImage<TColor>() where TColor : unmanaged, IColor<TColor>;
@@ -103,10 +103,10 @@ public interface IImage
 
     /// <summary>
     /// Converts the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
-    /// Padds each row to <paramref name="stride"/>-length
+    /// Pads each row to <paramref name="stride"/>-length.
     /// </summary>
     /// <param name="destination">The buffer to write to. The bytes between rows are left as they are.</param>
-    /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row is not padding.</param>
+    /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row needs no padding.</param>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
     void ConvertTo<TColor>(Span<byte> destination, int stride) where TColor : unmanaged, IColor<TColor>;
 

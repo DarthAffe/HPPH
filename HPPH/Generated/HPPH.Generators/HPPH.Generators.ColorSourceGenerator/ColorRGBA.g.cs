@@ -14,7 +14,7 @@ namespace HPPH;
 /// Represents a color in 32 bit RGBA-format.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ColorRGBA"/> class.
+/// Initializes a new instance of the <see cref="ColorRGBA"/> struct.
 /// </remarks>
 /// <param name="r">The Red-component of the color.</param>
 /// <param name="g">The Green-component of the color.</param>
@@ -51,7 +51,20 @@ public readonly partial struct ColorRGBA(byte r, byte g, byte b, byte a) : IColo
 
     #region Operators
     
+    /// <summary>
+    /// Checks if two colors are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
     public static bool operator ==(ColorRGBA left, ColorRGBA right) => left.Equals(right);
+
+    /// <summary>
+    /// Checks if two colors are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(ColorRGBA left, ColorRGBA right) => !left.Equals(right);
     
     #endregion

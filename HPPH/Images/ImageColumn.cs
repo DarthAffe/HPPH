@@ -3,6 +3,10 @@ using System.Runtime.InteropServices;
 
 namespace HPPH;
 
+/// <summary>
+/// Represents a single column of an image.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
 public readonly ref struct ImageColumn<T>
     where T : unmanaged, IColor<T>
@@ -14,14 +18,25 @@ public readonly ref struct ImageColumn<T>
     private readonly int _length;
     private readonly int _step;
 
+    /// <summary>
+    /// Gets the number of pixels in this column.
+    /// </summary>
     public int Length => _length;
 
+    /// <summary>
+    /// Gets the size in bytes of the pixels of this column.
+    /// </summary>
     public int SizeInBytes => Length * T.ColorFormat.BytesPerPixel;
 
     #endregion
 
     #region Indexer
 
+    /// <summary>
+    /// Gets the color at the specified location.
+    /// </summary>
+    /// <param name="y">The Y-location to read.</param>
+    /// <returns>The color at the specified location.</returns>
     public ref readonly T this[int y]
     {
         get
@@ -48,8 +63,22 @@ public readonly ref struct ImageColumn<T>
 
     #region Methods
 
+    /// <summary>
+    /// Copies the pixels of this column into a destination buffer.
+    /// </summary>
+    /// <param name="destination">The destination buffer.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="destination"/> is shorter than <see cref="Length"/>.
+    /// </exception>
     public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
 
+    /// <summary>
+    /// Copies the pixels of this column into a destination buffer.
+    /// </summary>
+    /// <param name="destination">The destination buffer.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="destination"/> is shorter than <see cref="SizeInBytes"/>.
+    /// </exception>
     public void CopyTo(Span<byte> destination)
     {
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
@@ -60,6 +89,10 @@ public readonly ref struct ImageColumn<T>
             target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
     }
 
+    /// <summary>
+    /// Allocates a new array and copies the pixels of this column into it.
+    /// </summary>
+    /// <returns>The new array containing the pixels of this column.</returns>
     public T[] ToArray()
     {
         T[] array = GC.AllocateUninitializedArray<T>(Length);
@@ -73,6 +106,9 @@ public readonly ref struct ImageColumn<T>
 
     #endregion
 
+    /// <summary>
+    /// Enumerates the pixels of an <see cref="ImageColumn{T}"/>.
+    /// </summary>
     public ref struct ImageColumnEnumerator
     {
         #region Properties & Fields

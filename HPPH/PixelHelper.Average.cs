@@ -7,6 +7,11 @@ public static partial class PixelHelper
 {
     #region Methods
 
+    /// <summary>
+    /// Calculates the average color of the pixels of <paramref name="image"/>.
+    /// </summary>
+    /// <param name="image">The image to calculate the average for.</param>
+    /// <returns>The average color.</returns>
     public static IColor Average(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
@@ -14,6 +19,7 @@ public static partial class PixelHelper
         return image.Execute<AverageOperation, IColor>(default);
     }
 
+    /// <inheritdoc cref="Average(IImage)"/>
     public static T Average<T>(this Image<T> image)
         where T : unmanaged, IColor<T>
     {
@@ -22,6 +28,7 @@ public static partial class PixelHelper
         return image.AsRefImage().Average();
     }
 
+    /// <inheritdoc cref="Average(IImage)"/>
     public static T Average<T>(this RefImage<T> image)
         where T : unmanaged, IColor<T>
     {
@@ -34,6 +41,11 @@ public static partial class PixelHelper
                         (byte)MathF.Round(sum.A / count));
     }
 
+    /// <summary>
+    /// Calculates the average color of <paramref name="colors"/>.
+    /// </summary>
+    /// <param name="colors">The colors to calculate the average for.</param>
+    /// <returns>The average color.</returns>
     public static T Average<T>(this ReadOnlySpan<T> colors)
         where T : unmanaged, IColor<T>
     {

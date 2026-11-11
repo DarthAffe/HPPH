@@ -5,8 +5,16 @@ using SkiaSharp;
 
 namespace HPPH.SkiaSharp;
 
+/// <summary>
+/// Contains extension methods to convert between HPPH images and SkiaSharp images.
+/// </summary>
 public static class ImageExtension
 {
+    /// <summary>
+    /// Copies the pixels of <paramref name="image"/> into a new <see cref="SKImage"/>.
+    /// </summary>
+    /// <param name="image">The image to convert.</param>
+    /// <returns>The new <see cref="SKImage"/>.</returns>
     public static SKImage ToSKImage(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
@@ -15,6 +23,14 @@ public static class ImageExtension
         return SKImage.FromBitmap(bitmap);
     }
 
+    /// <summary>
+    /// Copies the pixels of <paramref name="image"/> into a new <see cref="SKBitmap"/>.
+    /// </summary>
+    /// <remarks>
+    /// The bitmap is <see cref="SKColorType.Rgba8888"/> for <see cref="ColorRGBA"/>-images and <see cref="SKColorType.Bgra8888"/> otherwise.
+    /// </remarks>
+    /// <param name="image">The image to convert.</param>
+    /// <returns>The new <see cref="SKBitmap"/>.</returns>
     public static unsafe SKBitmap ToSKBitmap(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
@@ -40,6 +56,11 @@ public static class ImageExtension
         return bitmap;
     }
 
+    /// <summary>
+    /// Encodes <paramref name="image"/> as PNG.
+    /// </summary>
+    /// <param name="image">The image to encode.</param>
+    /// <returns>The PNG-encoded data.</returns>
     public static byte[] ToPng(this IImage image)
     {
         using SKImage skImage = image.ToSKImage();
@@ -47,8 +68,19 @@ public static class ImageExtension
         return data.ToArray();
     }
 
+    /// <summary>
+    /// Copies the pixels of <paramref name="skImage"/> into a new <see cref="Image{T}"/> of the color format <see cref="ColorBGRA"/>.
+    /// </summary>
+    /// <param name="skImage">The image to convert.</param>
+    /// <returns>The new image.</returns>
     public static Image<ColorBGRA> ToImage(this SKImage skImage) => skImage.ToImage<ColorBGRA>();
 
+    /// <summary>
+    /// Copies the pixels of <paramref name="skImage"/> into a new <see cref="Image{T}"/> of the color format <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="skImage">The image to convert.</param>
+    /// <typeparam name="T">The color format of the new image.</typeparam>
+    /// <returns>The new image.</returns>
     public static Image<T> ToImage<T>(this SKImage skImage)
         where T : unmanaged, IColor<T>
     {
@@ -58,8 +90,19 @@ public static class ImageExtension
         return bitmap.ToImage<T>();
     }
 
+    /// <summary>
+    /// Copies the pixels of <paramref name="bitmap"/> into a new <see cref="Image{T}"/> of the color format <see cref="ColorBGRA"/>.
+    /// </summary>
+    /// <param name="bitmap">The bitmap to convert.</param>
+    /// <returns>The new image.</returns>
     public static Image<ColorBGRA> ToImage(this SKBitmap bitmap) => bitmap.ToImage<ColorBGRA>();
 
+    /// <summary>
+    /// Copies the pixels of <paramref name="bitmap"/> into a new <see cref="Image{T}"/> of the color format <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="bitmap">The bitmap to convert.</param>
+    /// <typeparam name="T">The color format of the new image.</typeparam>
+    /// <returns>The new image.</returns>
     public static Image<T> ToImage<T>(this SKBitmap bitmap)
         where T : unmanaged, IColor<T>
     {

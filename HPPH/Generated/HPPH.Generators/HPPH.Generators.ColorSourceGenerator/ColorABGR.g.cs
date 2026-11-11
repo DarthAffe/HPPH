@@ -14,7 +14,7 @@ namespace HPPH;
 /// Represents a color in 32 bit ABGR-format.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ColorABGR"/> class.
+/// Initializes a new instance of the <see cref="ColorABGR"/> struct.
 /// </remarks>
 /// <param name="a">The Alpha-component of the color.</param>
 /// <param name="b">The Blue-component of the color.</param>
@@ -51,7 +51,20 @@ public readonly partial struct ColorABGR(byte a, byte b, byte g, byte r) : IColo
 
     #region Operators
     
+    /// <summary>
+    /// Checks if two colors are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
     public static bool operator ==(ColorABGR left, ColorABGR right) => left.Equals(right);
+
+    /// <summary>
+    /// Checks if two colors are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(ColorABGR left, ColorABGR right) => !left.Equals(right);
     
     #endregion

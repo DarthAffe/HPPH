@@ -2,14 +2,22 @@
 
 namespace HPPH;
 
+/// <summary>
+/// Represents the BGRA color-format.
+/// </summary>
 public sealed partial class ColorFormatBGRA : IColorFormat
 {
     #region Properties & Fields
 
+    /// <summary>
+    /// Gets the instance of the BGRA color-format.
+    /// </summary>
     public static ColorFormatBGRA Instance { get; } = new();
 
+    /// <inheritdoc />
     public int BytesPerPixel => 4;
     
+    /// <inheritdoc />
     public string Name => "BGRA";
 
     ReadOnlySpan<byte> IColorFormat.ByteMapping => [Color.B, Color.G, Color.R, Color.A];
@@ -24,6 +32,7 @@ public sealed partial class ColorFormatBGRA : IColorFormat
     
     #region Methods
     
+    /// <inheritdoc />
     public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorBGRA.Create(r, g, b, a);
 
     /// <inheritdoc cref="IColorFormat.CreateImage" />
