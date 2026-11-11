@@ -190,22 +190,24 @@ internal static unsafe class WuQuantizer
 
         int count = SplitBoxes(moments, boxes, capacity);
 
-        T[] result = new T[count];
+        T[] colors = new T[count];
+        long[] populations = new long[count];
         for (int i = 0; i < count; i++)
         {
             WuMoment moment = GetVolume(moments, boxes[i]);
-            result[i] = (T)T.Create(Average(moment.R, moment.Weight),
+            colors[i] = (T)T.Create(Average(moment.R, moment.Weight),
                                     Average(moment.G, moment.Weight),
                                     Average(moment.B, moment.Weight),
                                     Average(moment.A, moment.Weight));
+            populations[i] = moment.Weight;
         }
 
-        return result;
+        return PixelHelper.ToPalette<T>(colors, populations);
     }
 
     private static int SplitBoxes(WuMoment[] moments, Span<WuBox> boxes, int capacity)
     {
-        Span<double> variances = stackalloc double[MAX_STACKALLOC_BOXES];
+        Span<double> variances = capacity <= MAX_STACKALLOC_BOXES ? stackalloc double[MAX_STACKALLOC_BOXES] : new double[capacity];
         variances[0] = 0;
 
         int count = 1;

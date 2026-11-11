@@ -8,6 +8,7 @@ public static partial class PixelHelper
     /// Creates a palette of up to <paramref name="paletteSize"/> colors using Wu's quantizer.
     /// </summary>
     /// <remarks>
+    /// The palette is ordered by the number of pixels each color represents, most common first.
     /// Fewer colors are returned if the image doesn't have enough distinct colors to fill the palette.
     /// </remarks>
     public static IColor[] CreateWuColorPalette(this IImage image, int paletteSize)

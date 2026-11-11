@@ -549,6 +549,43 @@ public class QuantizeTests
     }
 
     [TestMethod]
+    public void MedianCutMergesDuplicateColors()
+    {
+        ColorRGB red = new(255, 0, 0);
+        ColorRGB blue = new(0, 0, 255);
+
+        ColorRGB[] colors = new ColorRGB[64];
+        for (int i = 0; i < colors.Length; i++)
+            colors[i] = (i % 2) == 0 ? red : blue;
+
+        ColorRGB[] palette = colors.CreateMedianCutColorPalette(8);
+
+        Assert.HasCount(2, palette);
+        Assert.Contains(red, palette);
+        Assert.Contains(blue, palette);
+    }
+
+    [TestMethod]
+    public void PaletteIsOrderedByPopulation()
+    {
+        ColorRGB red = new(255, 0, 0);
+        ColorRGB green = new(0, 255, 0);
+        ColorRGB blue = new(0, 0, 255);
+
+        // Least common first, so the order isn't just the order of appearance.
+        ColorRGB[] colors = [.. Enumerable.Repeat(blue, 2), .. Enumerable.Repeat(green, 6), .. Enumerable.Repeat(red, 8)];
+        ColorRGB[] expected = [red, green, blue];
+
+        Assert.AreSequenceEqual(expected, colors.CreateWuColorPalette(8), "Wu");
+        Assert.AreSequenceEqual(expected, colors.CreateMedianCutColorPalette(8), "MedianCut");
+        Assert.AreSequenceEqual(expected, colors.CreateColorPalette(8), "Default");
+
+        // Fewer pixels than the palette size takes the distinct colors shortcut.
+        Assert.AreSequenceEqual(expected, colors.CreateWuColorPalette(32), "Wu, distinct colors");
+        Assert.AreSequenceEqual(expected, colors.CreateMedianCutColorPalette(32), "MedianCut, distinct colors");
+    }
+
+    [TestMethod]
     public void PaletteLargerThan256MatchesReference()
     {
         // More than 256 boxes are picked from a priority queue instead of a linear search.

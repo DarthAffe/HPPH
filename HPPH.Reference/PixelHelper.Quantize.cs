@@ -41,8 +41,14 @@ public static partial class ReferencePixelHelper
             }
         }
 
-        return cubes.Where(c => c.Count > 0).Select(c => c.GetAverageColor<T>()).ToArray();
+        return ToPalette(cubes.Where(c => c.Count > 0).Select(c => (c.GetAverageColor<T>(), (long)c.Count)));
     }
+
+    private static TColor[] ToPalette<TColor>(IEnumerable<(TColor Color, long Population)> colors)
+        => [.. colors.GroupBy(x => x.Color)
+                     .Select(group => (Color: group.Key, Population: group.Sum(x => x.Population)))
+                     .OrderByDescending(x => x.Population)
+                     .Select(x => x.Color)];
 
 
     internal class ColorCube
@@ -126,7 +132,7 @@ public static partial class ReferencePixelHelper
         if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
         if ((paletteSize == 0) || colors.IsEmpty) return [];
 
-        if (colors.Length <= paletteSize) return [.. colors.ToArray().Distinct()];
+        if (colors.Length <= paletteSize) return ToPalette(colors.ToArray().Select(color => (color, 1L)));
 
         List<WuCell> cells = [.. colors.ToArray()
                                        .GroupBy(color => (color.R >> 3, color.G >> 3, color.B >> 3))
@@ -145,10 +151,11 @@ public static partial class ReferencePixelHelper
             boxes.Add(new WuBox([.. box.Cells.Where(cell => cell.Index[axis] >= position)]));
         }
 
-        return [.. boxes.Select(box => (T)T.Create((byte)MathF.Round(box.Stats.R / (float)box.Stats.Count),
+        return ToPalette(boxes.Select(box => ((T)T.Create((byte)MathF.Round(box.Stats.R / (float)box.Stats.Count),
                                                    (byte)MathF.Round(box.Stats.G / (float)box.Stats.Count),
                                                    (byte)MathF.Round(box.Stats.B / (float)box.Stats.Count),
-                                                   (byte)MathF.Round(box.Stats.A / (float)box.Stats.Count)))];
+                                                          (byte)MathF.Round(box.Stats.A / (float)box.Stats.Count)),
+                                              box.Stats.Count)));
     }
 
     internal readonly record struct WuStats(long Count, long R, long G, long B, long A, long Squares)

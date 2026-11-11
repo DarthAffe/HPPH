@@ -19,6 +19,7 @@ public static partial class PixelHelper
     /// </summary>
     /// <remarks>
     /// <paramref name="paletteSize"/> has to be a power of 2.
+    /// The palette is ordered by the number of pixels each color represents, most common first.
     /// Fewer colors are returned if the image doesn't have enough distinct colors to fill the palette.
     /// </remarks>
     public static IColor[] CreateMedianCutColorPalette(this IImage image, int paletteSize)
@@ -109,13 +110,18 @@ public static partial class PixelHelper
 
         int resultCount = cubes.Count(cube => cube.Length > 0);
 
-        T[] result = new T[resultCount];
+        T[] averages = new T[resultCount];
+        long[] populations = new long[resultCount];
         int resultIndex = 0;
         foreach (ColorCube<T> cube in cubes)
             if (cube.Length > 0)
-                result[resultIndex++] = cube.Slice(colors).Average();
+            {
+                averages[resultIndex] = cube.Slice(colors).Average();
+                populations[resultIndex] = cube.Length;
+                resultIndex++;
+            }
 
-        return result;
+        return ToPalette(averages, populations);
     }
 
     private static unsafe void SplitParallel<T>(Span<T> colors, ColorCube<T>[] cubes, int cubeCount)

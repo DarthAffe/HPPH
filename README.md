@@ -88,6 +88,7 @@ Creates a color-palette of a given size for some color-data.
 Currently this can be done using Wu's algorithm or median cut.   
 The default for `CreateColorPalette` is Wu's as it's higher quality and in most cases faster than median cut.   
 For both splits are only done on red, green and blue; alpha is averaged.   
+Palettes are ordered by the number of pixels each color represents (most common first) and never contain duplicates.   
 
 
 ### Conversion
