@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace HPPH;
 
@@ -11,14 +12,17 @@ public readonly record struct ColorMinMax(byte RedMin, byte RedMax, byte GreenMi
 {
     #region Properties & Fields
 
-    public byte RedRange => (byte)(RedMax - RedMin);
-    public byte GreenRange => (byte)(GreenMax - GreenMin);
-    public byte BlueRange => (byte)(BlueMax - BlueMin);
-    public byte AlphaRange => (byte)(AlphaMax - AlphaMin);
+    public byte RedRange => CalculateRange(RedMin, RedMax);
+    public byte GreenRange => CalculateRange(GreenMin, GreenMax);
+    public byte BlueRange => CalculateRange(BlueMin, BlueMax);
+    public byte AlphaRange => CalculateRange(AlphaMin, AlphaMax);
 
     #endregion
 
     #region Methods
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static byte CalculateRange(byte min, byte max) => max > min ? (byte)(max - min) : (byte)0;
 
     /// <inheritdoc />
     public override string ToString() => $"[A: {AlphaMin}-{AlphaMax}, R: {RedMin}-{RedMax}, G: {GreenMin}-{GreenMax}, B: {BlueMin}-{BlueMax}]";
