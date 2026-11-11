@@ -586,6 +586,89 @@ public class QuantizeTests
     }
 
     [TestMethod]
+    public void PixelCountsMatchPopulations()
+    {
+        ColorRGB red = new(255, 0, 0);
+        ColorRGB green = new(0, 255, 0);
+        ColorRGB blue = new(0, 0, 255);
+
+        ColorRGB[] colors = [.. Enumerable.Repeat(blue, 2), .. Enumerable.Repeat(green, 6), .. Enumerable.Repeat(red, 8)];
+        IImage image = Image<ColorRGB>.Create(colors, 4, 4);
+        long[] expected = [8, 6, 2];
+
+        foreach ((string name, Func<long[], int> createPalette) in new (string, Func<long[], int>)[]
+                 {
+                     ("Wu", counts => colors.CreateWuColorPalette(8, counts).Length),
+                     ("MedianCut", counts => colors.CreateMedianCutColorPalette(8, counts).Length),
+                     ("Default", counts => colors.CreateColorPalette(8, counts).Length),
+                     ("Wu, distinct colors", counts => colors.CreateWuColorPalette(32, counts).Length),
+                     ("MedianCut, distinct colors", counts => colors.CreateMedianCutColorPalette(32, counts).Length),
+                     ("Wu, IImage", counts => image.CreateWuColorPalette(8, counts).Length),
+                     ("MedianCut, IImage", counts => image.CreateMedianCutColorPalette(8, counts).Length),
+                     ("Default, IImage", counts => image.CreateColorPalette(8, counts).Length)
+                 })
+        {
+            long[] counts = new long[32];
+            int paletteLength = createPalette(counts);
+
+            Assert.AreEqual(expected.Length, paletteLength, name);
+            Assert.AreSequenceEqual(expected, counts[..paletteLength], name);
+            Assert.IsTrue(counts.Skip(paletteLength).All(c => c == 0), $"{name}: entries after the palette are untouched");
+        }
+    }
+
+    [TestMethod]
+    public void PixelCountsCoverEveryPixel()
+    {
+        const int WIDTH = 300;
+        const int HEIGHT = 200;
+        const int STRIDE = (WIDTH * 4) + 20;
+
+        byte[] buffer = new byte[STRIDE * HEIGHT];
+        new Random(5).NextBytes(buffer);
+
+        Image<ColorBGRA> image = Image<ColorBGRA>.Wrap(buffer, WIDTH, HEIGHT, STRIDE);
+        RefImage<ColorBGRA> region = image[17, 9, 250, 150];
+
+        foreach (int size in new[] { 1, 16, 256 })
+        {
+            long[] wuCounts = new long[size];
+            ColorBGRA[] wu = region.CreateWuColorPalette(size, wuCounts);
+
+            long[] medianCutCounts = new long[size];
+            ColorBGRA[] medianCut = region.CreateMedianCutColorPalette(size, medianCutCounts);
+
+            foreach ((string name, ColorBGRA[] palette, long[] counts) in new[] { ("Wu", wu, wuCounts), ("MedianCut", medianCut, medianCutCounts) })
+            {
+                long[] used = counts[..palette.Length];
+
+                Assert.AreEqual(250L * 150L, used.Sum(), $"{name}, size {size}");
+                Assert.IsTrue(used.All(c => c > 0), $"{name}, size {size}: every color represents pixels");
+                Assert.AreSequenceEqual(used.OrderDescending(), used, $"{name}, size {size}: ordered like the palette");
+            }
+
+            // Asking for the counts doesn't change the palette.
+            Assert.AreSequenceEqual(region.CreateWuColorPalette(size), wu, $"Wu, size {size}");
+            Assert.AreSequenceEqual(region.CreateMedianCutColorPalette(size), medianCut, $"MedianCut, size {size}");
+        }
+    }
+
+    [TestMethod]
+    public void PixelCountsShorterThanPaletteSizeThrow()
+    {
+        ColorRGB[] colors = [new(1, 2, 3), new(4, 5, 6)];
+        Image<ColorRGB> image = Image<ColorRGB>.Create(colors, 2, 1);
+
+        Assert.ThrowsExactly<ArgumentException>(() => new ReadOnlySpan<ColorRGB>(colors).CreateWuColorPalette(4, new long[3]));
+        Assert.ThrowsExactly<ArgumentException>(() => new ReadOnlySpan<ColorRGB>(colors).CreateMedianCutColorPalette(4, new long[3]));
+        Assert.ThrowsExactly<ArgumentException>(() => image.CreateColorPalette(4, new long[3]));
+        Assert.ThrowsExactly<ArgumentException>(() => ((IImage)image).CreateMedianCutColorPalette(4, new long[3]));
+
+        // Thrown even if the input is empty, so a wrong buffer size doesn't go unnoticed.
+        Assert.ThrowsExactly<ArgumentException>(() => ReadOnlySpan<ColorRGB>.Empty.CreateWuColorPalette(4, new long[3]));
+    }
+
+    [TestMethod]
     public void PaletteLargerThan256MatchesReference()
     {
         ColorRGB[] colors = new ColorRGB[8000];

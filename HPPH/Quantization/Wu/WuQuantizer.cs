@@ -28,7 +28,7 @@ internal static unsafe class WuQuantizer
 
     #region Methods
 
-    internal static T[] CreateColorPalette<T>(byte* data, nuint rowPixels, nuint stride, nuint rows, int paletteSize)
+    internal static T[] CreateColorPalette<T>(byte* data, nuint rowPixels, nuint stride, nuint rows, int paletteSize, Span<long> pixelCounts)
         where T : unmanaged, IColor<T>
     {
         WuMoment[] moments = ArrayPool<WuMoment>.Shared.Rent(TABLE_SIZE);
@@ -37,7 +37,7 @@ internal static unsafe class WuQuantizer
             BuildHistogram<T>(data, rowPixels, stride, rows, moments);
             ComputeCumulativeMoments(moments);
 
-            return BuildPalette<T>(moments, paletteSize);
+            return BuildPalette<T>(moments, paletteSize, pixelCounts);
         }
         finally
         {
@@ -180,7 +180,7 @@ internal static unsafe class WuQuantizer
         }
     }
 
-    private static T[] BuildPalette<T>(WuMoment[] moments, int paletteSize)
+    private static T[] BuildPalette<T>(WuMoment[] moments, int paletteSize, Span<long> pixelCounts)
         where T : unmanaged, IColor<T>
     {
         int capacity = Math.Min(paletteSize, MAX_BOXES);
@@ -202,7 +202,7 @@ internal static unsafe class WuQuantizer
             populations[i] = moment.Weight;
         }
 
-        return PixelHelper.ToPalette<T>(colors, populations);
+        return PixelHelper.ToPalette(colors, populations, pixelCounts);
     }
 
     private static int SplitBoxes(WuMoment[] moments, Span<WuBox> boxes, int capacity)

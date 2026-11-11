@@ -7,35 +7,51 @@ public static partial class PixelHelper
     #region Methods
 
     /// <summary>
-    /// Creates a palette of up to <paramref name="paletteSize"/> colors using the default algorithm (currently <see cref="CreateWuColorPalette(IImage, int)"/>).
+    /// Creates a palette of up to <paramref name="paletteSize"/> colors using the default algorithm (currently <see cref="CreateWuColorPalette(IImage, int, Span{long})"/>).
     /// </summary>
     /// <remarks>
     /// The palette is ordered by the number of pixels each color represents, most common first.
     /// Fewer colors are returned if the image doesn't have enough distinct colors to fill the palette.
     /// </remarks>
-    public static IColor[] CreateColorPalette(this IImage image, int paletteSize)
-        => image.CreateWuColorPalette(paletteSize);
+    /// <param name="image">The image to create the palette for.</param>
+    /// <param name="paletteSize">The maximum number of colors in the palette.</param>
+    /// <param name="pixelCounts">
+    /// Optional. Receives the number of pixels each palette color represents, at the same index as the color.
+    /// Needs at least <paramref name="paletteSize"/> elements, only the first <c>palette.Length</c> are written.
+    /// </param>
+    /// <returns>The palette.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="paletteSize"/> is negative, or <paramref name="pixelCounts"/> is not empty but shorter than <paramref name="paletteSize"/>.
+    /// </exception>
+    public static IColor[] CreateColorPalette(this IImage image, int paletteSize, Span<long> pixelCounts = default)
+        => image.CreateWuColorPalette(paletteSize, pixelCounts);
 
-    /// <inheritdoc cref="CreateColorPalette(IImage, int)"/>
-    public static T[] CreateColorPalette<T>(this Image<T> image, int paletteSize)
+    /// <inheritdoc cref="CreateColorPalette(IImage, int, Span{long})"/>
+    public static T[] CreateColorPalette<T>(this Image<T> image, int paletteSize, Span<long> pixelCounts = default)
         where T : unmanaged, IColor<T>
-        => image.CreateWuColorPalette(paletteSize);
+        => image.CreateWuColorPalette(paletteSize, pixelCounts);
 
-    /// <inheritdoc cref="CreateColorPalette(IImage, int)"/>
-    public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize)
+    /// <inheritdoc cref="CreateColorPalette(IImage, int, Span{long})"/>
+    public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize, Span<long> pixelCounts = default)
         where T : unmanaged, IColor<T>
-        => image.CreateWuColorPalette(paletteSize);
+        => image.CreateWuColorPalette(paletteSize, pixelCounts);
 
-    /// <inheritdoc cref="CreateColorPalette(IImage, int)"/>
-    public static T[] CreateColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
+    /// <inheritdoc cref="CreateColorPalette(IImage, int, Span{long})"/>
+    public static T[] CreateColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize, Span<long> pixelCounts = default)
         where T : unmanaged, IColor<T>
-        => colors.CreateWuColorPalette(paletteSize);
-    
-    private static T[] GetDistinctColors<T>(ReadOnlySpan<T> colors)
-        where T : unmanaged, IColor<T>
-        => ToPalette(colors, []);
+        => colors.CreateWuColorPalette(paletteSize, pixelCounts);
 
-    internal static T[] ToPalette<T>(ReadOnlySpan<T> colors, ReadOnlySpan<long> populations)
+    private static void ValidatePaletteArguments(int paletteSize, Span<long> pixelCounts)
+    {
+        if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
+        if (!pixelCounts.IsEmpty && (pixelCounts.Length < paletteSize)) throw new ArgumentException($"PixelCounts needs room for the whole palette. {pixelCounts.Length} < {paletteSize}", nameof(pixelCounts));
+    }
+
+    private static T[] GetDistinctColors<T>(ReadOnlySpan<T> colors, Span<long> pixelCounts)
+        where T : unmanaged, IColor<T>
+        => ToPalette(colors, [], pixelCounts);
+
+    internal static T[] ToPalette<T>(ReadOnlySpan<T> colors, ReadOnlySpan<long> populations, Span<long> pixelCounts)
         where T : unmanaged, IColor<T>
     {
         T[] distinct = new T[colors.Length];
@@ -68,6 +84,10 @@ public static partial class PixelHelper
         T[] palette = new T[count];
         for (int i = 0; i < palette.Length; i++)
             palette[i] = distinct[order[i]];
+
+        if (!pixelCounts.IsEmpty)
+            for (int i = 0; i < palette.Length; i++)
+                pixelCounts[i] = distinctPopulations[order[i]];
 
         return palette;
     }
