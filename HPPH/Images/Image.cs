@@ -46,8 +46,6 @@ public sealed class Image<T> : IImage, IEnumerable<T>
     /// <inheritdoc />
     IColor IImage.this[int x, int y] => this[x, y];
 
-#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
-
     /// <summary>
     /// Gets the color at the specified location.
     /// </summary>
@@ -59,7 +57,7 @@ public sealed class Image<T> : IImage, IEnumerable<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new ArgumentOutOfRangeException();
+            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) ImageValidation.ThrowLocationOutOfRange(x, y, Width, Height);
 
             return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (nint)(uint)((_y + y) * _stride))), (nint)(uint)(_x + x));
         }
@@ -81,13 +79,11 @@ public sealed class Image<T> : IImage, IEnumerable<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
+            ImageValidation.ValidateRegion(x, y, width, height, Width, Height);
 
             return new RefImage<T>(_buffer, _x + x, _y + y, width, height, _stride);
         }
     }
-
-#pragma warning restore CA2208
 
     /// <summary>
     /// Gets a list of all rows of this image.
@@ -166,11 +162,7 @@ public sealed class Image<T> : IImage, IEnumerable<T>
     /// <inheritdoc cref="IImage.Slice" />
     public Image<T> Slice(int x, int y, int width, int height)
     {
-#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
-
-        if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
-
-#pragma warning restore CA2208
+        ImageValidation.ValidateRegion(x, y, width, height, Width, Height);
 
         return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
     }

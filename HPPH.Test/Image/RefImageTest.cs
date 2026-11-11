@@ -280,9 +280,43 @@ public class RefImageTest
         AssertThrows(0, 0, 10, 0);
         AssertThrows(1, 0, 10, 20);
         AssertThrows(0, 1, 10, 20);
+        AssertThrows(5, 0, int.MaxValue, 20);
+        AssertThrows(0, 5, 10, int.MaxValue);
 
         static void AssertThrows(int x, int y, int width, int height)
             => Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage().Slice(x, y, width, height));
+    }
+
+    [TestMethod]
+    public void SliceOutOfRangeDescribesTheProblem()
+    {
+        AssertParameter(-1, 0, 5, 5, "x", -1);
+        AssertParameter(0, -1, 5, 5, "y", -1);
+        AssertParameter(0, 0, 0, 5, "width", 0);
+        AssertParameter(0, 0, 5, 0, "height", 0);
+        AssertParameter(6, 0, 5, 5, "width", 5);
+        AssertParameter(0, 16, 5, 5, "height", 5);
+
+        static void AssertParameter(int x, int y, int width, int height, string expectedParamName, int expectedValue)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage().Slice(x, y, width, height));
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"Slice({x}, {y}, {width}, {height})");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"Slice({x}, {y}, {width}, {height})");
+        }
+    }
+
+    [TestMethod]
+    public void IndexerOutOfRangeDescribesTheProblem()
+    {
+        AssertParameter(10, 0, "x", 10);
+        AssertParameter(0, -1, "y", -1);
+
+        static void AssertParameter(int x, int y, string expectedParamName, int expectedValue)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage()[x, y]);
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"[{x}, {y}]");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"[{x}, {y}]");
+        }
     }
 
     [TestMethod]

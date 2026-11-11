@@ -54,8 +54,6 @@ public readonly ref struct RefImage<T>
 
     #region Indexer
 
-#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
-
     /// <summary>
     /// Gets the color at the specified location.
     /// </summary>
@@ -67,7 +65,7 @@ public readonly ref struct RefImage<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new ArgumentOutOfRangeException();
+            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) ImageValidation.ThrowLocationOutOfRange(x, y, Width, Height);
 
             return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_data), (nint)(uint)((_y + y) * Stride))), (nint)(uint)(_x + x));
         }
@@ -86,8 +84,6 @@ public readonly ref struct RefImage<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Slice(x, y, width, height);
     }
-
-#pragma warning restore CA2208
 
     /// <summary>
     /// Gets a list of all rows of this image.
@@ -159,11 +155,7 @@ public readonly ref struct RefImage<T>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RefImage<T> Slice(int x, int y, int width, int height)
     {
-#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
-
-        if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
-
-#pragma warning restore CA2208
+        ImageValidation.ValidateRegion(x, y, width, height, Width, Height);
 
         return new RefImage<T>(_data, _x + x, _y + y, width, height, Stride);
     }

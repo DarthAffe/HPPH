@@ -341,6 +341,52 @@ public class ImageTest
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 0, 5, 0));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(6, 0, 5, 5));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 6, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(5, 0, int.MaxValue, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 5, 5, int.MaxValue));
+    }
+
+    [TestMethod]
+    public void SliceOutOfRangeDescribesTheProblem()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+
+        AssertParameter(-1, 0, 5, 5, "x", -1);
+        AssertParameter(0, -1, 5, 5, "y", -1);
+        AssertParameter(0, 0, 0, 5, "width", 0);
+        AssertParameter(0, 0, 5, -1, "height", -1);
+        AssertParameter(6, 0, 5, 5, "width", 5);
+        AssertParameter(0, 16, 5, 5, "height", 5);
+        AssertParameter(5, 0, int.MaxValue, 5, "width", int.MaxValue);
+
+        void AssertParameter(int x, int y, int width, int height, string expectedParamName, int expectedValue)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(x, y, width, height));
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"Slice({x}, {y}, {width}, {height})");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"Slice({x}, {y}, {width}, {height})");
+
+            ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[x, y, width, height]);
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"[{x}, {y}, {width}, {height}]");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"[{x}, {y}, {width}, {height}]");
+        }
+    }
+
+    [TestMethod]
+    public void IndexerOutOfRangeDescribesTheProblem()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+
+        AssertParameter(-1, 0, "x", -1);
+        AssertParameter(10, 0, "x", 10);
+        AssertParameter(0, -1, "y", -1);
+        AssertParameter(0, 20, "y", 20);
+        AssertParameter(10, 20, "x", 10);
+
+        void AssertParameter(int x, int y, string expectedParamName, int expectedValue)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[x, y]);
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"[{x}, {y}]");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"[{x}, {y}]");
+        }
     }
 
     [TestMethod]
