@@ -47,9 +47,9 @@ public static class ImageExtension
         return data.ToArray();
     }
 
-    public static IImage<ColorBGRA> ToImage(this SKImage skImage) => skImage.ToImage<ColorBGRA>();
+    public static Image<ColorBGRA> ToImage(this SKImage skImage) => skImage.ToImage<ColorBGRA>();
 
-    public static IImage<T> ToImage<T>(this SKImage skImage)
+    public static Image<T> ToImage<T>(this SKImage skImage)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(skImage);
@@ -58,9 +58,9 @@ public static class ImageExtension
         return bitmap.ToImage<T>();
     }
 
-    public static IImage<ColorBGRA> ToImage(this SKBitmap bitmap) => bitmap.ToImage<ColorBGRA>();
+    public static Image<ColorBGRA> ToImage(this SKBitmap bitmap) => bitmap.ToImage<ColorBGRA>();
 
-    public static IImage<T> ToImage<T>(this SKBitmap bitmap)
+    public static Image<T> ToImage<T>(this SKBitmap bitmap)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(bitmap);

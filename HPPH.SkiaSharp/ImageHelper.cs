@@ -6,18 +6,18 @@ namespace HPPH.SkiaSharp;
 
 public static class ImageHelper
 {
-    public static IImage LoadImage(string path) => LoadImage<ColorBGRA>(path);
+    public static Image<ColorBGRA> LoadImage(string path) => LoadImage<ColorBGRA>(path);
 
-    public static IImage<T> LoadImage<T>(string path)
+    public static Image<T> LoadImage<T>(string path)
         where T : unmanaged, IColor<T>
     {
         using SKCodec codec = SKCodec.Create(path) ?? throw new InvalidDataException($"'{path}' is not an image SkiaSharp can decode.");
         return Decode<T>(codec);
     }
 
-    public static IImage LoadImage(Stream stream) => LoadImage<ColorBGRA>(stream);
+    public static Image<ColorBGRA> LoadImage(Stream stream) => LoadImage<ColorBGRA>(stream);
 
-    public static IImage<T> LoadImage<T>(Stream stream)
+    public static Image<T> LoadImage<T>(Stream stream)
         where T : unmanaged, IColor<T>
     {
         using SKData data = SKData.Create(stream);
@@ -25,7 +25,7 @@ public static class ImageHelper
         return Decode<T>(codec);
     }
 
-    private static IImage<T> Decode<T>(SKCodec codec)
+    private static Image<T> Decode<T>(SKCodec codec)
         where T : unmanaged, IColor<T>
     {
         SKImageInfo info = codec.Info;

@@ -170,10 +170,13 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     IImage IImage.Slice(int x, int y, int width, int height) => Slice(x, y, width, height);
 
-    /// <inheritdoc />
-    public IImage<TColor> ConvertTo<TColor>()
+    /// <inheritdoc cref="IImage.ConvertTo{TColor}()" />
+    public Image<TColor> ConvertTo<TColor>()
         where TColor : unmanaged, IColor<TColor>
         => AsRefImage().ConvertTo<TColor>();
+
+    /// <inheritdoc />
+    IImage<TColor> IImage.ConvertTo<TColor>() => ConvertTo<TColor>();
 
     /// <inheritdoc />
     public void ConvertTo<TColor>(Span<TColor> destination)

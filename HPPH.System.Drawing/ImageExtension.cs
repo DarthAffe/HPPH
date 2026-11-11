@@ -65,7 +65,7 @@ public static class ImageExtension
     }
 
     [SupportedOSPlatform("windows")]
-    public static IImage<T> ToImage<T>(this Bitmap bitmap)
+    public static Image<T> ToImage<T>(this Bitmap bitmap)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(bitmap);
