@@ -119,17 +119,22 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <summary>
     /// Creates an image from a copy of <paramref name="buffer"/>.
     /// </summary>
+    /// <remarks>
+    /// Only the pixels are copied. Row padding and data after the last row are dropped,
+    /// After creation its <see cref="Stride"/> is <c>width * BytesPerPixel</c>.
+    /// </remarks>
     /// <param name="buffer">The pixel data.</param>
     /// <param name="width">The width of the image in pixels.</param>
     /// <param name="height">The height of the image in pixels.</param>
-    /// <param name="stride">The distance between the starts of two rows, in bytes. The last row needs no padding.</param>
+    /// <param name="stride">The distance between the starts of two rows in <paramref name="buffer"/>, in bytes. The last row needs no padding.</param>
     public static Image<T> Create(ReadOnlySpan<byte> buffer, int width, int height, int stride)
     {
-        ImageValidation.ValidateLayout(buffer.Length, width, height, stride, T.ColorFormat.BytesPerPixel);
+        RefImage<T> source = RefImage<T>.Wrap(buffer, width, height, stride);
 
-        byte[] data = GC.AllocateUninitializedArray<byte>(buffer.Length);
-        buffer.CopyTo(data);
-        return new Image<T>(data, 0, 0, width, height, stride);
+        byte[] data = GC.AllocateUninitializedArray<byte>(source.SizeInBytes);
+        source.CopyTo(data);
+
+        return Wrap(data, width, height, width * T.ColorFormat.BytesPerPixel);
     }
 
     /// <summary>

@@ -761,6 +761,53 @@ public class ImageTest
     }
 
     [TestMethod]
+    public void CreateDropsPadding()
+    {
+        const int WIDTH = 10;
+        const int HEIGHT = 5;
+        const int STRIDE = (WIDTH * 3) + 7;
+
+        // Padding and trailing bytes are filled with garbage that must not end up in the image.
+        byte[] buffer = new byte[(STRIDE * HEIGHT) + 100];
+        buffer.AsSpan().Fill(0xAB);
+
+        Image<ColorRGB> expected = TestDataHelper.CreateTestImage<ColorRGB>(WIDTH, HEIGHT);
+        for (int y = 0; y < HEIGHT; y++)
+            expected.Rows[y].CopyTo(buffer.AsSpan(y * STRIDE));
+
+        Image<ColorRGB> image = Image<ColorRGB>.Create(buffer, WIDTH, HEIGHT, STRIDE);
+
+        Assert.AreEqual(WIDTH * 3, image.Stride);
+        Assert.AreEqual(WIDTH * HEIGHT * 3, image.SizeInBytes);
+        Assert.IsTrue(image.Equals(expected));
+        Assert.AreSequenceEqual(expected.ToRawArray(), image.ToRawArray());
+        Assert.AreEqual(expected.Sum(), image.Sum());
+    }
+
+    [TestMethod]
+    public void CreateCopiesData()
+    {
+        byte[] buffer = new byte[4 * 4 * 3];
+        Image<ColorRGB> image = Image<ColorRGB>.Create(buffer, 4, 4, 4 * 3);
+
+        buffer[0] = 42;
+
+        Assert.AreEqual(0, image[0, 0].R);
+    }
+
+    [TestMethod]
+    public void CreateEmpty()
+    {
+        Image<ColorRGB> zeroHeight = Image<ColorRGB>.Create(new byte[10], 3, 0, 10);
+        Assert.AreEqual(0, zeroHeight.SizeInBytes);
+        Assert.AreEqual(3 * 3, zeroHeight.Stride);
+
+        Image<ColorRGB> zeroWidth = Image<ColorRGB>.Create(new byte[100], 0, 5, 10);
+        Assert.AreEqual(0, zeroWidth.SizeInBytes);
+        Assert.AreEqual(0, zeroWidth.Stride);
+    }
+
+    [TestMethod]
     public void CopyToByteEmpty()
     {
         Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<byte>)default));
