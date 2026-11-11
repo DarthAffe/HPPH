@@ -1,9 +1,13 @@
 ﻿namespace HPPH;
 
 /// <summary>
-/// Represents an image.
+/// Represents an image whose color format is only known at runtime.
 /// </summary>
-public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
+/// <remarks>
+/// <see cref="Image{T}"/> is the only implementation. Cast to it, or use <see cref="Execute{TOperation, TResult}(TOperation)"/>, to work with the pixels without boxing.
+/// Implementing this interface outside of HPPH is not needed and not supported - it's signature might change at any time without prior warning.
+/// </remarks>
+public interface IImage : IEquatable<IImage>
 {
     /// <summary>
     /// Gets the color format used in this image.
@@ -34,26 +38,20 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     /// <summary>
     /// Gets the color at the specified location.
     /// </summary>
+    /// <remarks>
+    /// The color is boxed. Use <see cref="Image{T}"/> or <see cref="Execute{TOperation, TResult}(TOperation)"/> to process many pixels.
+    /// </remarks>
     /// <param name="x">The X-location to read.</param>
     /// <param name="y">The Y-location to read.</param>
     /// <returns>The color at the specified location.</returns>
     IColor this[int x, int y] { get; }
 
     /// <summary>
-    /// Gets a list of all rows of this image.
-    /// </summary>
-    IImageRows Rows { get; }
-
-    /// <summary>
-    /// Gets a list of all columns of this image.
-    /// </summary>
-    IImageColumns Columns { get; }
-
-    /// <summary>
     /// Gets an <see cref="RefImage{TColor}"/> representing this <see cref="IImage"/>.
     /// </summary>
     /// <typeparam name="TColor">The color-type of the iamge.</typeparam>
     /// <returns>The <inheritdoc cref="RefImage{TColor}"/>.</returns>
+    /// <exception cref="ArgumentException"><typeparamref name="TColor"/> is not the color type of this image.</exception>
     RefImage<TColor> AsRefImage<TColor>() where TColor : unmanaged, IColor<TColor>;
 
     /// <summary>
@@ -92,7 +90,9 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     /// <summary>
     /// Converts this image into a new image of the color format <typeparamref name="TColor"/>.
     /// </summary>
-    IImage<TColor> ConvertTo<TColor>() where TColor : unmanaged, IColor<TColor>;
+    /// <typeparam name="TColor">The color format to convert to.</typeparam>
+    /// <returns>The converted image.</returns>
+    Image<TColor> ConvertTo<TColor>() where TColor : unmanaged, IColor<TColor>;
 
     /// <summary>
     /// Converts the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
@@ -111,11 +111,11 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     void ConvertTo<TColor>(Span<byte> destination, int stride) where TColor : unmanaged, IColor<TColor>;
 
     /// <summary>
-    /// Copies the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance.
+    /// Copies the pixels of this <see cref="IImage"/> into a destination buffer, row after row without padding.
     /// </summary>
-    /// <param name="destination">The destination <see cref="Span{T}"/> instance.</param>
+    /// <param name="destination">The destination buffer.</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="destination"/> is shorter than the source <see cref="IImage"/> instance.
+    /// Thrown when <paramref name="destination"/> is shorter than <see cref="SizeInBytes"/>.
     /// </exception>
     void CopyTo(Span<byte> destination);
 
@@ -130,65 +130,8 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     void CopyTo(Span<byte> destination, int stride);
 
     /// <summary>
-    /// Allocates a new array and copies this <see cref="IImage"/> into it.
+    /// Allocates a new array and copies the pixels of this <see cref="IImage"/> into it, row after row without padding.
     /// </summary>
     /// <returns>The new array containing the data of this <see cref="IImage"/>.</returns>
     byte[] ToRawArray();
-}
-
-/// <summary>
-/// Represents an image.
-/// </summary>
-public interface IImage<T> : IImage, IEquatable<IImage<T>>
-    where T : unmanaged, IColor<T>
-{
-    /// <summary>
-    /// Gets the color at the specified location.
-    /// </summary>
-    /// <param name="x">The X-location to read.</param>
-    /// <param name="y">The Y-location to read.</param>
-    /// <returns>The color at the specified location.</returns>
-    new ref readonly T this[int x, int y] { get; }
-
-    /// <summary>
-    /// Gets a <see cref="RefImage{T}"/> representing the specified region of this image.
-    /// </summary>
-    /// <param name="x">The X-location of the region.</param>
-    /// <param name="y">The Y-location of the region.</param>
-    /// <param name="width">The width of the region.</param>
-    /// <param name="height">The height of the region.</param>
-    /// <returns>A view on the data of this image.</returns>
-    RefImage<T> this[int x, int y, int width, int height] { get; }
-
-    /// <inheritdoc cref="IImage.Slice"/>
-    new IImage<T> Slice(int x, int y, int width, int height);
-
-    /// <summary>
-    /// Gets a list of all rows of this image.
-    /// </summary>
-    new ImageRows<T> Rows { get; }
-
-    /// <summary>
-    /// Gets a list of all columns of this image.
-    /// </summary>
-    new ImageColumns<T> Columns { get; }
-
-    /// <summary>
-    /// Gets an <see cref="RefImage{TColor}"/> representing this <see cref="IImage"/>.
-    /// </summary>
-    /// <returns>The <inheritdoc cref="RefImage{TColor}"/>.</returns>
-    RefImage<T> AsRefImage();
-
-    /// <summary>
-    /// Copies the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance.
-    /// </summary>
-    /// <param name="destination">The destination <see cref="Span{T}"/> instance.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="destination"/> is shorter than the source <see cref="IImage"/> instance.
-    /// </exception>
-    void CopyTo(Span<T> destination);
-
-    new T[] ToArray();
-
-    new IEnumerator<T> GetEnumerator();
 }

@@ -25,7 +25,7 @@ internal static class BenchmarkHelper
         where T : unmanaged, IColor<T>
         => [.. GetSampleDataImages<T>(dataSet).Select(image => image.ToArray())];
 
-    public static List<IImage<T>> GetSampleDataImages<T>(DataSet dataSet)
+    public static List<Image<T>> GetSampleDataImages<T>(DataSet dataSet)
         where T : unmanaged, IColor<T>
         => dataSet switch
         {
@@ -35,7 +35,7 @@ internal static class BenchmarkHelper
             _ => throw new ArgumentOutOfRangeException(nameof(dataSet))
         };
 
-    private static IImage<T> CreateScaledImage<T>(int width, int height)
+    private static Image<T> CreateScaledImage<T>(int width, int height)
         where T : unmanaged, IColor<T>
     {
         using Bitmap source = new(GetSampleFiles().First());

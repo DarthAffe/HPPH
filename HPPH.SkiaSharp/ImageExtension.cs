@@ -19,7 +19,7 @@ public static class ImageExtension
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        bool rgba = image is IImage<ColorRGBA>;
+        bool rgba = image is Image<ColorRGBA>;
 
         SKBitmap bitmap = new(image.Width, image.Height, rgba ? SKColorType.Rgba8888 : SKColorType.Bgra8888, SKAlphaType.Unpremul);
 

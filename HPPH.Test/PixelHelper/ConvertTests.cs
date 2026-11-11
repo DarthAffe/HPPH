@@ -34,7 +34,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
+        Image<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -70,7 +70,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorARGB>();
+        Image<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorARGB>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -106,7 +106,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGRA>();
+        Image<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGRA>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -142,7 +142,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorRGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorRGB>();
+        Image<ColorRGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorRGB>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -178,7 +178,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGR>();
+        Image<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -214,7 +214,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorRGBA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorRGBA>();
+        Image<ColorRGBA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorRGBA>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -258,7 +258,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorARGB>();
+        Image<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorARGB>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -302,7 +302,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGRA>();
+        Image<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGRA>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -346,7 +346,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorABGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorABGR>();
+        Image<ColorABGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorABGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -390,7 +390,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
+        Image<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)

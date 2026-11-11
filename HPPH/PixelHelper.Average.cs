@@ -14,7 +14,7 @@ public static partial class PixelHelper
         return image.Execute<AverageOperation, IColor>(default);
     }
 
-    public static T Average<T>(this IImage<T> image)
+    public static T Average<T>(this Image<T> image)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);

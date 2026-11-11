@@ -42,7 +42,7 @@ public static partial class PixelHelper
         return image.Execute<MinMaxOperation, ColorMinMax>(default);
     }
 
-    public static ColorMinMax MinMax<T>(this IImage<T> image)
+    public static ColorMinMax MinMax<T>(this Image<T> image)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);

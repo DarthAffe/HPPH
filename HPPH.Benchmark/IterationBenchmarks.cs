@@ -22,16 +22,26 @@ public class IterationBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _images = [.. BenchmarkHelper.GetSampleDataImages<ColorRGBA>(Data).Cast<Image<ColorRGBA>>()];
+        _images = BenchmarkHelper.GetSampleDataImages<ColorRGBA>(Data);
     }
-    
+
     [Benchmark]
-    public long Foreach_IImage()
+    public long Foreach_Image()
     {
         long sum = 0;
-        // ReSharper disable once MoreSpecificForeachVariableTypeAvailable
-        foreach (IImage<ColorRGBA> image in _images)
+        foreach (Image<ColorRGBA> image in _images)
             foreach (ColorRGBA color in image)
+                sum += color.R;
+
+        return sum;
+    }
+
+    [Benchmark]
+    public long Foreach_Enumerable()
+    {
+        long sum = 0;
+        foreach (Image<ColorRGBA> image in _images)
+            foreach (ColorRGBA color in (IEnumerable<ColorRGBA>)image)
                 sum += color.R;
 
         return sum;

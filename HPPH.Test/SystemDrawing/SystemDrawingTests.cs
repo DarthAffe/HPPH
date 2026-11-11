@@ -109,7 +109,7 @@ public class SystemDrawingTests
     private static void LoadImageInto<T>(string image)
         where T : unmanaged, IColor<T>
     {
-        IImage<T> expected = System.Drawing.ImageHelper.LoadImage(image).ConvertTo<T>();
+        Image<T> expected = System.Drawing.ImageHelper.LoadImage(image).ConvertTo<T>();
 
         Assert.AreEqual(expected, System.Drawing.ImageHelper.LoadImage<T>(image), $"{T.ColorFormat.Name}: {image}");
 

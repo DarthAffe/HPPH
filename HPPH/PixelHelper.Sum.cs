@@ -37,7 +37,7 @@ public static partial class PixelHelper
         return image.Execute<SumOperation, ColorSum>(default);
     }
 
-    public static ColorSum Sum<T>(this IImage<T> image)
+    public static ColorSum Sum<T>(this Image<T> image)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);

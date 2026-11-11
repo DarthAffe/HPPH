@@ -15,7 +15,7 @@ public static partial class ReferencePixelHelper
                              (byte)MathF.Round(sum.A / count));
     }
 
-    public static T Average<T>(IImage<T> image)
+    public static T Average<T>(Image<T> image)
         where T : unmanaged, IColor<T>
     {
         float count = image.Width * image.Height;

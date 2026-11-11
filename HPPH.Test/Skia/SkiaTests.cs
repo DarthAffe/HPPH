@@ -69,7 +69,7 @@ public class SkiaTests
                 for (int x = 0; x < bitmap.Width; x++)
                     bitmap.SetPixel(x, y, new SKColor((byte)(x * 32), (byte)(y * 48), 200, translucent ? (byte)(50 + (x * 20)) : (byte)255));
 
-            IImage<ColorBGRA> image = bitmap.ToImage();
+            Image<ColorBGRA> image = bitmap.ToImage();
 
             string name = $"{colorType} {alphaType}";
             for (int y = 0; y < bitmap.Height; y++)
@@ -123,7 +123,7 @@ public class SkiaTests
     private static void LoadImageInto<T>(string image)
         where T : unmanaged, IColor<T>
     {
-        IImage<T> expected = SkiaSharp.ImageHelper.LoadImage(image).ConvertTo<T>();
+        Image<T> expected = SkiaSharp.ImageHelper.LoadImage(image).ConvertTo<T>();
 
         Assert.AreEqual(expected, SkiaSharp.ImageHelper.LoadImage<T>(image), $"{T.ColorFormat.Name}: {image}");
 

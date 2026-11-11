@@ -30,7 +30,7 @@ public static partial class PixelHelper
     }
 
     /// <inheritdoc cref="CreateMedianCutColorPalette(IImage, int)"/>
-    public static T[] CreateMedianCutColorPalette<T>(this IImage<T> image, int paletteSize)
+    public static T[] CreateMedianCutColorPalette<T>(this Image<T> image, int paletteSize)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(image);

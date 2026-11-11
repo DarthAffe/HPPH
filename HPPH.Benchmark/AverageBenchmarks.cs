@@ -16,8 +16,8 @@ public class AverageBenchmarks
 
     private List<ColorRGB[]> _colors3bpp = [];
     private List<ColorRGBA[]> _colors4bpp = [];
-    private List<IImage<ColorRGB>> _images3bpp = [];
-    private List<IImage<ColorRGBA>> _images4bpp = [];
+    private List<Image<ColorRGB>> _images3bpp = [];
+    private List<Image<ColorRGBA>> _images4bpp = [];
 
     #endregion
 

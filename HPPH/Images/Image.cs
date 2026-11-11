@@ -4,9 +4,12 @@ using System.Runtime.InteropServices;
 
 namespace HPPH;
 
-/// <inheritdoc cref="IImage{T}" />
+/// <summary>
+/// Represents an image with the color type <typeparamref name="T"/>.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
-public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
+public sealed class Image<T> : IImage, IEnumerable<T>, IEquatable<Image<T>>
     where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
@@ -45,7 +48,12 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
 #pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the color at the specified location.
+    /// </summary>
+    /// <param name="x">The X-location to read.</param>
+    /// <param name="y">The Y-location to read.</param>
+    /// <returns>The color at the specified location.</returns>
     public ref readonly T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -57,7 +65,14 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a <see cref="RefImage{T}"/> representing the specified region of this image.
+    /// </summary>
+    /// <param name="x">The X-location of the region.</param>
+    /// <param name="y">The Y-location of the region.</param>
+    /// <param name="width">The width of the region.</param>
+    /// <param name="height">The height of the region.</param>
+    /// <returns>A view on the data of this image.</returns>
     public RefImage<T> this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,18 +86,18 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
 #pragma warning restore CA2208
 
-    /// <inheritdoc />
-    IImageRows IImage.Rows => new IColorImageRows<T>(_buffer, _x, _y, Width, Height, _stride);
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a list of all rows of this image.
+    /// </summary>
     public ImageRows<T> Rows
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => new(_buffer, _x, _y, Width, Height, _stride);
     }
 
-    IImageColumns IImage.Columns => new IColorImageColumns<T>(_buffer, _x, _y, Width, Height, _stride);
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a list of all columns of this image.
+    /// </summary>
     public ImageColumns<T> Columns
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -152,7 +167,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return new Image<T>(buffer, 0, 0, width, height, stride);
     }
 
-    /// <inheritdoc cref="IImage{T}.Slice" />
+    /// <inheritdoc cref="IImage.Slice" />
     public Image<T> Slice(int x, int y, int width, int height)
     {
 #pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
@@ -165,18 +180,12 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     }
 
     /// <inheritdoc />
-    IImage<T> IImage<T>.Slice(int x, int y, int width, int height) => Slice(x, y, width, height);
-
-    /// <inheritdoc />
     IImage IImage.Slice(int x, int y, int width, int height) => Slice(x, y, width, height);
 
-    /// <inheritdoc cref="IImage.ConvertTo{TColor}()" />
+    /// <inheritdoc />
     public Image<TColor> ConvertTo<TColor>()
         where TColor : unmanaged, IColor<TColor>
         => AsRefImage().ConvertTo<TColor>();
-
-    /// <inheritdoc />
-    IImage<TColor> IImage.ConvertTo<TColor>() => ConvertTo<TColor>();
 
     /// <inheritdoc />
     public void ConvertTo<TColor>(Span<TColor> destination)
@@ -188,7 +197,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         where TColor : unmanaged, IColor<TColor>
         => AsRefImage().ConvertTo<TColor>(destination, stride);
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="RefImage{T}.CopyTo(Span{T})" />
     public void CopyTo(Span<T> destination) => AsRefImage().CopyTo(destination);
 
     /// <inheritdoc />
@@ -205,7 +214,10 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return array;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Allocates a new array and copies the pixels of this image into it, row after row.
+    /// </summary>
+    /// <returns>The new array containing the pixels of this image.</returns>
     public T[] ToArray()
     {
         T[] colors = GC.AllocateUninitializedArray<T>(Width * Height);
@@ -213,21 +225,10 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return colors;
     }
 
-    //TODO DarthAffe 11.07.2024: This has some potential for optimization
-    /// <inheritdoc />
-    IColor[] IImage.ToArray()
-    {
-        IColor[] colors = new IColor[Width * Height];
-
-        int counter = 0;
-        foreach (ImageRow<T> row in Rows)
-            foreach (T color in row)
-                colors[counter++] = color;
-
-        return colors;
-    }
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a <see cref="RefImage{T}"/> representing this image.
+    /// </summary>
+    /// <returns>A view on the data of this image.</returns>
     public RefImage<T> AsRefImage() => new(_buffer, _x, _y, Width, Height, _stride);
 
     /// <inheritdoc />
@@ -267,8 +268,11 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (_y * _stride) + (_x * ColorFormat.BytesPerPixel));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public RefImage<T>.ImageEnumerator GetEnumerator() => AsRefImage().GetEnumerator();
+
     /// <inheritdoc />
-    public IEnumerator<T> GetEnumerator()
+    IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
         int bpp = T.ColorFormat.BytesPerPixel;
         for (int y = 0; y < Height; y++)
@@ -280,19 +284,10 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     }
 
     /// <inheritdoc />
-    IEnumerator<IColor> IEnumerable<IColor>.GetEnumerator()
-    {
-        int bpp = T.ColorFormat.BytesPerPixel;
-        for (int y = 0; y < Height; y++)
-        {
-            int rowOffset = ((_y + y) * _stride) + (_x * bpp);
-            for (int x = 0; x < Width; x++)
-                yield return Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_buffer), (nint)(uint)rowOffset)), (nint)(uint)x);
-        }
-    }
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
 
     /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    void IImage.Seal() { }
 
     /// <inheritdoc />
     public bool Equals(IImage? other)
@@ -301,14 +296,6 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         if (other.ColorFormat != ColorFormat) return false;
 
         return Equals(other.AsRefImage<T>());
-    }
-
-    /// <inheritdoc />
-    public bool Equals(IImage<T>? other)
-    {
-        if (other == null) return false;
-
-        return Equals(other.AsRefImage());
     }
 
     /// <inheritdoc />

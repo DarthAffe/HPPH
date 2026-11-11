@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace HPPH;
 
@@ -96,72 +95,4 @@ public readonly ref struct ImageColumns<T>
 
         #endregion
     }
-}
-
-//HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
-[SkipLocalsInit]
-internal sealed class IColorImageColumns<T> : IImageColumns
-    where T : unmanaged, IColor<T>
-{
-    #region Properties & Fields
-
-    private readonly byte[] _data;
-    private readonly int _x;
-    private readonly int _y;
-    private readonly int _width;
-    private readonly int _height;
-    private readonly int _stride;
-    private readonly int _bpp;
-
-    /// <inheritdoc />
-    public int Count => _width;
-
-    #endregion
-
-    #region Indexer
-
-    /// <inheritdoc />
-    public IImageColumn this[int column]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            if ((column < 0) || (column >= _width)) throw new ArgumentOutOfRangeException(nameof(column));
-
-            return new IColorImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
-        }
-    }
-
-    #endregion
-
-    #region Constructors
-
-    // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
-    internal IColorImageColumns(byte[] data, int x, int y, int width, int height, int stride)
-    {
-        this._data = data;
-        this._x = x;
-        this._y = y;
-        this._width = width;
-        this._height = height;
-        this._stride = stride;
-
-        _bpp = T.ColorFormat.BytesPerPixel;
-    }
-
-    #endregion
-
-    #region Methods
-
-    /// <inheritdoc />
-    public IEnumerator<IImageColumn> GetEnumerator()
-    {
-        for (int i = 0; i < _width; i++)
-            yield return this[i];
-    }
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    #endregion
 }

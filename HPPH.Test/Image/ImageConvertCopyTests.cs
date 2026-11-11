@@ -24,7 +24,7 @@ public class ImageConvertCopyTests
         where TSource : unmanaged, IColor<TSource>
         where TTarget : unmanaged, IColor<TTarget>
     {
-        foreach ((string name, IImage<TSource> image) in Images<TSource>())
+        foreach ((string name, Image<TSource> image) in Images<TSource>())
         {
             TTarget[] expected = Expected<TSource, TTarget>(image);
 
@@ -36,7 +36,7 @@ public class ImageConvertCopyTests
             image.AsRefImage().ConvertTo(fromRef.AsSpan());
             Assert.AreSequenceEqual(expected, fromRef, $"{name}: RefImage.ConvertTo(Span)");
 
-            IImage<TTarget> converted = image.ConvertTo<TTarget>();
+            Image<TTarget> converted = image.ConvertTo<TTarget>();
             Assert.AreEqual(image.Width, converted.Width);
             Assert.AreEqual(image.Height, converted.Height);
             Assert.AreSequenceEqual(expected, converted.ToArray(), $"{name}: ConvertTo()");
@@ -62,7 +62,7 @@ public class ImageConvertCopyTests
     {
         int targetBpp = TTarget.ColorFormat.BytesPerPixel;
 
-        foreach ((string name, IImage<TSource> image) in Images<TSource>())
+        foreach ((string name, Image<TSource> image) in Images<TSource>())
         {
             TTarget[] expected = Expected<TSource, TTarget>(image);
             int rowSize = image.Width * targetBpp;
@@ -102,7 +102,7 @@ public class ImageConvertCopyTests
     [TestMethod]
     public void RefImageCopyToBytes()
     {
-        foreach ((string name, IImage<ColorRGB> image) in Images<ColorRGB>())
+        foreach ((string name, Image<ColorRGB> image) in Images<ColorRGB>())
         {
             byte[] expected = MemoryMarshal.AsBytes(Expected<ColorRGB, ColorRGB>(image).AsSpan()).ToArray();
 
@@ -173,15 +173,18 @@ public class ImageConvertCopyTests
     [TestMethod]
     public void EnumeratorsVisitEveryPixelInOrder()
     {
-        foreach ((string name, IImage<ColorBGRA> image) in Images<ColorBGRA>())
+        foreach ((string name, Image<ColorBGRA> image) in Images<ColorBGRA>())
         {
             ColorBGRA[] expected = Expected<ColorBGRA, ColorBGRA>(image);
 
             List<ColorBGRA> generic = [.. image];
-            Assert.AreSequenceEqual(expected, generic, $"{name}: IImage<T>");
+            Assert.AreSequenceEqual(expected, generic, $"{name}: Image<T>");
 
-            List<IColor> colors = [.. image];
-            Assert.AreSequenceEqual(expected, colors.Select(c => (ColorBGRA)c).ToArray(), $"{name}: IImage");
+            List<ColorBGRA> enumerable = [.. (IEnumerable<ColorBGRA>)image];
+            Assert.AreSequenceEqual(expected, enumerable, $"{name}: IEnumerable<T>");
+
+            ColorBGRA[] linq = image.Select(c => c).ToArray();
+            Assert.AreSequenceEqual(expected, linq, $"{name}: LINQ");
 
             List<ColorBGRA> refImage = [.. image.AsRefImage()];
             Assert.AreSequenceEqual(expected, refImage, $"{name}: RefImage<T>");
@@ -192,7 +195,7 @@ public class ImageConvertCopyTests
                     rows.Add(color);
             Assert.AreSequenceEqual(expected, rows, $"{name}: ImageRow<T>");
 
-            using IEnumerator<ColorBGRA> enumerator = image.GetEnumerator();
+            using IEnumerator<ColorBGRA> enumerator = ((IEnumerable<ColorBGRA>)image).GetEnumerator();
             while (enumerator.MoveNext()) { }
             Assert.IsFalse(enumerator.MoveNext(), $"{name}: MoveNext after the end");
         }
@@ -208,7 +211,7 @@ public class ImageConvertCopyTests
             int count = 0;
             foreach (ColorRGB _ in image) count++;
             foreach (ColorRGB _ in image.AsRefImage()) count++;
-            foreach (IColor _ in (IEnumerable<IColor>)image) count++;
+            foreach (ColorRGB _ in (IEnumerable<ColorRGB>)image) count++;
 
             Assert.AreEqual(0, count, $"{width}x{height}");
         }
@@ -234,18 +237,18 @@ public class ImageConvertCopyTests
         return Image<T>.Create(pixels, WIDTH, HEIGHT);
     }
 
-    private static IEnumerable<(string Name, IImage<T> Image)> Images<T>()
+    private static IEnumerable<(string Name, Image<T> Image)> Images<T>()
         where T : unmanaged, IColor<T>
     {
         yield return ("contiguous", CreateContiguousImage<T>(1));
 
         Image<T> padded = CreatePaddedImage<T>(2);
         yield return ("padded", padded);
-        yield return ("region", (IImage<T>)((IImage)padded).Slice(3, 2, WIDTH - 7, HEIGHT - 5));
-        yield return ("full-width rows", (IImage<T>)((IImage)CreateContiguousImage<T>(3)).Slice(0, 4, WIDTH, HEIGHT - 8));
+        yield return ("region", (Image<T>)((IImage)padded).Slice(3, 2, WIDTH - 7, HEIGHT - 5));
+        yield return ("full-width rows", (Image<T>)((IImage)CreateContiguousImage<T>(3)).Slice(0, 4, WIDTH, HEIGHT - 8));
     }
 
-    private static TTarget[] Expected<TSource, TTarget>(IImage<TSource> image)
+    private static TTarget[] Expected<TSource, TTarget>(Image<TSource> image)
         where TSource : unmanaged, IColor<TSource>
         where TTarget : unmanaged, IColor<TTarget>
     {

@@ -24,7 +24,7 @@ public class RegionBenchmarks
     [Params(DataSet.Samples, DataSet.FullHD, DataSet.UHD)]
     public DataSet Data { get; set; }
 
-    private List<IImage<ColorBGRA>> _images = [];
+    private List<Image<ColorBGRA>> _images = [];
 
     #endregion
 
@@ -42,7 +42,7 @@ public class RegionBenchmarks
         ColorBGRA[] averages = new ColorBGRA[_images.Count * REGIONS_PER_EDGE * 4];
 
         int index = 0;
-        foreach (IImage<ColorBGRA> image in _images)
+        foreach (Image<ColorBGRA> image in _images)
         {
             RefImage<ColorBGRA> refImage = image.AsRefImage();
             int horizontalSize = image.Width / REGIONS_PER_EDGE;

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace HPPH;
@@ -69,94 +68,6 @@ public readonly ref struct ImageRow<T>
     /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<T>.Enumerator GetEnumerator() => AsSpan().GetEnumerator();
-
-    #endregion
-}
-
-//HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
-[SkipLocalsInit]
-internal sealed class IColorImageRow<T> : IImageRow
-    where T : unmanaged, IColor<T>
-{
-    #region Properties & Fields
-
-    private readonly byte[] _buffer;
-    private readonly int _start;
-    private readonly int _length;
-
-    /// <inheritdoc />
-    public int Length => _length;
-
-    /// <inheritdoc />
-    public int SizeInBytes => Length * T.ColorFormat.BytesPerPixel;
-
-    #endregion
-
-    #region Indexer
-
-    /// <inheritdoc />
-    public IColor this[int x]
-    {
-        get
-        {
-            if ((x < 0) || (x >= _length)) throw new ArgumentOutOfRangeException(nameof(x));
-
-            return Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (nint)(uint)_start)), (nint)(uint)x);
-        }
-    }
-
-    #endregion
-
-    #region Constructors
-
-    internal IColorImageRow(byte[] buffer, int start, int length)
-    {
-        this._buffer = buffer;
-        this._start = start;
-        this._length = length;
-    }
-
-    #endregion
-
-    #region Methods
-
-    /// <inheritdoc />
-    public ReadOnlySpan<byte> AsByteSpan() => _buffer.AsSpan().Slice(_start, SizeInBytes);
-
-    /// <inheritdoc />
-    public void CopyTo(Span<IColor> destination)
-    {
-        if (destination.Length < _length) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
-
-        for (int i = 0; i < _length; i++)
-            destination[i] = this[i];
-    }
-
-    /// <inheritdoc />
-    public void CopyTo(Span<byte> destination)
-    {
-        if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
-
-        _buffer.AsSpan().Slice(_start, SizeInBytes).CopyTo(destination);
-    }
-
-    /// <inheritdoc />
-    public IColor[] ToArray()
-    {
-        IColor[] array = new IColor[Length];
-        CopyTo(array);
-        return array;
-    }
-
-    /// <inheritdoc />
-    public IEnumerator<IColor> GetEnumerator()
-    {
-        for (int i = 0; i < _length; i++)
-            yield return this[i];
-    }
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     #endregion
 }

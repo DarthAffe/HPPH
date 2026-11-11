@@ -19,8 +19,8 @@ public class IntegrationBenchmarks
     [Params(DataSet.Samples, DataSet.FullHD, DataSet.UHD)]
     public DataSet Data { get; set; }
 
-    private List<IImage<ColorRGBA>> _rgbaImages = [];
-    private List<IImage<ColorBGRA>> _bgraImages = [];
+    private List<Image<ColorRGBA>> _rgbaImages = [];
+    private List<Image<ColorBGRA>> _bgraImages = [];
     private List<byte[]> _pngs = [];
     private List<Bitmap> _bitmaps = [];
 
@@ -58,9 +58,9 @@ public class IntegrationBenchmarks
     }
 
     [Benchmark]
-    public IImage<ColorRGB>? Skia_LoadImage_Generic()
+    public Image<ColorRGB>? Skia_LoadImage_Generic()
     {
-        IImage<ColorRGB>? result = null;
+        Image<ColorRGB>? result = null;
         foreach (byte[] png in _pngs)
         {
             using MemoryStream stream = new(png, false);
@@ -71,9 +71,9 @@ public class IntegrationBenchmarks
     }
 
     [Benchmark]
-    public IImage<ColorRGB>? Skia_LoadImage_ConvertTo()
+    public Image<ColorRGB>? Skia_LoadImage_ConvertTo()
     {
-        IImage<ColorRGB>? result = null;
+        Image<ColorRGB>? result = null;
         foreach (byte[] png in _pngs)
         {
             using MemoryStream stream = new(png, false);
@@ -87,7 +87,7 @@ public class IntegrationBenchmarks
     public int Skia_ToSKBitmap_BGRA()
     {
         int result = 0;
-        foreach (IImage<ColorBGRA> image in _bgraImages)
+        foreach (Image<ColorBGRA> image in _bgraImages)
         {
             using SKBitmap bitmap = Skia.ImageExtension.ToSKBitmap(image);
             result += bitmap.Width;
@@ -100,7 +100,7 @@ public class IntegrationBenchmarks
     public int Skia_ToSKBitmap_RGBA()
     {
         int result = 0;
-        foreach (IImage<ColorRGBA> image in _rgbaImages)
+        foreach (Image<ColorRGBA> image in _rgbaImages)
         {
             using SKBitmap bitmap = Skia.ImageExtension.ToSKBitmap(image);
             result += bitmap.Width;
@@ -113,7 +113,7 @@ public class IntegrationBenchmarks
     public int Gdi_ToBitmap_BGRA()
     {
         int result = 0;
-        foreach (IImage<ColorBGRA> image in _bgraImages)
+        foreach (Image<ColorBGRA> image in _bgraImages)
         {
             using Bitmap bitmap = Gdi.ImageExtension.ToBitmap(image);
             result += bitmap.Width;
@@ -126,7 +126,7 @@ public class IntegrationBenchmarks
     public int Gdi_ToBitmap_RGBA()
     {
         int result = 0;
-        foreach (IImage<ColorRGBA> image in _rgbaImages)
+        foreach (Image<ColorRGBA> image in _rgbaImages)
         {
             using Bitmap bitmap = Gdi.ImageExtension.ToBitmap(image);
             result += bitmap.Width;

@@ -17,7 +17,7 @@ public static partial class PixelHelper
         => image.CreateWuColorPalette(paletteSize);
 
     /// <inheritdoc cref="CreateColorPalette(IImage, int)"/>
-    public static T[] CreateColorPalette<T>(this IImage<T> image, int paletteSize)
+    public static T[] CreateColorPalette<T>(this Image<T> image, int paletteSize)
         where T : unmanaged, IColor<T>
         => image.CreateWuColorPalette(paletteSize);
 
