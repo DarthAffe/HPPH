@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net11.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -22,8 +22,8 @@
     <RootNamespace>HPPH</RootNamespace>
     <Description>Some optimized things to perform on color-data</Description>
     <Summary>High Performance Pixel Handling</Summary>
-    <Copyright>Copyright © Darth Affe 2024</Copyright>
-    <PackageCopyright>Copyright © Darth Affe 2024</PackageCopyright>
+    <Copyright>Copyright © Darth Affe 2026</Copyright>
+    <PackageCopyright>Copyright © Darth Affe 2026</PackageCopyright>
     <PackageIcon>hpph.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/DarthAffe/HPPH</PackageProjectUrl>
