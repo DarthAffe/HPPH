@@ -285,10 +285,7 @@ public sealed class Image<T> : IImage, IEnumerable<T>, IEquatable<Image<T>>
 
     /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
-
-    /// <inheritdoc />
-    void IImage.Seal() { }
-
+    
     /// <inheritdoc />
     public bool Equals(IImage? other)
     {
