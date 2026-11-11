@@ -22,7 +22,7 @@ public class SumTests
     }
 
     private static void SumRefImage<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         RefImage<T> data = ImageHelper.GetImage<T>(image).AsRefImage<T>();
 
@@ -50,7 +50,7 @@ public class SumTests
     }
 
     private static void SumGenericImage<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         Image<T> data = ImageHelper.GetImage<T>(image);
 
@@ -78,7 +78,7 @@ public class SumTests
     }
 
     private static void SumImage<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
@@ -106,7 +106,7 @@ public class SumTests
     }
 
     private static void SumSpan<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         Span<T> span = data;
@@ -135,7 +135,7 @@ public class SumTests
     }
 
     private static void SumReadOnlySpan<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         ReadOnlySpan<T> span = data;

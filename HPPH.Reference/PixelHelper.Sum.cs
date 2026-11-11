@@ -20,7 +20,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static ColorSum Sum<T>(RefImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
 
@@ -36,7 +36,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static ColorSum Sum<T>(Span<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
 
@@ -52,7 +52,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static ColorSum Sum<T>(ReadOnlySpan<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
 

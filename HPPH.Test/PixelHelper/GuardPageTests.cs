@@ -22,7 +22,7 @@ public class GuardPageTests
     }
 
     private static void SumStaysInBounds<T>()
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
             using (buffer)
@@ -40,7 +40,7 @@ public class GuardPageTests
     }
 
     private static void MinMaxStaysInBounds<T>()
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
             using (buffer)
@@ -60,7 +60,7 @@ public class GuardPageTests
     }
 
     private static void AverageStaysInBounds<T>()
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<T>())
             using (buffer)
@@ -78,7 +78,7 @@ public class GuardPageTests
     }
 
     private static void ImageReductionsStayInBounds<T>()
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         int bpp = T.ColorFormat.BytesPerPixel;
 
@@ -110,8 +110,8 @@ public class GuardPageTests
     }
 
     private static void ConvertInPlaceStaysInBounds<TSource, TTarget>()
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         foreach ((int length, GuardedBuffer buffer) in Buffers<TSource>())
             using (buffer)
@@ -135,8 +135,8 @@ public class GuardPageTests
     }
 
     private static void ConvertStaysInBounds<TSource, TTarget>()
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         int targetBpp = TTarget.ColorFormat.BytesPerPixel;
 
@@ -154,7 +154,7 @@ public class GuardPageTests
     }
 
     private static IEnumerable<(int Length, GuardedBuffer Buffer)> Buffers<T>()
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         int bpp = T.ColorFormat.BytesPerPixel;
 
@@ -171,8 +171,8 @@ public class GuardPageTests
     }
 
     private static TTarget[] ConvertScalar<TSource, TTarget>(ReadOnlySpan<TSource> source)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         TTarget[] result = new TTarget[source.Length];
         for (int i = 0; i < source.Length; i++)

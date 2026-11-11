@@ -28,7 +28,7 @@ public class ConvertFuzzTests
     }
 
     private static void ConvertFrom<TSource>(Random random)
-        where TSource : struct, IColor
+        where TSource : unmanaged, IColor
     {
         ConvertBetween<TSource, ColorRGB>(random);
         ConvertBetween<TSource, ColorBGR>(random);
@@ -39,8 +39,8 @@ public class ConvertFuzzTests
     }
 
     private static void ConvertBetween<TSource, TTarget>(Random random)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         int sourceBpp = TSource.ColorFormat.BytesPerPixel;
         int targetBpp = TTarget.ColorFormat.BytesPerPixel;
@@ -81,8 +81,8 @@ public class ConvertFuzzTests
     }
 
     private static TTarget[] ConvertScalar<TSource, TTarget>(ReadOnlySpan<TSource> source)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         TTarget[] result = new TTarget[source.Length];
         for (int i = 0; i < source.Length; i++)

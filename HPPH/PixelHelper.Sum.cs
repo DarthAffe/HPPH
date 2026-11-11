@@ -38,7 +38,7 @@ public static partial class PixelHelper
     }
 
     public static ColorSum Sum<T>(this IImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -46,19 +46,15 @@ public static partial class PixelHelper
     }
 
     public static ColorSum Sum<T>(this RefImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
         => T.ColorFormat.ToColorSum(SumBytes(image));
 
     public static ColorSum Sum<T>(this ReadOnlySpan<T> colors)
-        where T : struct, IColor
-        => T.ColorFormat.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));
-
-    public static ColorSum Sum<T>(this Span<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor
         => T.ColorFormat.ToColorSum(SumBytes<T>(MemoryMarshal.AsBytes(colors)));
 
     internal static Generic4LongData SumBytes<T>(RefImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         if ((image.Width == 0) || (image.Height == 0)) return default;
 
@@ -73,7 +69,7 @@ public static partial class PixelHelper
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Generic4LongData SumBytes<T>(ReadOnlySpan<byte> data)
-        where T : struct, IColor
+        where T : unmanaged, IColor
         => T.ColorFormat.BytesPerPixel switch
         {
             3 => Sum(MemoryMarshal.Cast<byte, Generic3ByteData>(data)),
@@ -83,10 +79,10 @@ public static partial class PixelHelper
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GetRows<T>(RefImage<T> image, out nuint rowBytes, out nuint stride, out nuint rows)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         rowBytes = (nuint)image.Width * (nuint)T.ColorFormat.BytesPerPixel;
-        stride = (nuint)image.RawStride;
+        stride = (nuint)image.Stride;
         rows = (nuint)image.Height;
 
         // Contiguous images become one row.

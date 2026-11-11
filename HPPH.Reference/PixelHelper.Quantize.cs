@@ -21,7 +21,7 @@ public static partial class ReferencePixelHelper
         CreateMedianCutColorPalette<T>(colors.ToArray().Cast<IColor>().ToArray(), paletteSize).Select(x => T.Create(x.R, x.G, x.B, x.A)).Cast<T>().ToArray();
 
     private static IColor[] CreateMedianCutColorPalette<T>(IColor[] colors, int paletteSize)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         if (paletteSize == 0) return [];
 
@@ -96,7 +96,7 @@ public static partial class ReferencePixelHelper
         }
 
         internal IColor GetAverageColor<T>()
-            where T : struct, IColor
+            where T : unmanaged, IColor
         {
             if (_colors.Count == 0) return T.Create(0, 0, 0, 0);
 
@@ -152,8 +152,8 @@ public static partial class ReferencePixelHelper
         }
 
         return ToPalette(boxes.Select(box => ((T)T.Create((byte)MathF.Round(box.Stats.R / (float)box.Stats.Count),
-                                                   (byte)MathF.Round(box.Stats.G / (float)box.Stats.Count),
-                                                   (byte)MathF.Round(box.Stats.B / (float)box.Stats.Count),
+                                                          (byte)MathF.Round(box.Stats.G / (float)box.Stats.Count),
+                                                          (byte)MathF.Round(box.Stats.B / (float)box.Stats.Count),
                                                           (byte)MathF.Round(box.Stats.A / (float)box.Stats.Count)),
                                               box.Stats.Count)));
     }

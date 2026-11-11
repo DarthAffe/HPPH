@@ -3,7 +3,7 @@
 internal static class TestDataHelper
 {
     public static T GetColorFromLocation<T>(int x, int y)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         byte[] xBytes = BitConverter.GetBytes((short)x);
         byte[] yBytes = BitConverter.GetBytes((short)y);
@@ -11,7 +11,7 @@ internal static class TestDataHelper
     }
 
     public static T[] GetPixelData<T>(int width, int height)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         T[] buffer = new T[width * height];
 
@@ -23,6 +23,6 @@ internal static class TestDataHelper
     }
 
     public static Image<T> CreateTestImage<T>(int width, int height)
-        where T : struct, IColor
+        where T : unmanaged, IColor
         => Image<T>.Create(GetPixelData<T>(width, height), width, height);
 }

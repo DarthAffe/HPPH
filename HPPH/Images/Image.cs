@@ -7,7 +7,7 @@ namespace HPPH;
 /// <inheritdoc cref="IImage{T}" />
 [SkipLocalsInit]
 public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
-    where T : struct, IColor
+    where T : unmanaged, IColor
 {
     #region Properties & Fields
 
@@ -212,7 +212,7 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     /// <inheritdoc />
     public RefImage<TColor> AsRefImage<TColor>()
-        where TColor : struct, IColor
+        where TColor : unmanaged, IColor
     {
         if (typeof(TColor) != typeof(T)) throw new ArgumentException("The requested color format does not fit this image.", nameof(TColor));
 

@@ -43,7 +43,7 @@ public static partial class PixelHelper
     }
 
     public static ColorMinMax MinMax<T>(this IImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -51,7 +51,7 @@ public static partial class PixelHelper
     }
 
     public static ColorMinMax MinMax<T>(this RefImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         IColorFormat colorFormat = T.ColorFormat;
         bool empty = (image.Width == 0) || (image.Height == 0);
@@ -65,12 +65,8 @@ public static partial class PixelHelper
         };
     }
 
-    public static ColorMinMax MinMax<T>(this Span<T> colors)
-        where T : struct, IColor
-        => ((ReadOnlySpan<T>)colors).MinMax();
-
     public static ColorMinMax MinMax<T>(this ReadOnlySpan<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         IColorFormat colorFormat = T.ColorFormat;
         ReadOnlySpan<byte> data = MemoryMarshal.AsBytes(colors);

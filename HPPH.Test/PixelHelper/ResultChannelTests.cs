@@ -19,7 +19,7 @@ public class ResultChannelTests
     }
 
     private static void Check<T>()
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         string name = T.ColorFormat.Name;
         bool hasAlpha = T.ColorFormat.BytesPerPixel == 4;

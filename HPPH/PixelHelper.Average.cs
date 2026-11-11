@@ -15,7 +15,7 @@ public static partial class PixelHelper
     }
 
     public static T Average<T>(this IImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         ArgumentNullException.ThrowIfNull(image);
 
@@ -23,7 +23,7 @@ public static partial class PixelHelper
     }
 
     public static T Average<T>(this RefImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         float count = image.Width * image.Height;
 
@@ -34,19 +34,8 @@ public static partial class PixelHelper
                            (byte)MathF.Round(sum.A / count));
     }
 
-    public static T Average<T>(this Span<T> colors)
-        where T : struct, IColor
-    {
-        return T.ColorFormat.BytesPerPixel switch
-        {
-            3 => Unsafe.BitCast<Generic3ByteData, T>(Average(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
-            4 => Unsafe.BitCast<Generic4ByteData, T>(Average(MemoryMarshal.Cast<T, Generic4ByteData>(colors))),
-            _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
-        };
-    }
-
     public static T Average<T>(this ReadOnlySpan<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         return T.ColorFormat.BytesPerPixel switch
         {

@@ -409,7 +409,7 @@ public class ConvertTests
     }
 
     private static void ConvertFrom<TSource>()
-        where TSource : struct, IColor
+        where TSource : unmanaged, IColor
     {
         ConvertBetween<TSource, ColorRGB>();
         ConvertBetween<TSource, ColorBGR>();
@@ -420,8 +420,8 @@ public class ConvertTests
     }
 
     private static void ConvertBetween<TSource, TTarget>()
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         TSource[] source = new TSource[40];
         for (int i = 0; i < source.Length; i++)

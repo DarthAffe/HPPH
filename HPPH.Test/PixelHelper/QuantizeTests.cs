@@ -131,7 +131,7 @@ public class QuantizeTests
     }
 
     private void CreateMedianCutColorPaletteImage<T>(string image, int size)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
@@ -357,7 +357,7 @@ public class QuantizeTests
     }
 
     private void CreateWuColorPaletteImage<T>(string image, int size)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
@@ -588,7 +588,6 @@ public class QuantizeTests
     [TestMethod]
     public void PaletteLargerThan256MatchesReference()
     {
-        // More than 256 boxes are picked from a priority queue instead of a linear search.
         ColorRGB[] colors = new ColorRGB[8000];
         new Random(7).NextBytes(MemoryMarshal.AsBytes(colors.AsSpan()));
 

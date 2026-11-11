@@ -58,19 +58,19 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     /// </summary>
     /// <typeparam name="TColor">The color-type of the iamge.</typeparam>
     /// <returns>The <inheritdoc cref="RefImage{TColor}"/>.</returns>
-    RefImage<TColor> AsRefImage<TColor>() where TColor : struct, IColor;
+    RefImage<TColor> AsRefImage<TColor>() where TColor : unmanaged, IColor;
 
     /// <summary>
     /// Converts this image into a new image of the color format <typeparamref name="TColor"/>.
     /// </summary>
-    IImage<TColor> ConvertTo<TColor>() where TColor : struct, IColor;
+    IImage<TColor> ConvertTo<TColor>() where TColor : unmanaged, IColor;
 
     /// <summary>
     /// Converts the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
     /// </summary>
     /// <param name="destination">The buffer to write to. Needs at least <c>Width * Height</c> elements.</param>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
-    void ConvertTo<TColor>(Span<TColor> destination) where TColor : struct, IColor;
+    void ConvertTo<TColor>(Span<TColor> destination) where TColor : unmanaged, IColor;
 
     /// <summary>
     /// Converts the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance with color format <typeparamref name="TColor"/>.
@@ -79,7 +79,7 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     /// <param name="destination">The buffer to write to. The bytes between rows are left as they are.</param>
     /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row is not padding.</param>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>
-    void ConvertTo<TColor>(Span<byte> destination, int stride) where TColor : struct, IColor;
+    void ConvertTo<TColor>(Span<byte> destination, int stride) where TColor : unmanaged, IColor;
 
     /// <summary>
     /// Copies the contents of this <see cref="IImage"/> into a destination <see cref="Span{T}"/> instance.
@@ -103,7 +103,7 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
 /// Represents an image.
 /// </summary>
 public interface IImage<T> : IImage, IEquatable<IImage<T>>
-    where T : struct, IColor
+    where T : unmanaged, IColor
 {
     /// <summary>
     /// Gets the color at the specified location.

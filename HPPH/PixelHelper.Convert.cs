@@ -33,8 +33,8 @@ public static partial class PixelHelper
     #region Methods
 
     public static Span<TTarget> ConvertInPlace<TSource, TTarget>(this Span<TSource> colors)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         if (colors.Length == 0) return MemoryMarshal.Cast<TSource, TTarget>(colors);
 
@@ -50,36 +50,18 @@ public static partial class PixelHelper
         return MemoryMarshal.Cast<byte, TTarget>(data);
     }
 
-    public static TTarget[] Convert<TSource, TTarget>(this Span<TSource> colors)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
-    {
-        TTarget[] buffer = GC.AllocateUninitializedArray<TTarget>(colors.Length);
-        colors.Convert(buffer.AsSpan());
-        return buffer;
-    }
-
     public static TTarget[] Convert<TSource, TTarget>(this ReadOnlySpan<TSource> colors)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         TTarget[] buffer = GC.AllocateUninitializedArray<TTarget>(colors.Length);
         colors.Convert(buffer.AsSpan());
         return buffer;
-    }
-
-    public static void Convert<TSource, TTarget>(this Span<TSource> source, Span<TTarget> target)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
-    {
-        if (target.Length < source.Length) throw new ArgumentException($"Target-buffer is not big enough. {target.Length} < {source.Length}", nameof(target));
-
-        Convert<TSource, TTarget>(MemoryMarshal.AsBytes(source), MemoryMarshal.AsBytes(target));
     }
 
     public static void Convert<TSource, TTarget>(this ReadOnlySpan<TSource> source, Span<TTarget> target)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         if (target.Length < source.Length) throw new ArgumentException($"Target-buffer is not big enough. {target.Length} < {source.Length}", nameof(target));
 
@@ -87,8 +69,8 @@ public static partial class PixelHelper
     }
 
     private static void Convert<TSource, TTarget>(ReadOnlySpan<byte> source, Span<byte> target)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         if (source.Length == 0) return;
 
@@ -472,8 +454,8 @@ public static partial class PixelHelper
     #region Masks
 
     private static class ConvertMasks<TSource, TTarget>
-    where TSource : struct, IColor
-    where TTarget : struct, IColor
+    where TSource : unmanaged, IColor
+    where TTarget : unmanaged, IColor
     {
         // ReSharper disable once StaticMemberInGenericType - that's exactly what we want here
         public static readonly byte[] Masks = CreateMasks(TSource.ColorFormat, TTarget.ColorFormat);

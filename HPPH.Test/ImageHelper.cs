@@ -7,7 +7,7 @@ internal static class ImageHelper
     #region Methods
 
     public static T[] GetColorsFromImage<T>(string file)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         using FileStream stream = File.OpenRead(file);
         using Bitmap bmp = new(stream);
@@ -16,7 +16,7 @@ internal static class ImageHelper
     }
 
     public static Image<T> GetImage<T>(string file)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         using FileStream stream = File.OpenRead(file);
         using Bitmap bmp = new(stream);
@@ -34,7 +34,7 @@ internal static class ImageHelper
     }
 
     private static T[] GetColors<T>(Bitmap bmp)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         T[] colors = new T[bmp.Width * bmp.Height];
         int i = 0;

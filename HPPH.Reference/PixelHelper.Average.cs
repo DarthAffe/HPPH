@@ -16,7 +16,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static T Average<T>(IImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         float count = image.Width * image.Height;
 
@@ -28,7 +28,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static T Average<T>(RefImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         float count = image.Width * image.Height;
 
@@ -40,7 +40,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static T Average<T>(Span<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         float count = colors.Length;
 
@@ -52,7 +52,7 @@ public static partial class ReferencePixelHelper
     }
 
     public static T Average<T>(ReadOnlySpan<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         float count = colors.Length;
 

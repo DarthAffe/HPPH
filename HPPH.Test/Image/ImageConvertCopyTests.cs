@@ -21,8 +21,8 @@ public class ImageConvertCopyTests
     }
 
     private static void ConvertToSpan<TSource, TTarget>()
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         foreach ((string name, IImage<TSource> image) in Images<TSource>())
         {
@@ -57,8 +57,8 @@ public class ImageConvertCopyTests
     }
 
     private static void ConvertToStridedBuffer<TSource, TTarget>()
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         int targetBpp = TTarget.ColorFormat.BytesPerPixel;
 
@@ -168,7 +168,7 @@ public class ImageConvertCopyTests
     /// A WIDTH x HEIGHT image with PADDING bytes after every row except the last one.
     /// </summary>
     private static Image<T> CreatePaddedImage<T>(int seed)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         int stride = (WIDTH * T.ColorFormat.BytesPerPixel) + PADDING;
         byte[] buffer = new byte[((HEIGHT - 1) * stride) + (WIDTH * T.ColorFormat.BytesPerPixel)];
@@ -177,7 +177,7 @@ public class ImageConvertCopyTests
     }
 
     private static Image<T> CreateContiguousImage<T>(int seed)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         T[] pixels = new T[WIDTH * HEIGHT];
         new Random(seed).NextBytes(MemoryMarshal.AsBytes(pixels.AsSpan()));
@@ -185,7 +185,7 @@ public class ImageConvertCopyTests
     }
 
     private static IEnumerable<(string Name, IImage<T> Image)> Images<T>()
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         yield return ("contiguous", CreateContiguousImage<T>(1));
 
@@ -196,8 +196,8 @@ public class ImageConvertCopyTests
     }
 
     private static TTarget[] Expected<TSource, TTarget>(IImage<TSource> image)
-        where TSource : struct, IColor
-        where TTarget : struct, IColor
+        where TSource : unmanaged, IColor
+        where TTarget : unmanaged, IColor
     {
         TTarget[] expected = new TTarget[image.Width * image.Height];
         for (int y = 0; y < image.Height; y++)

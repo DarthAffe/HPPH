@@ -121,7 +121,7 @@ public class SkiaTests
     }
 
     private static void LoadImageInto<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor
     {
         IImage<T> expected = SkiaSharp.ImageHelper.LoadImage(image).ConvertTo<T>();
 
