@@ -232,7 +232,19 @@ internal class Colors : IGeneratorFeature
                      #region Methods
                      
                      public IColor CreateColor(byte r, byte g, byte b, byte a) => Color{{colorFormat.Format}}.Create(r, g, b, a);
-                     
+
+                     /// <inheritdoc cref="IColorFormat.CreateImage" />
+                     public Image<Color{{colorFormat.Format}}> CreateImage(ReadOnlySpan<byte> buffer, int width, int height, int stride) => Image<Color{{colorFormat.Format}}>.Create(buffer, width, height, stride);
+
+                     /// <inheritdoc />
+                     IImage IColorFormat.CreateImage(ReadOnlySpan<byte> buffer, int width, int height, int stride) => CreateImage(buffer, width, height, stride);
+
+                     /// <inheritdoc cref="IColorFormat.WrapImage" />
+                     public Image<Color{{colorFormat.Format}}> WrapImage(byte[] buffer, int width, int height, int stride) => Image<Color{{colorFormat.Format}}>.Wrap(buffer, width, height, stride);
+
+                     /// <inheritdoc />
+                     IImage IColorFormat.WrapImage(byte[] buffer, int width, int height, int stride) => WrapImage(buffer, width, height, stride);
+
                      #endregion
                  }
                  """;

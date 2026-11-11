@@ -25,6 +25,18 @@ public sealed partial class ColorFormatBGRA : IColorFormat
     #region Methods
     
     public IColor CreateColor(byte r, byte g, byte b, byte a) => ColorBGRA.Create(r, g, b, a);
-    
+
+    /// <inheritdoc cref="IColorFormat.CreateImage" />
+    public Image<ColorBGRA> CreateImage(ReadOnlySpan<byte> buffer, int width, int height, int stride) => Image<ColorBGRA>.Create(buffer, width, height, stride);
+
+    /// <inheritdoc />
+    IImage IColorFormat.CreateImage(ReadOnlySpan<byte> buffer, int width, int height, int stride) => CreateImage(buffer, width, height, stride);
+
+    /// <inheritdoc cref="IColorFormat.WrapImage" />
+    public Image<ColorBGRA> WrapImage(byte[] buffer, int width, int height, int stride) => Image<ColorBGRA>.Wrap(buffer, width, height, stride);
+
+    /// <inheritdoc />
+    IImage IColorFormat.WrapImage(byte[] buffer, int width, int height, int stride) => WrapImage(buffer, width, height, stride);
+
     #endregion
 }
