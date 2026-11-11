@@ -121,6 +121,56 @@ public class ImageConvertCopyTests
     }
 
     [TestMethod]
+    public void CopyToStridedBuffer()
+    {
+        CopyToStridedBuffer<ColorRGB>();
+        CopyToStridedBuffer<ColorBGRA>();
+    }
+
+    private static void CopyToStridedBuffer<T>()
+        where T : unmanaged, IColor<T>
+    {
+        foreach ((string name, Image<T> image) in Images<T>())
+        {
+            byte[] expected = MemoryMarshal.AsBytes(Expected<T, T>(image).AsSpan()).ToArray();
+            int rowSize = image.Width * T.ColorFormat.BytesPerPixel;
+
+            foreach (int padding in new[] { 0, 5, 64 })
+            {
+                int stride = rowSize + padding;
+                int length = ((image.Height - 1) * stride) + rowSize + 8;
+
+                byte[] fromImage = new byte[length];
+                byte[] fromInterface = new byte[length];
+                byte[] fromRef = new byte[length];
+                fromImage.AsSpan().Fill(SENTINEL);
+                fromInterface.AsSpan().Fill(SENTINEL);
+                fromRef.AsSpan().Fill(SENTINEL);
+
+                image.CopyTo(fromImage, stride);
+                ((IImage)image).CopyTo(fromInterface, stride);
+                image.AsRefImage().CopyTo(fromRef, stride);
+
+                Assert.AreSequenceEqual(fromImage, fromInterface, $"{name}, padding {padding}: IImage");
+                Assert.AreSequenceEqual(fromImage, fromRef, $"{name}, padding {padding}: RefImage");
+
+                for (int y = 0; y < image.Height; y++)
+                {
+                    Assert.AreSequenceEqual(expected.AsSpan(y * rowSize, rowSize).ToArray(), fromImage.AsSpan(y * stride, rowSize).ToArray(), $"{name}, padding {padding}: row {y}");
+
+                    int paddingEnd = y == (image.Height - 1) ? fromImage.Length : (y + 1) * stride;
+                    Assert.AreEqual(-1, fromImage.AsSpan((y * stride) + rowSize, paddingEnd - ((y * stride) + rowSize)).IndexOfAnyExcept(SENTINEL), $"{name}, padding {padding}: padding after row {y} was written");
+                }
+            }
+
+            byte[] exact = new byte[((image.Height - 1) * (rowSize + 3)) + rowSize];
+            image.CopyTo(exact, rowSize + 3);
+            Assert.ThrowsExactly<ArgumentException>(() => image.CopyTo(new byte[exact.Length - 1], rowSize + 3), name);
+            Assert.ThrowsExactly<ArgumentException>(() => image.CopyTo(new byte[exact.Length * 2], rowSize - 1), name);
+        }
+    }
+
+    [TestMethod]
     public void EnumeratorsVisitEveryPixelInOrder()
     {
         foreach ((string name, IImage<ColorBGRA> image) in Images<ColorBGRA>())
