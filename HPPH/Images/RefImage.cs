@@ -191,6 +191,26 @@ public readonly ref struct RefImage<T>
     }
 
     /// <summary>
+    /// Copies the pixels of this <see cref="RefImage{T}"/> into a destination buffer whose rows are <paramref name="stride"/> bytes apart.
+    /// </summary>
+    /// <param name="destination">The buffer to write to.</param>
+    /// <param name="stride">The distance between the starts of two rows in <paramref name="destination"/>, in bytes. The last row needs no padding.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="stride"/> is smaller than a row or <paramref name="destination"/> is too small.
+    /// </exception>
+    public void CopyTo(Span<byte> destination, int stride)
+    {
+        int rowSize = Width * T.ColorFormat.BytesPerPixel;
+        ImageValidation.ValidateLayout(destination.Length, Width, Height, stride, T.ColorFormat.BytesPerPixel);
+
+        if (stride == rowSize)
+            CopyTo(destination);
+        else
+            for (int y = 0; y < Height; y++)
+                GetRowBytes(y).CopyTo(destination.Slice(y * stride, rowSize));
+    }
+
+    /// <summary>
     /// Allocates a new array and copies this <see cref="RefImage{T}"/> into it.
     /// </summary>
     /// <returns>The new array containing the data of this <see cref="RefImage{T}"/>.</returns>

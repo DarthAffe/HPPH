@@ -195,6 +195,9 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     public void CopyTo(Span<byte> destination) => AsRefImage().CopyTo(destination);
 
     /// <inheritdoc />
+    public void CopyTo(Span<byte> destination, int stride) => AsRefImage().CopyTo(destination, stride);
+
+    /// <inheritdoc />
     public byte[] ToRawArray()
     {
         byte[] array = GC.AllocateUninitializedArray<byte>(SizeInBytes);
