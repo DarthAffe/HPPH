@@ -8,16 +8,13 @@ namespace HPPH.Benchmark;
 [MemoryDiagnoser]
 public class PaletteBenchmarks
 {
-    #region Constants
-
-    private const int PALETTE_SIZE = 16;
-
-    #endregion
-
     #region Properties & Fields
 
     [Params(DataSet.Samples, DataSet.FullHD, DataSet.UHD)]
     public DataSet Data { get; set; }
+
+    [Params(16, 256)]
+    public int PaletteSize { get; set; }
 
     private List<ColorRGB[]> _colors = [];
 
@@ -32,11 +29,21 @@ public class PaletteBenchmarks
     }
 
     [Benchmark]
-    public ColorRGB[] CreateSimpleColorPalette()
+    public ColorRGB[] CreateMedianCutColorPalette()
     {
         ColorRGB[] result = [];
         foreach (ColorRGB[] colors in _colors)
-            result = new ReadOnlySpan<ColorRGB>(colors).CreateSimpleColorPalette(PALETTE_SIZE);
+            result = new ReadOnlySpan<ColorRGB>(colors).CreateMedianCutColorPalette(PaletteSize);
+
+        return result;
+    }
+
+    [Benchmark]
+    public ColorRGB[] CreateWuColorPalette()
+    {
+        ColorRGB[] result = [];
+        foreach (ColorRGB[] colors in _colors)
+            result = new ReadOnlySpan<ColorRGB>(colors).CreateWuColorPalette(PaletteSize);
 
         return result;
     }

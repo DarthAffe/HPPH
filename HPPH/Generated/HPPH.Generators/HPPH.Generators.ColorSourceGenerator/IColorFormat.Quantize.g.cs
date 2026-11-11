@@ -4,6 +4,6 @@ namespace HPPH;
 
 public partial interface IColorFormat
 {
-    internal IColor[] CreateColorPalette(ReadOnlySpan<byte> data, int paletteSize);
-    internal IColor[] CreateSimpleColorPalette(ReadOnlySpan<byte> data, int paletteSize);
+    internal IColor[] CreateWuColorPalette(IImage image, int paletteSize);
+    internal IColor[] CreateMedianCutColorPalette(IImage image, int paletteSize);
 }

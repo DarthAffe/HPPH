@@ -20,17 +20,15 @@ internal class Quantize : IGeneratorFeature
         return $$"""
                  #nullable enable
                  
-                 using System.Runtime.InteropServices;
-                 
                  namespace HPPH;
 
                  public sealed partial class ColorFormat{{colorFormat.Format}}
                  {
                      #region Methods
                  
-                     unsafe IColor[] IColorFormat.CreateColorPalette(ReadOnlySpan<byte> data, int paletteSize)
+                     IColor[] IColorFormat.CreateWuColorPalette(IImage image, int paletteSize)
                      {
-                         Color{{colorFormat.Format}}[] colors = PixelHelper.CreateColorPalette<Color{{colorFormat.Format}}>(MemoryMarshal.Cast<byte, Color{{colorFormat.Format}}>(data), paletteSize);
+                         Color{{colorFormat.Format}}[] colors = PixelHelper.CreateWuColorPalette(image.AsRefImage<Color{{colorFormat.Format}}>(), paletteSize);
                          
                          IColor[] result = new IColor[colors.Length];
                          for(int i = 0; i < colors.Length; i++)
@@ -39,9 +37,9 @@ internal class Quantize : IGeneratorFeature
                          return result;
                      }
                  
-                     unsafe IColor[] IColorFormat.CreateSimpleColorPalette(ReadOnlySpan<byte> data, int paletteSize)
+                     IColor[] IColorFormat.CreateMedianCutColorPalette(IImage image, int paletteSize)
                      {
-                         Color{{colorFormat.Format}}[] colors = PixelHelper.CreateSimpleColorPalette<Color{{colorFormat.Format}}>(MemoryMarshal.Cast<byte, Color{{colorFormat.Format}}>(data), paletteSize);
+                         Color{{colorFormat.Format}}[] colors = PixelHelper.CreateMedianCutColorPalette(image.AsRefImage<Color{{colorFormat.Format}}>(), paletteSize);
                          
                          IColor[] result = new IColor[colors.Length];
                          for(int i = 0; i < colors.Length; i++)
@@ -64,8 +62,8 @@ internal class Quantize : IGeneratorFeature
                
                public partial interface IColorFormat
                {
-                   internal IColor[] CreateColorPalette(ReadOnlySpan<byte> data, int paletteSize);
-                   internal IColor[] CreateSimpleColorPalette(ReadOnlySpan<byte> data, int paletteSize);
+                   internal IColor[] CreateWuColorPalette(IImage image, int paletteSize);
+                   internal IColor[] CreateMedianCutColorPalette(IImage image, int paletteSize);
                }
                """;
     }

@@ -1,16 +1,14 @@
 ﻿#nullable enable
 
-using System.Runtime.InteropServices;
-
 namespace HPPH;
 
 public sealed partial class ColorFormatRGB
 {
     #region Methods
 
-    unsafe IColor[] IColorFormat.CreateColorPalette(ReadOnlySpan<byte> data, int paletteSize)
+    IColor[] IColorFormat.CreateWuColorPalette(IImage image, int paletteSize)
     {
-        ColorRGB[] colors = PixelHelper.CreateColorPalette<ColorRGB>(MemoryMarshal.Cast<byte, ColorRGB>(data), paletteSize);
+        ColorRGB[] colors = PixelHelper.CreateWuColorPalette(image.AsRefImage<ColorRGB>(), paletteSize);
         
         IColor[] result = new IColor[colors.Length];
         for(int i = 0; i < colors.Length; i++)
@@ -19,9 +17,9 @@ public sealed partial class ColorFormatRGB
         return result;
     }
 
-    unsafe IColor[] IColorFormat.CreateSimpleColorPalette(ReadOnlySpan<byte> data, int paletteSize)
+    IColor[] IColorFormat.CreateMedianCutColorPalette(IImage image, int paletteSize)
     {
-        ColorRGB[] colors = PixelHelper.CreateSimpleColorPalette<ColorRGB>(MemoryMarshal.Cast<byte, ColorRGB>(data), paletteSize);
+        ColorRGB[] colors = PixelHelper.CreateMedianCutColorPalette(image.AsRefImage<ColorRGB>(), paletteSize);
         
         IColor[] result = new IColor[colors.Length];
         for(int i = 0; i < colors.Length; i++)

@@ -85,9 +85,9 @@ The algorithm is stable.
 ### Quantization
 
 Creates a color-palette of a given size for some color-data.   
-Currently only a simple but fast variation using the median-cut algorithm is implemented. It's also limited to sizes being a power of 2.   
-
-A more quality focused implementation without the size limitation is planned.
+Currently this can be done using Wu's algorithm or median cut.   
+The default for `CreateColorPalette` is Wu's as it's higher quality and in most cases faster than median cut.   
+For both splits are only done on red, green and blue; alpha is averaged.   
 
 
 ### Conversion
