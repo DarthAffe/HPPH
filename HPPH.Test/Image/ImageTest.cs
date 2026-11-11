@@ -37,7 +37,7 @@ public class ImageTest
         foreach ((int width, int height) in SIZES)
         {
             IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-            image = image[0, 0, image.Width, image.Height];
+            image = image.Slice(0, 0, image.Width, image.Height);
 
             for (int y = 0; y < image.Height; y++)
                 for (int x = 0; x < image.Width; x++)
@@ -71,7 +71,7 @@ public class ImageTest
         (int width, int height) = SIZES[0];
 
         IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
+        image = image.Slice(163, 280, 720, 13);
 
         Assert.AreEqual(720, image.Width);
         Assert.AreEqual(13, image.Height);
@@ -87,8 +87,8 @@ public class ImageTest
         (int width, int height) = SIZES[0];
 
         IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
-        image = image[15, 2, 47, 8];
+        image = image.Slice(163, 280, 720, 13);
+        image = image.Slice(15, 2, 47, 8);
 
         Assert.AreEqual(47, image.Width);
         Assert.AreEqual(8, image.Height);
@@ -123,7 +123,7 @@ public class ImageTest
         (int width, int height) = SIZES[0];
 
         IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
+        image = image.Slice(163, 280, 720, 13);
 
         Assert.AreEqual(image.Height, image.Rows.Count);
 
@@ -179,7 +179,7 @@ public class ImageTest
         (int width, int height) = SIZES[0];
 
         IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
+        image = image.Slice(163, 280, 720, 13);
 
         Assert.AreEqual(image.Width, image.Columns.Count);
 
@@ -872,42 +872,42 @@ public class ImageTest
     public void SubImageInterfaceWrongX()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[-1, 0, 10, 20]);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(-1, 0, 10, 20));
     }
 
     [TestMethod]
     public void SubImageInterfaceWrongY()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, -1, 10, 20]);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, -1, 10, 20));
     }
 
     [TestMethod]
     public void SubImageInterfaceWrongWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 0, 20]);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, 0, 0, 20));
     }
 
     [TestMethod]
     public void SubImageInterfaceWrongHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 10, 0]);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, 0, 10, 0));
     }
 
     [TestMethod]
     public void SubImageInterfaceInvalidSizeWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[1, 0, 10, 20]);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(1, 0, 10, 20));
     }
 
     [TestMethod]
     public void SubImageInterfaceInvalidSizeHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 1, 10, 20]);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, 1, 10, 20));
     }
 
     [TestMethod]

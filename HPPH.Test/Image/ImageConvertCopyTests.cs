@@ -191,8 +191,8 @@ public class ImageConvertCopyTests
 
         Image<T> padded = CreatePaddedImage<T>(2);
         yield return ("padded", padded);
-        yield return ("region", (IImage<T>)((IImage)padded)[3, 2, WIDTH - 7, HEIGHT - 5]);
-        yield return ("full-width rows", (IImage<T>)((IImage)CreateContiguousImage<T>(3))[0, 4, WIDTH, HEIGHT - 8]);
+        yield return ("region", (IImage<T>)((IImage)padded).Slice(3, 2, WIDTH - 7, HEIGHT - 5));
+        yield return ("full-width rows", (IImage<T>)((IImage)CreateContiguousImage<T>(3)).Slice(0, 4, WIDTH, HEIGHT - 8));
     }
 
     private static TTarget[] Expected<TSource, TTarget>(IImage<TSource> image)

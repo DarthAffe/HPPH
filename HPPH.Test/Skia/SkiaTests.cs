@@ -85,7 +85,7 @@ public class SkiaTests
     public void ToSKBitmapOfRegion()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(40, 30);
-        IImage region = ((IImage)image)[5, 3, 21, 17];
+        IImage region = ((IImage)image).Slice(5, 3, 21, 17);
 
         using SKBitmap bitmap = region.ToSKBitmap();
 

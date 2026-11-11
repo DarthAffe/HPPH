@@ -58,13 +58,6 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     }
 
     /// <inheritdoc />
-    IImage IImage.this[int x, int y, int width, int height]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Slice(x, y, width, height);
-    }
-
-    /// <inheritdoc />
     public RefImage<T> this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -168,6 +161,9 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     /// <inheritdoc />
     IImage<T> IImage<T>.Slice(int x, int y, int width, int height) => Slice(x, y, width, height);
+
+    /// <inheritdoc />
+    IImage IImage.Slice(int x, int y, int width, int height) => Slice(x, y, width, height);
 
     /// <inheritdoc />
     public IImage<TColor> ConvertTo<TColor>()

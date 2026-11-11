@@ -63,15 +63,18 @@ public readonly ref struct RefImage<T>
         }
     }
 
+    /// <summary>
+    /// Gets a <see cref="RefImage{T}"/> representing the specified region of this image. Same as <see cref="Slice"/>.
+    /// </summary>
+    /// <param name="x">The X-location of the region.</param>
+    /// <param name="y">The Y-location of the region.</param>
+    /// <param name="width">The width of the region.</param>
+    /// <param name="height">The height of the region.</param>
+    /// <returns>A view on the data of this image.</returns>
     public RefImage<T> this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
-
-            return new RefImage<T>(_data, _x + x, _y + y, width, height, Stride);
-        }
+        get => Slice(x, y, width, height);
     }
 
 #pragma warning restore CA2208
@@ -127,6 +130,26 @@ public readonly ref struct RefImage<T>
         ImageValidation.ValidateLayout(buffer.Length, width, height, stride, T.ColorFormat.BytesPerPixel);
 
         return new RefImage<T>(buffer, 0, 0, width, height, stride);
+    }
+
+    /// <summary>
+    /// Gets a <see cref="RefImage{T}"/> representing the specified region of this image.
+    /// </summary>
+    /// <param name="x">The X-location of the region.</param>
+    /// <param name="y">The Y-location of the region.</param>
+    /// <param name="width">The width of the region.</param>
+    /// <param name="height">The height of the region.</param>
+    /// <returns>A view on the data of this image.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public RefImage<T> Slice(int x, int y, int width, int height)
+    {
+#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
+
+        if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
+
+#pragma warning restore CA2208
+
+        return new RefImage<T>(_data, _x + x, _y + y, width, height, Stride);
     }
 
     /// <summary>

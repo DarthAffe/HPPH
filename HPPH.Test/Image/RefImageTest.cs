@@ -254,6 +254,38 @@ public class RefImageTest
     }
 
     [TestMethod]
+    public void Slice()
+    {
+        (int width, int height) = SIZES[0];
+
+        RefImage<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height).AsRefImage();
+        RefImage<ColorARGB> slice = image.Slice(10, 20, 100, 200).Slice(5, 7, 30, 40);
+
+        Assert.AreEqual(30, slice.Width);
+        Assert.AreEqual(40, slice.Height);
+        Assert.AreEqual(image.Stride, slice.Stride);
+        Assert.IsTrue(image[15, 27, 30, 40].ToArray().AsSpan().SequenceEqual(slice.ToArray()));
+
+        for (int y = 0; y < 40; y++)
+            for (int x = 0; x < 30; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(15 + x, 27 + y), slice[x, y]);
+    }
+
+    [TestMethod]
+    public void SliceOutOfRange()
+    {
+        AssertThrows(-1, 0, 10, 20);
+        AssertThrows(0, -1, 10, 20);
+        AssertThrows(0, 0, 0, 20);
+        AssertThrows(0, 0, 10, 0);
+        AssertThrows(1, 0, 10, 20);
+        AssertThrows(0, 1, 10, 20);
+
+        static void AssertThrows(int x, int y, int width, int height)
+            => Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 20).AsRefImage().Slice(x, y, width, height));
+    }
+
+    [TestMethod]
     public unsafe void Pin()
     {
         foreach ((int width, int height) in SIZES)

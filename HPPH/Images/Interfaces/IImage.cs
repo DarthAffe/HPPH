@@ -40,16 +40,6 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     IColor this[int x, int y] { get; }
 
     /// <summary>
-    /// Gets an image representing the specified location.
-    /// </summary>
-    /// <param name="x">The X-location of the image.</param>
-    /// <param name="y">The Y-location of the image.</param>
-    /// <param name="width">The width of the sub-image.</param>
-    /// <param name="height"></param>
-    /// <returns></returns>
-    IImage this[int x, int y, int width, int height] { get; }
-
-    /// <summary>
     /// Gets a list of all rows of this image.
     /// </summary>
     IImageRows Rows { get; }
@@ -65,6 +55,16 @@ public interface IImage : IEnumerable<IColor>, IEquatable<IImage>
     /// <typeparam name="TColor">The color-type of the iamge.</typeparam>
     /// <returns>The <inheritdoc cref="RefImage{TColor}"/>.</returns>
     RefImage<TColor> AsRefImage<TColor>() where TColor : unmanaged, IColor<TColor>;
+
+    /// <summary>
+    /// Gets an image representing the specified region of this image.
+    /// </summary>
+    /// <param name="x">The X-location of the region.</param>
+    /// <param name="y">The Y-location of the region.</param>
+    /// <param name="width">The width of the region.</param>
+    /// <param name="height">The height of the region.</param>
+    /// <returns>An image sharing the data of this image.</returns>
+    IImage Slice(int x, int y, int width, int height);
 
     /// <summary>
     /// Executes <paramref name="operation"/> on this image.
@@ -143,24 +143,17 @@ public interface IImage<T> : IImage, IEquatable<IImage<T>>
     new ref readonly T this[int x, int y] { get; }
 
     /// <summary>
-    /// Gets an image representing the specified location.
-    /// </summary>
-    /// <param name="x">The X-location of the image.</param>
-    /// <param name="y">The Y-location of the image.</param>
-    /// <param name="width">The width of the sub-image.</param>
-    /// <param name="height"></param>
-    /// <returns></returns>
-    new RefImage<T> this[int x, int y, int width, int height] { get; }
-
-    /// <summary>
-    /// Gets an image representing the specified region of this image.
+    /// Gets a <see cref="RefImage{T}"/> representing the specified region of this image.
     /// </summary>
     /// <param name="x">The X-location of the region.</param>
     /// <param name="y">The Y-location of the region.</param>
     /// <param name="width">The width of the region.</param>
     /// <param name="height">The height of the region.</param>
-    /// <returns>An image sharing the data of this image.</returns>
-    IImage<T> Slice(int x, int y, int width, int height);
+    /// <returns>A view on the data of this image.</returns>
+    RefImage<T> this[int x, int y, int width, int height] { get; }
+
+    /// <inheritdoc cref="IImage.Slice"/>
+    new IImage<T> Slice(int x, int y, int width, int height);
 
     /// <summary>
     /// Gets a list of all rows of this image.
