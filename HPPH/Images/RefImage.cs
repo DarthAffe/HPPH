@@ -233,6 +233,16 @@ public readonly ref struct RefImage<T>
     }
 
     /// <summary>
+    /// Copies the pixels of this <see cref="RefImage{T}"/> into a new <see cref="Image{T}"/>.
+    /// </summary>
+    /// <remarks>
+    /// The new image owns its data. It doesn't share the buffer of this image and later changes to that buffer don't show up in it.
+    /// Row padding is dropped, its <see cref="Image{T}.Stride"/> is <c>Width * BytesPerPixel</c>.
+    /// </remarks>
+    /// <returns>The new image.</returns>
+    public Image<T> ToImage() => Image<T>.Wrap(ToRawArray(), Width, Height, Width * T.ColorFormat.BytesPerPixel);
+
+    /// <summary>
     /// Converts this image into a new image of the color format <typeparamref name="TColor"/>.
     /// </summary>
     /// <typeparam name="TColor">The color format to convert to.</typeparam>

@@ -68,6 +68,9 @@ public sealed class Image<T> : IImage, IEnumerable<T>
     /// <summary>
     /// Gets a <see cref="RefImage{T}"/> representing the specified region of this image.
     /// </summary>
+    /// <remarks>
+    /// Use <see cref="RefImage{T}.ToImage"/> on the result to get an independent copy of the region.
+    /// </remarks>
     /// <param name="x">The X-location of the region.</param>
     /// <param name="y">The Y-location of the region.</param>
     /// <param name="width">The width of the region.</param>
@@ -143,14 +146,7 @@ public sealed class Image<T> : IImage, IEnumerable<T>
     /// <param name="height">The height of the image in pixels.</param>
     /// <param name="stride">The distance between the starts of two rows in <paramref name="buffer"/>, in bytes. The last row needs no padding.</param>
     public static Image<T> Create(ReadOnlySpan<byte> buffer, int width, int height, int stride)
-    {
-        RefImage<T> source = RefImage<T>.Wrap(buffer, width, height, stride);
-
-        byte[] data = GC.AllocateUninitializedArray<byte>(source.SizeInBytes);
-        source.CopyTo(data);
-
-        return Wrap(data, width, height, width * T.ColorFormat.BytesPerPixel);
-    }
+        => RefImage<T>.Wrap(buffer, width, height, stride).ToImage();
 
     /// <summary>
     /// Creates an image on top of <paramref name="buffer"/> without copying it. Changes to the buffer show up in the image.

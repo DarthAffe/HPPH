@@ -585,5 +585,53 @@ public class RefImageTest
         });
     }
 
+    [TestMethod]
+    public void ToImage()
+    {
+        foreach ((int width, int height) in SIZES)
+        {
+            Image<ColorRGB> source = TestDataHelper.CreateTestImage<ColorRGB>(width, height);
+            RefImage<ColorRGB> region = source[width / 4, height / 4, Math.Max(1, width / 2), Math.Max(1, height / 2)];
+
+            Image<ColorRGB> image = region.ToImage();
+
+            Assert.AreEqual(region.Width, image.Width);
+            Assert.AreEqual(region.Height, image.Height);
+            Assert.AreEqual(region.Width * 3, image.Stride);
+            Assert.IsTrue(image.ContentEquals(region));
+        }
+    }
+
+    [TestMethod]
+    public void ToImageIsIndependentOfSource()
+    {
+        const int WIDTH = 4;
+        const int HEIGHT = 3;
+        const int STRIDE = (WIDTH * 4) + 8;
+
+        byte[] buffer = new byte[STRIDE * HEIGHT];
+        for (int i = 0; i < buffer.Length; i++)
+            buffer[i] = (byte)i;
+
+        Image<ColorRGBA> source = Image<ColorRGBA>.Wrap(buffer, WIDTH, HEIGHT, STRIDE);
+        Image<ColorRGBA> copy = source[1, 1, 2, 2].ToImage();
+        ColorRGBA[] expected = copy.ToArray();
+
+        buffer.AsSpan().Clear();
+
+        Assert.AreSequenceEqual(expected, copy.ToArray());
+        Assert.IsFalse(copy.ContentEquals(source[1, 1, 2, 2]));
+    }
+
+    [TestMethod]
+    public void ToImageEmpty()
+    {
+        Image<ColorRGB> image = RefImage<ColorRGB>.Wrap([], 0, 0, 0).ToImage();
+
+        Assert.AreEqual(0, image.Width);
+        Assert.AreEqual(0, image.Height);
+        Assert.AreEqual(0, image.SizeInBytes);
+    }
+
     #endregion
 }
