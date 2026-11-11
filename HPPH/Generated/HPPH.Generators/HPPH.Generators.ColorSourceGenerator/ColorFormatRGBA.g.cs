@@ -47,5 +47,8 @@ public sealed partial class ColorFormatRGBA : IColorFormat
     /// <inheritdoc />
     IImage IColorFormat.WrapImage(byte[] buffer, int width, int height, int stride) => WrapImage(buffer, width, height, stride);
 
+    /// <inheritdoc />
+    public override string ToString() => Name;
+
     #endregion
 }
