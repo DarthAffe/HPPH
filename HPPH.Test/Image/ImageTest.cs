@@ -331,6 +331,81 @@ public class ImageTest
     }
 
     [TestMethod]
+    public void ToImage()
+    {
+        foreach ((int width, int height) in SIZES)
+        {
+            Image<ColorRGB> source = TestDataHelper.CreateTestImage<ColorRGB>(width, height);
+            Image<ColorRGB> slice = source.Slice(width / 4, height / 4, Math.Max(1, width / 2), Math.Max(1, height / 2));
+
+            Image<ColorRGB> image = slice.ToImage();
+
+            Assert.AreNotSame(slice, image);
+            Assert.AreEqual(slice.Width, image.Width);
+            Assert.AreEqual(slice.Height, image.Height);
+            Assert.AreEqual(slice.Width * 3, image.Stride);
+            Assert.IsTrue(image.ContentEquals(slice));
+        }
+    }
+
+    [TestMethod]
+    public void ToImageOfCompactImage()
+    {
+        Image<ColorBGRA> source = TestDataHelper.CreateTestImage<ColorBGRA>(10, 20);
+
+        Image<ColorBGRA> image = source.ToImage();
+
+        Assert.AreNotSame(source, image);
+        Assert.AreEqual(source.Stride, image.Stride);
+        Assert.IsTrue(image.ContentEquals(source));
+    }
+
+    [TestMethod]
+    public void ToImageIsIndependentOfSource()
+    {
+        const int WIDTH = 4;
+        const int HEIGHT = 3;
+        const int STRIDE = (WIDTH * 4) + 8;
+
+        byte[] buffer = new byte[STRIDE * HEIGHT];
+        for (int i = 0; i < buffer.Length; i++)
+            buffer[i] = (byte)i;
+
+        Image<ColorRGBA> slice = Image<ColorRGBA>.Wrap(buffer, WIDTH, HEIGHT, STRIDE).Slice(1, 1, 2, 2);
+        Image<ColorRGBA> copy = slice.ToImage();
+        ColorRGBA[] expected = copy.ToArray();
+
+        buffer.AsSpan().Clear();
+
+        Assert.AreSequenceEqual(expected, copy.ToArray());
+        Assert.IsFalse(copy.ContentEquals(slice));
+    }
+
+    [TestMethod]
+    public void ToImageEmpty()
+    {
+        Image<ColorRGB> image = Image<ColorRGB>.Create([], 0, 0).ToImage();
+
+        Assert.AreEqual(0, image.Width);
+        Assert.AreEqual(0, image.Height);
+        Assert.AreEqual(0, image.SizeInBytes);
+    }
+
+    [TestMethod]
+    public void IImageToImage()
+    {
+        IImage source = TestDataHelper.CreateTestImage<ColorARGB>(30, 20);
+        IImage slice = source.Slice(3, 4, 15, 10);
+
+        IImage image = slice.ToImage();
+
+        Assert.IsInstanceOfType<Image<ColorARGB>>(image);
+        Assert.AreNotSame(slice, image);
+        Assert.AreEqual(15 * 4, image.Stride);
+        Assert.IsTrue(image.ContentEquals(slice));
+    }
+
+    [TestMethod]
     public void SliceOutOfRange()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);

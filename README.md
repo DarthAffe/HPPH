@@ -68,12 +68,14 @@ ColorRGB[] firstRow = image.Rows[0].ToArray();
 
 ### Regions
 
-Regions share the data of the image, nothing is copied.
+Regions share the data of the image, nothing is copied.   
+A slice keeps the whole buffer of its image alive. Use `ToImage` to get an independent copy, for example before storing a small region of a big image.
 
 ```csharp
 RefImage<ColorRGB> region = image[10, 10, 100, 50];   // allocation free
 Image<ColorRGB> slice = image.Slice(10, 10, 100, 50); // can be stored in a field
 Image<ColorRGB> copy = region.ToImage();              // independent copy
+Image<ColorRGB> copy2 = slice.ToImage();              // same for slices
 ```
 
 ### Copying and converting

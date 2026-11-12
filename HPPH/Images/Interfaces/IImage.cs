@@ -57,6 +57,10 @@ public interface IImage
     /// <summary>
     /// Gets an image representing the specified region of this image.
     /// </summary>
+    /// <remarks>
+    /// The region keeps the whole buffer of this image alive, not only its own pixels.
+    /// Use <see cref="ToImage"/> on it to get an independent copy, for example before storing a small region of a big image.
+    /// </remarks>
     /// <param name="x">The X-location of the region.</param>
     /// <param name="y">The Y-location of the region.</param>
     /// <param name="width">The width of the region.</param>
@@ -134,6 +138,16 @@ public interface IImage
     /// </summary>
     /// <returns>The new array containing the data of this <see cref="IImage"/>.</returns>
     byte[] ToRawArray();
+
+    /// <summary>
+    /// Copies the pixels of this image into a new image of the same color format.
+    /// </summary>
+    /// <remarks>
+    /// The new image owns its data. It doesn't share the buffer of this image, so later changes to that buffer don't show up in it and it doesn't keep that buffer alive.
+    /// Row padding is dropped, its <see cref="Stride"/> is <c>Width * BytesPerPixel</c>.
+    /// </remarks>
+    /// <returns>The new image.</returns>
+    IImage ToImage();
 
     /// <summary>
     /// Checks if <paramref name="other"/> has the same color format, size and pixels as this image.

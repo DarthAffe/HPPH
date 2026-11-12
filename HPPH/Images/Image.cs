@@ -213,6 +213,12 @@ public sealed class Image<T> : IImage, IEnumerable<T>
         return colors;
     }
 
+    /// <inheritdoc cref="IImage.ToImage" />
+    public Image<T> ToImage() => AsRefImage().ToImage();
+
+    /// <inheritdoc />
+    IImage IImage.ToImage() => ToImage();
+
     /// <summary>
     /// Gets a <see cref="RefImage{T}"/> representing this image.
     /// </summary>
