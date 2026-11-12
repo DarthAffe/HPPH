@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System.Buffers;
 using System.Runtime.InteropServices;
 using SkiaSharp;
 
@@ -20,6 +21,8 @@ public static class ImageExtension
         ArgumentNullException.ThrowIfNull(image);
 
         using SKBitmap bitmap = image.ToSKBitmap();
+        bitmap.SetImmutable();
+
         return SKImage.FromBitmap(bitmap);
     }
 
@@ -73,6 +76,7 @@ public static class ImageExtension
     /// </summary>
     /// <param name="skImage">The image to convert.</param>
     /// <returns>The new image.</returns>
+    /// <exception cref="InvalidOperationException">The pixels of <paramref name="skImage"/> can't be read.</exception>
     public static Image<ColorBGRA> ToImage(this SKImage skImage) => skImage.ToImage<ColorBGRA>();
 
     /// <summary>
@@ -81,13 +85,18 @@ public static class ImageExtension
     /// <param name="skImage">The image to convert.</param>
     /// <typeparam name="T">The color format of the new image.</typeparam>
     /// <returns>The new image.</returns>
+    /// <exception cref="InvalidOperationException">The pixels of <paramref name="skImage"/> can't be read.</exception>
     public static Image<T> ToImage<T>(this SKImage skImage)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(skImage);
 
-        using SKBitmap bitmap = SKBitmap.FromImage(skImage);
-        return bitmap.ToImage<T>();
+        // Raster images expose their pixels. Everything else, like lazily decoded images, has to be read.
+        using SKPixmap? pixmap = skImage.PeekPixels();
+        if (pixmap != null) return ToImage<T>(pixmap);
+
+        return ReadPixels<T>(skImage.Width, skImage.Height, skImage.AlphaType, (info, pixels) => skImage.ReadPixels(info, pixels, info.RowBytes))
+            ?? throw new InvalidOperationException("The pixels of the image could not be read.");
     }
 
     /// <summary>
@@ -95,6 +104,7 @@ public static class ImageExtension
     /// </summary>
     /// <param name="bitmap">The bitmap to convert.</param>
     /// <returns>The new image.</returns>
+    /// <exception cref="ArgumentException"><paramref name="bitmap"/> has a size but no pixels.</exception>
     public static Image<ColorBGRA> ToImage(this SKBitmap bitmap) => bitmap.ToImage<ColorBGRA>();
 
     /// <summary>
@@ -103,19 +113,79 @@ public static class ImageExtension
     /// <param name="bitmap">The bitmap to convert.</param>
     /// <typeparam name="T">The color format of the new image.</typeparam>
     /// <returns>The new image.</returns>
+    /// <exception cref="ArgumentException"><paramref name="bitmap"/> has a size but no pixels.</exception>
     public static Image<T> ToImage<T>(this SKBitmap bitmap)
         where T : unmanaged, IColor<T>
     {
         ArgumentNullException.ThrowIfNull(bitmap);
 
-        bool straightAlpha = bitmap.AlphaType is SKAlphaType.Unpremul or SKAlphaType.Opaque;
+        using SKPixmap? pixmap = bitmap.PeekPixels();
+        if (pixmap == null)
+        {
+            if ((bitmap.Width == 0) || (bitmap.Height == 0)) return Image<T>.Create([], bitmap.Width, bitmap.Height);
 
-        if (straightAlpha && (bitmap.ColorType == SKColorType.Bgra8888))
-            return RefImage<ColorBGRA>.Wrap(bitmap.GetPixelSpan(), bitmap.Width, bitmap.Height, bitmap.RowBytes).ConvertTo<T>();
+            throw new ArgumentException("The bitmap has no pixels.", nameof(bitmap));
+        }
 
-        if (straightAlpha && (bitmap.ColorType == SKColorType.Rgba8888))
-            return RefImage<ColorRGBA>.Wrap(bitmap.GetPixelSpan(), bitmap.Width, bitmap.Height, bitmap.RowBytes).ConvertTo<T>();
+        return ToImage<T>(pixmap);
+    }
 
-        return RefImage<ColorBGRA>.Wrap(MemoryMarshal.Cast<SKColor, ColorBGRA>(bitmap.Pixels), bitmap.Width, bitmap.Height).ConvertTo<T>();
+    private static Image<T> ToImage<T>(SKPixmap pixmap)
+        where T : unmanaged, IColor<T>
+    {
+        bool straightAlpha = pixmap.AlphaType is SKAlphaType.Unpremul or SKAlphaType.Opaque;
+
+        if (straightAlpha && (pixmap.ColorType == SKColorType.Bgra8888))
+            return RefImage<ColorBGRA>.Wrap(pixmap.GetPixelSpan(), pixmap.Width, pixmap.Height, pixmap.RowBytes).ConvertTo<T>();
+
+        if (straightAlpha && (pixmap.ColorType == SKColorType.Rgba8888))
+            return RefImage<ColorRGBA>.Wrap(pixmap.GetPixelSpan(), pixmap.Width, pixmap.Height, pixmap.RowBytes).ConvertTo<T>();
+
+        return ReadPixels<T>(pixmap.Width, pixmap.Height, pixmap.AlphaType, (info, pixels) => pixmap.ReadPixels(info, pixels, info.RowBytes))
+            ?? throw new InvalidOperationException("The pixels could not be read.");
+    }
+
+    /// <summary>
+    /// Lets SkiaSharp write the pixels with straight alpha directly into the buffer of a new image.
+    /// </summary>
+    /// <param name="width">The width of the image.</param>
+    /// <param name="height">The height of the image.</param>
+    /// <param name="sourceAlphaType">The alpha type of the source. Opaque sources stay opaque, all others are read as straight alpha.</param>
+    /// <param name="read">Writes the pixels in the given format to the given address, rows <c>info.RowBytes</c> apart. Returns whether that worked.</param>
+    /// <typeparam name="T">The color format of the new image.</typeparam>
+    /// <returns>The new image, or <see langword="null"/> if <paramref name="read"/> failed.</returns>
+    internal static unsafe Image<T>? ReadPixels<T>(int width, int height, SKAlphaType sourceAlphaType, Func<SKImageInfo, nint, bool> read)
+        where T : unmanaged, IColor<T>
+    {
+        bool rgba = typeof(T) == typeof(ColorRGBA);
+        SKImageInfo info = new(width, height, rgba ? SKColorType.Rgba8888 : SKColorType.Bgra8888, sourceAlphaType == SKAlphaType.Opaque ? SKAlphaType.Opaque : SKAlphaType.Unpremul);
+        int size = checked((int)info.BytesSize64);
+
+        if (T.ColorFormat.BytesPerPixel == 4)
+        {
+            byte[] buffer = GC.AllocateUninitializedArray<byte>(size);
+            fixed (byte* ptr = buffer)
+                if (!read(info, (nint)ptr)) return null;
+
+            // SkiaSharp has no ARGB or ABGR color type, so these are reordered in place.
+            if (!rgba && (typeof(T) != typeof(ColorBGRA)))
+                MemoryMarshal.Cast<byte, ColorBGRA>(buffer.AsSpan()).ConvertInPlace<ColorBGRA, T>();
+
+            return Image<T>.Wrap(buffer, width, height, info.RowBytes);
+        }
+
+        // SkiaSharp has no 24 bit color type, so these take a detour through a temporary 32 bit buffer.
+        byte[] temp = ArrayPool<byte>.Shared.Rent(size);
+        try
+        {
+            fixed (byte* ptr = temp)
+                if (!read(info, (nint)ptr)) return null;
+
+            return RefImage<ColorBGRA>.Wrap(temp.AsSpan(0, size), width, height, info.RowBytes).ConvertTo<T>();
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(temp);
+        }
     }
 }

@@ -58,10 +58,8 @@ public static class ImageHelper
         where T : unmanaged, IColor<T>
     {
         SKImageInfo info = codec.Info;
-        SKColorType colorType = typeof(T) == typeof(ColorRGBA) ? SKColorType.Rgba8888 : SKColorType.Bgra8888;
-        SKImageInfo target = new(info.Width, info.Height, colorType, info.AlphaType == SKAlphaType.Opaque ? SKAlphaType.Opaque : SKAlphaType.Unpremul);
 
-        using SKBitmap bitmap = SKBitmap.Decode(codec, target) ?? throw new InvalidDataException("The image could not be decoded.");
-        return bitmap.ToImage<T>();
+        return ImageExtension.ReadPixels<T>(info.Width, info.Height, info.AlphaType, (target, pixels) => codec.GetPixels(target, pixels) is SKCodecResult.Success or SKCodecResult.IncompleteInput)
+            ?? throw new InvalidDataException("The image could not be decoded.");
     }
 }

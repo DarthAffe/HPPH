@@ -59,7 +59,8 @@ public class SkiaTests
             (SKColorType.Rgba8888, SKAlphaType.Unpremul, true),
             (SKColorType.Bgra8888, SKAlphaType.Opaque, false),
             (SKColorType.Bgra8888, SKAlphaType.Premul, false),
-            (SKColorType.Rgb565, SKAlphaType.Opaque, false)
+            (SKColorType.Rgb565, SKAlphaType.Opaque, false),
+            (SKColorType.Gray8, SKAlphaType.Opaque, false)
         ];
 
         foreach ((SKColorType colorType, SKAlphaType alphaType, bool translucent) in layouts)
@@ -79,6 +80,72 @@ public class SkiaTests
                     Assert.AreEqual(new ColorBGRA(expected.Blue, expected.Green, expected.Red, expected.Alpha), image[x, y], $"{name} at {x},{y}");
                 }
         }
+    }
+
+    [TestMethod]
+    public void ToImageIntoEveryFormat()
+    {
+        foreach (string file in GetTestImages())
+        {
+            byte[] encoded = File.ReadAllBytes(file);
+
+            // LoadImage decodes straight to unpremultiplied pixels, so it has the exact values of the file.
+            Image<ColorBGRA> expected = SkiaSharp.ImageHelper.LoadImage(file);
+            SKImageInfo info = new(expected.Width, expected.Height);
+
+            using SKBitmap straight = SKBitmap.Decode(encoded, info.WithColorType(SKColorType.Rgba8888).WithAlphaType(SKAlphaType.Unpremul));
+            using SKBitmap premultiplied = SKBitmap.Decode(encoded, info.WithColorType(SKColorType.Bgra8888).WithAlphaType(SKAlphaType.Premul));
+            using SKImage rasterStraight = SKImage.FromBitmap(straight);
+            using SKImage rasterPremultiplied = SKImage.FromBitmap(premultiplied);
+            using SKImage lazy = SKImage.FromEncodedData(encoded);
+
+            Sources sources = new(file, straight, premultiplied, rasterStraight, rasterPremultiplied, lazy);
+            ToImageInto(expected.ConvertTo<ColorRGB>(), sources);
+            ToImageInto(expected.ConvertTo<ColorBGR>(), sources);
+            ToImageInto(expected.ConvertTo<ColorRGBA>(), sources);
+            ToImageInto(expected, sources);
+            ToImageInto(expected.ConvertTo<ColorARGB>(), sources);
+            ToImageInto(expected.ConvertTo<ColorABGR>(), sources);
+        }
+    }
+
+    private sealed record Sources(string File, SKBitmap Straight, SKBitmap Premultiplied, SKImage RasterStraight, SKImage RasterPremultiplied, SKImage Lazy);
+
+    private static void ToImageInto<T>(Image<T> expected, Sources sources)
+        where T : unmanaged, IColor<T>
+    {
+        string name = $"{T.ColorFormat.Name}: {sources.File}";
+
+        Assert.IsTrue(expected.ContentEquals(sources.Straight.ToImage<T>()), $"{name} (bitmap)");
+        Assert.IsTrue(expected.ContentEquals(sources.RasterStraight.ToImage<T>()), $"{name} (raster image)");
+
+        // Premultiplying loses precision, so these can be off by 1.
+        AssertSimilar(expected, sources.Premultiplied.ToImage<T>(), $"{name} (premultiplied bitmap)");
+        AssertSimilar(expected, sources.RasterPremultiplied.ToImage<T>(), $"{name} (premultiplied raster image)");
+        AssertSimilar(expected, sources.Lazy.ToImage<T>(), $"{name} (encoded image)");
+    }
+
+    private static void AssertSimilar<T>(Image<T> expected, Image<T> actual, string message)
+        where T : unmanaged, IColor<T>
+    {
+        Assert.AreEqual(expected.Width, actual.Width, message);
+        Assert.AreEqual(expected.Height, actual.Height, message);
+
+        byte[] expectedBytes = expected.ToRawArray();
+        byte[] actualBytes = actual.ToRawArray();
+        for (int i = 0; i < expectedBytes.Length; i++)
+            if (Math.Abs(expectedBytes[i] - actualBytes[i]) > 1)
+                Assert.Fail($"{message}: byte {i} is {actualBytes[i]}, expected {expectedBytes[i]}");
+    }
+
+    [TestMethod]
+    public void ToImageOfEmptyBitmap()
+    {
+        using SKBitmap bitmap = new();
+        Image<ColorBGRA> image = bitmap.ToImage();
+
+        Assert.AreEqual(0, image.Width);
+        Assert.AreEqual(0, image.Height);
     }
 
     [TestMethod]
