@@ -29,8 +29,9 @@ public static partial class PixelHelper
     /// Needs at least <paramref name="paletteSize"/> elements, only the first <c>palette.Length</c> are written.
     /// </param>
     /// <returns>The palette.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="paletteSize"/> is negative.</exception>
     /// <exception cref="ArgumentException">
-    /// <paramref name="paletteSize"/> is negative or not a power of 2, or <paramref name="pixelCounts"/> is not empty but shorter than <paramref name="paletteSize"/>.
+    /// <paramref name="paletteSize"/> is not a power of 2, or <paramref name="pixelCounts"/> is not empty but shorter than <paramref name="paletteSize"/>.
     /// </exception>
     public static IColor[] CreateMedianCutColorPalette(this IImage image, int paletteSize, Span<long> pixelCounts = default)
     {

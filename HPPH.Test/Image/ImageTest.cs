@@ -390,6 +390,28 @@ public class ImageTest
     }
 
     [TestMethod]
+    public void RowAndColumnIndexerOutOfRangeDescribesTheProblem()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+
+        AssertParameter(() => _ = image.Rows[-1], "row", -1, "Rows[-1]");
+        AssertParameter(() => _ = image.Rows[20], "row", 20, "Rows[20]");
+        AssertParameter(() => _ = image.Columns[-1], "column", -1, "Columns[-1]");
+        AssertParameter(() => _ = image.Columns[10], "column", 10, "Columns[10]");
+        AssertParameter(() => _ = image.Rows[0][-1], "x", -1, "Rows[0][-1]");
+        AssertParameter(() => _ = image.Rows[0][10], "x", 10, "Rows[0][10]");
+        AssertParameter(() => _ = image.Columns[0][-1], "y", -1, "Columns[0][-1]");
+        AssertParameter(() => _ = image.Columns[0][20], "y", 20, "Columns[0][20]");
+
+        static void AssertParameter(Action action, string expectedParamName, int expectedValue, string access)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(action);
+            Assert.AreEqual(expectedParamName, ex.ParamName, access);
+            Assert.AreEqual(expectedValue, ex.ActualValue, access);
+        }
+    }
+
+    [TestMethod]
     public void Stride()
     {
         const int STRIDE = (10 * 4) + 12;

@@ -44,6 +44,38 @@ internal static class ImageValidation
         throw new ArgumentOutOfRangeException(nameof(y), y, $"The Y-location has to be at least 0 and less than the height of the image ({imageHeight}).");
     }
 
+    /// <summary>
+    /// Throws the exception for a location outside of a row. Kept out of line so the bounds check of the indexer stays small.
+    /// </summary>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowRowLocationOutOfRange(int x, int rowLength)
+        => throw new ArgumentOutOfRangeException(nameof(x), x, $"The X-location has to be at least 0 and less than the length of the row ({rowLength}).");
+
+    /// <summary>
+    /// Throws the exception for a location outside of a column. Kept out of line so the bounds check of the indexer stays small.
+    /// </summary>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowColumnLocationOutOfRange(int y, int columnLength)
+        => throw new ArgumentOutOfRangeException(nameof(y), y, $"The Y-location has to be at least 0 and less than the length of the column ({columnLength}).");
+
+    /// <summary>
+    /// Throws the exception for a row index outside of an image. Kept out of line so the bounds check of the indexer stays small.
+    /// </summary>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowRowOutOfRange(int row, int rowCount)
+        => throw new ArgumentOutOfRangeException(nameof(row), row, $"The row has to be at least 0 and less than the number of rows ({rowCount}).");
+
+    /// <summary>
+    /// Throws the exception for a column index outside of an image. Kept out of line so the bounds check of the indexer stays small.
+    /// </summary>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowColumnOutOfRange(int column, int columnCount)
+        => throw new ArgumentOutOfRangeException(nameof(column), column, $"The column has to be at least 0 and less than the number of columns ({columnCount}).");
+
     [DoesNotReturn]
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ThrowRegionOutOfRange(int x, int y, int width, int height, int imageWidth, int imageHeight)

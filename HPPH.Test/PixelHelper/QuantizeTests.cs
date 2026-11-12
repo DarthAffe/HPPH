@@ -471,9 +471,16 @@ public class QuantizeTests
     public void NegativePaletteSizeThrows()
     {
         ColorRGB[] colors = [new(1, 2, 3)];
+        Image<ColorRGB> image = Image<ColorRGB>.Create(colors, 1, 1);
 
-        Assert.ThrowsExactly<ArgumentException>(() => new ReadOnlySpan<ColorRGB>(colors).CreateWuColorPalette(-1));
-        Assert.ThrowsExactly<ArgumentException>(() => Image<ColorRGB>.Create(colors, 1, 1).CreateWuColorPalette(-1));
+        AssertThrows(() => new ReadOnlySpan<ColorRGB>(colors).CreateWuColorPalette(-1));
+        AssertThrows(() => image.CreateWuColorPalette(-1));
+        AssertThrows(() => new ReadOnlySpan<ColorRGB>(colors).CreateMedianCutColorPalette(-1));
+        AssertThrows(() => image.CreateMedianCutColorPalette(-1));
+        AssertThrows(() => ((IImage)image).CreateColorPalette(-1));
+
+        static void AssertThrows(Action action)
+            => Assert.AreEqual("paletteSize", Assert.ThrowsExactly<ArgumentOutOfRangeException>(action).ParamName);
     }
 
     [TestMethod]

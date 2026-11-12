@@ -39,7 +39,7 @@ public readonly ref struct ImageRows<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((row < 0) || (row >= _height)) throw new ArgumentOutOfRangeException(nameof(row));
+            if ((row < 0) || (row >= _height)) ImageValidation.ThrowRowOutOfRange(row, _height);
 
             return new ImageRow<T>(_data, ((row + _y) * _stride) + (_x * _bpp), _width);
         }

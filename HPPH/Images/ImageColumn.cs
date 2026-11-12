@@ -41,7 +41,7 @@ public readonly ref struct ImageColumn<T>
     {
         get
         {
-            if ((y < 0) || (y >= _length)) throw new ArgumentOutOfRangeException(nameof(y));
+            if ((y < 0) || (y >= _length)) ImageValidation.ThrowColumnLocationOutOfRange(y, _length);
 
             return ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), (nint)(uint)(_start + (y * _step))));
         }

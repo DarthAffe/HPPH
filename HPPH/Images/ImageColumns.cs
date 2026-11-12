@@ -39,7 +39,7 @@ public readonly ref struct ImageColumns<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((column < 0) || (column >= _width)) throw new ArgumentOutOfRangeException(nameof(column));
+            if ((column < 0) || (column >= _width)) ImageValidation.ThrowColumnOutOfRange(column, _width);
 
             return new ImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
         }

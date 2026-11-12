@@ -20,9 +20,8 @@ public static partial class PixelHelper
     /// Needs at least <paramref name="paletteSize"/> elements, only the first <c>palette.Length</c> are written.
     /// </param>
     /// <returns>The palette.</returns>
-    /// <exception cref="ArgumentException">
-    /// <paramref name="paletteSize"/> is negative, or <paramref name="pixelCounts"/> is not empty but shorter than <paramref name="paletteSize"/>.
-    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="paletteSize"/> is negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="pixelCounts"/> is not empty but shorter than <paramref name="paletteSize"/>.</exception>
     public static IColor[] CreateColorPalette(this IImage image, int paletteSize, Span<long> pixelCounts = default)
         => image.CreateWuColorPalette(paletteSize, pixelCounts);
 
@@ -43,7 +42,7 @@ public static partial class PixelHelper
 
     private static void ValidatePaletteArguments(int paletteSize, Span<long> pixelCounts)
     {
-        if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
+        ArgumentOutOfRangeException.ThrowIfNegative(paletteSize);
         if (!pixelCounts.IsEmpty && (pixelCounts.Length < paletteSize)) throw new ArgumentException($"PixelCounts needs room for the whole palette. {pixelCounts.Length} < {paletteSize}", nameof(pixelCounts));
     }
 

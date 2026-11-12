@@ -40,7 +40,7 @@ public readonly ref struct ImageRow<T>
     {
         get
         {
-            if ((x < 0) || (x >= _length)) throw new ArgumentOutOfRangeException(nameof(x));
+            if ((x < 0) || (x >= _length)) ImageValidation.ThrowRowLocationOutOfRange(x, _length);
 
             return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), (nint)(uint)_start)), (nint)(uint)x);
         }
