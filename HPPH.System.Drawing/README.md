@@ -25,6 +25,7 @@ Image<ColorRGB> image2 = bitmap.ToImage<ColorRGB>();
 
 // HPPH -> System.Drawing
 using Bitmap newBitmap = image.ToBitmap();
+using Bitmap regionBitmap = image[10, 10, 100, 50].ToBitmap();
 
 byte[] png = image.ToPng();
 ```

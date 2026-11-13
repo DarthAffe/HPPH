@@ -167,6 +167,47 @@ public class SkiaTests
     }
 
     [TestMethod]
+    public void ExportFromEveryFormat()
+    {
+        ExportFrom<ColorRGB>();
+        ExportFrom<ColorBGR>();
+        ExportFrom<ColorRGBA>();
+        ExportFrom<ColorBGRA>();
+        ExportFrom<ColorARGB>();
+        ExportFrom<ColorABGR>();
+    }
+
+    private static void ExportFrom<T>()
+        where T : unmanaged, IColor<T>
+    {
+        // G and A of the test data are the high bytes of x and y, so the region starts beyond them to give every channel its own value.
+        Image<T> image = TestDataHelper.CreateTestImage<T>(300, 560).Slice(260, 520, 21, 17);
+        IImage asIImage = image;
+
+        AssertExported(image, image.ToSKBitmap(), image.ToSKImage(), image.ToPng(), "Image<T>");
+        AssertExported(image, image.AsRefImage().ToSKBitmap(), image.AsRefImage().ToSKImage(), image.AsRefImage().ToPng(), "RefImage<T>");
+        AssertExported(image, asIImage.ToSKBitmap(), asIImage.ToSKImage(), asIImage.ToPng(), "IImage");
+    }
+
+    private static void AssertExported<T>(Image<T> expected, SKBitmap bitmap, SKImage skImage, byte[] png, string source)
+        where T : unmanaged, IColor<T>
+    {
+        string name = $"{T.ColorFormat.Name} from {source}";
+
+        using (bitmap)
+        {
+            Assert.AreEqual(typeof(T) == typeof(ColorRGBA) ? SKColorType.Rgba8888 : SKColorType.Bgra8888, bitmap.ColorType, name);
+            Assert.IsTrue(expected.ContentEquals(bitmap.ToImage<T>()), $"{name}: ToSKBitmap");
+        }
+
+        using (skImage)
+            Assert.IsTrue(expected.ContentEquals(skImage.ToImage<T>()), $"{name}: ToSKImage");
+
+        using MemoryStream stream = new(png);
+        Assert.IsTrue(expected.ContentEquals(SkiaSharp.ImageHelper.LoadImage<T>(stream)), $"{name}: ToPng");
+    }
+
+    [TestMethod]
     public void LoadImageRejectsInvalidData()
     {
         using MemoryStream stream = new([1, 2, 3, 4, 5, 6, 7, 8]);

@@ -93,6 +93,47 @@ public class SystemDrawingTests
     }
 
     [TestMethod]
+    public void ExportFromEveryFormat()
+    {
+        ExportFrom<ColorRGB>();
+        ExportFrom<ColorBGR>();
+        ExportFrom<ColorRGBA>();
+        ExportFrom<ColorBGRA>();
+        ExportFrom<ColorARGB>();
+        ExportFrom<ColorABGR>();
+    }
+
+    private static void ExportFrom<T>()
+        where T : unmanaged, IColor<T>
+    {
+        // G and A of the test data are the high bytes of x and y, so the region starts beyond them to give every channel its own value.
+        Image<T> image = TestDataHelper.CreateTestImage<T>(300, 560).Slice(260, 520, 21, 17);
+        IImage asIImage = image;
+
+        AssertExported(image, image.ToBitmap(), image.ToPng(), "Image<T>");
+        AssertExported(image, image.AsRefImage().ToBitmap(), image.AsRefImage().ToPng(), "RefImage<T>");
+        AssertExported(image, asIImage.ToBitmap(), asIImage.ToPng(), "IImage");
+    }
+
+    private static void AssertExported<T>(Image<T> expected, Bitmap bitmap, byte[] png, string source)
+        where T : unmanaged, IColor<T>
+    {
+        string name = $"{T.ColorFormat.Name} from {source}";
+
+        using (bitmap)
+        {
+            global::System.Drawing.Imaging.PixelFormat expectedFormat = T.ColorFormat.BytesPerPixel == 3
+                                                                            ? global::System.Drawing.Imaging.PixelFormat.Format24bppRgb
+                                                                            : global::System.Drawing.Imaging.PixelFormat.Format32bppArgb;
+            Assert.AreEqual(expectedFormat, bitmap.PixelFormat, name);
+            Assert.IsTrue(expected.ContentEquals(bitmap.ToImage<T>()), $"{name}: ToBitmap");
+        }
+
+        using MemoryStream stream = new(png);
+        Assert.IsTrue(expected.ContentEquals(System.Drawing.ImageHelper.LoadImage<T>(stream)), $"{name}: ToPng");
+    }
+
+    [TestMethod]
     public void LoadImageIntoEveryFormat()
     {
         foreach (string image in GetTestImages())

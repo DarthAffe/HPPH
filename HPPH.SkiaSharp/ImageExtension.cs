@@ -26,6 +26,25 @@ public static class ImageExtension
         return SKImage.FromBitmap(bitmap);
     }
 
+    /// <inheritdoc cref="ToSKImage(IImage)"/>
+    public static SKImage ToSKImage<T>(this Image<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        return image.AsRefImage().ToSKImage();
+    }
+
+    /// <inheritdoc cref="ToSKImage(IImage)"/>
+    public static SKImage ToSKImage<T>(this RefImage<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        using SKBitmap bitmap = image.ToSKBitmap();
+        bitmap.SetImmutable();
+
+        return SKImage.FromBitmap(bitmap);
+    }
+
     /// <summary>
     /// Copies the pixels of <paramref name="image"/> into a new <see cref="SKBitmap"/>.
     /// </summary>
@@ -34,11 +53,27 @@ public static class ImageExtension
     /// </remarks>
     /// <param name="image">The image to convert.</param>
     /// <returns>The new <see cref="SKBitmap"/>.</returns>
-    public static unsafe SKBitmap ToSKBitmap(this IImage image)
+    public static SKBitmap ToSKBitmap(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        bool rgba = image is Image<ColorRGBA>;
+        return image.Execute<ToSKBitmapOperation, SKBitmap>(default);
+    }
+
+    /// <inheritdoc cref="ToSKBitmap(IImage)"/>
+    public static SKBitmap ToSKBitmap<T>(this Image<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        return image.AsRefImage().ToSKBitmap();
+    }
+
+    /// <inheritdoc cref="ToSKBitmap(IImage)"/>
+    public static unsafe SKBitmap ToSKBitmap<T>(this RefImage<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        bool rgba = typeof(T) == typeof(ColorRGBA);
 
         SKBitmap bitmap = new(image.Width, image.Height, rgba ? SKColorType.Rgba8888 : SKColorType.Bgra8888, SKAlphaType.Unpremul);
 
@@ -65,6 +100,24 @@ public static class ImageExtension
     /// <param name="image">The image to encode.</param>
     /// <returns>The PNG-encoded data.</returns>
     public static byte[] ToPng(this IImage image)
+    {
+        using SKImage skImage = image.ToSKImage();
+        using SKData data = skImage.Encode(SKEncodedImageFormat.Png, 100);
+        return data.ToArray();
+    }
+
+    /// <inheritdoc cref="ToPng(IImage)"/>
+    public static byte[] ToPng<T>(this Image<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        return image.AsRefImage().ToPng();
+    }
+
+    /// <inheritdoc cref="ToPng(IImage)"/>
+    public static byte[] ToPng<T>(this RefImage<T> image)
+        where T : unmanaged, IColor<T>
     {
         using SKImage skImage = image.ToSKImage();
         using SKData data = skImage.Encode(SKEncodedImageFormat.Png, 100);
@@ -187,5 +240,10 @@ public static class ImageExtension
         {
             ArrayPool<byte>.Shared.Return(temp);
         }
+    }
+
+    private readonly struct ToSKBitmapOperation : IImageOperation<SKBitmap>
+    {
+        public SKBitmap Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => image.ToSKBitmap();
     }
 }

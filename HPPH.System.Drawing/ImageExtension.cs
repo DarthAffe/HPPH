@@ -22,11 +22,29 @@ public static class ImageExtension
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        PixelFormat format = image.ColorFormat.BytesPerPixel switch
+        return image.Execute<ToBitmapOperation, Bitmap>(default);
+    }
+
+    /// <inheritdoc cref="ToBitmap(IImage)"/>
+    [SupportedOSPlatform("windows")]
+    public static Bitmap ToBitmap<T>(this Image<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        return image.AsRefImage().ToBitmap();
+    }
+
+    /// <inheritdoc cref="ToBitmap(IImage)"/>
+    [SupportedOSPlatform("windows")]
+    public static Bitmap ToBitmap<T>(this RefImage<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        PixelFormat format = T.ColorFormat.BytesPerPixel switch
         {
             3 => PixelFormat.Format24bppRgb,
             4 => PixelFormat.Format32bppArgb,
-            _ => throw new NotSupportedException($"Unsupported color format '{image.ColorFormat}'.")
+            _ => throw new NotSupportedException($"Unsupported color format '{T.ColorFormat}'.")
         };
 
         Bitmap bitmap = new(image.Width, image.Height, format);
@@ -65,6 +83,28 @@ public static class ImageExtension
     {
         ArgumentNullException.ThrowIfNull(image);
 
+        using Bitmap bitmap = image.ToBitmap();
+        using MemoryStream ms = new();
+        bitmap.Save(ms, ImageFormat.Png);
+
+        return ms.ToArray();
+    }
+
+    /// <inheritdoc cref="ToPng(IImage)"/>
+    [SupportedOSPlatform("windows")]
+    public static byte[] ToPng<T>(this Image<T> image)
+        where T : unmanaged, IColor<T>
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        return image.AsRefImage().ToPng();
+    }
+
+    /// <inheritdoc cref="ToPng(IImage)"/>
+    [SupportedOSPlatform("windows")]
+    public static byte[] ToPng<T>(this RefImage<T> image)
+        where T : unmanaged, IColor<T>
+    {
         using Bitmap bitmap = image.ToBitmap();
         using MemoryStream ms = new();
         bitmap.Save(ms, ImageFormat.Png);
@@ -123,5 +163,11 @@ public static class ImageExtension
         if (data.Stride < 0) throw new NotSupportedException("Bottom-up bitmaps (negative stride) are not supported.");
 
         return new Span<byte>(data.Scan0.ToPointer(), data.Stride * data.Height);
+    }
+
+    [SupportedOSPlatform("windows")]
+    private readonly struct ToBitmapOperation : IImageOperation<Bitmap>
+    {
+        public Bitmap Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => image.ToBitmap();
     }
 }
