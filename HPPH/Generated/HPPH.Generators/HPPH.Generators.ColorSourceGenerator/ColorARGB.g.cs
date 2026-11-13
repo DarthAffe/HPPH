@@ -14,7 +14,7 @@ namespace HPPH;
 /// Represents a color in 32 bit ARGB-format.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ColorARGB"/> class.
+/// Initializes a new instance of the <see cref="ColorARGB"/> struct.
 /// </remarks>
 /// <param name="a">The Alpha-component of the color.</param>
 /// <param name="r">The Red-component of the color.</param>
@@ -23,7 +23,7 @@ namespace HPPH;
 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
 [SkipLocalsInit]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct ColorARGB(byte a, byte r, byte g, byte b) : IColor, IEquatable<ColorARGB>
+public readonly partial struct ColorARGB(byte a, byte r, byte g, byte b) : IColor<ColorARGB>, IEquatable<ColorARGB>
 {
     #region Properties & Fields
 
@@ -51,7 +51,20 @@ public readonly partial struct ColorARGB(byte a, byte r, byte g, byte b) : IColo
 
     #region Operators
     
+    /// <summary>
+    /// Checks if two colors are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
     public static bool operator ==(ColorARGB left, ColorARGB right) => left.Equals(right);
+
+    /// <summary>
+    /// Checks if two colors are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(ColorARGB left, ColorARGB right) => !left.Equals(right);
     
     #endregion
@@ -62,19 +75,24 @@ public readonly partial struct ColorARGB(byte a, byte r, byte g, byte b) : IColo
     public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
 
     /// <inheritdoc />
-    public bool Equals(ColorARGB other) => (_a == other._a) && (_r == other._r) && (_g == other._g)&& (_b== other._b);
+    public bool Equals(ColorARGB other) => Unsafe.BitCast<ColorARGB, uint>(this) == Unsafe.BitCast<ColorARGB, uint>(other);
     
     /// <inheritdoc />
-    public override bool Equals(object? obj) => obj is ColorARGB other && Equals(other);
+    public override bool Equals(object? obj) => obj switch
+    {
+        ColorARGB other => Equals(other),
+        IColor other => Equals(other),
+        _ => false
+    };
     
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(_a, _r, _g, _b);
+    public override int GetHashCode() => R | (G << 8) | (B << 16) | (A << 24);
 
     /// <inheritdoc />
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
 
     /// <inheritdoc />
-    public static IColor Create(byte r, byte g, byte b, byte a) => new ColorARGB(a, r, g, b);
+    public static ColorARGB Create(byte r, byte g, byte b, byte a) => new ColorARGB(a, r, g, b);
 
     #endregion
 }

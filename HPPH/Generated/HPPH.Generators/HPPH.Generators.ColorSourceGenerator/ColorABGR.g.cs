@@ -14,7 +14,7 @@ namespace HPPH;
 /// Represents a color in 32 bit ABGR-format.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ColorABGR"/> class.
+/// Initializes a new instance of the <see cref="ColorABGR"/> struct.
 /// </remarks>
 /// <param name="a">The Alpha-component of the color.</param>
 /// <param name="b">The Blue-component of the color.</param>
@@ -23,7 +23,7 @@ namespace HPPH;
 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
 [SkipLocalsInit]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct ColorABGR(byte a, byte b, byte g, byte r) : IColor, IEquatable<ColorABGR>
+public readonly partial struct ColorABGR(byte a, byte b, byte g, byte r) : IColor<ColorABGR>, IEquatable<ColorABGR>
 {
     #region Properties & Fields
 
@@ -51,7 +51,20 @@ public readonly partial struct ColorABGR(byte a, byte b, byte g, byte r) : IColo
 
     #region Operators
     
+    /// <summary>
+    /// Checks if two colors are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
     public static bool operator ==(ColorABGR left, ColorABGR right) => left.Equals(right);
+
+    /// <summary>
+    /// Checks if two colors are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(ColorABGR left, ColorABGR right) => !left.Equals(right);
     
     #endregion
@@ -62,19 +75,24 @@ public readonly partial struct ColorABGR(byte a, byte b, byte g, byte r) : IColo
     public bool Equals(IColor? other) => (other != null) && (R == other.R) && (G == other.G) && (B == other.B) && (A == other.A);
 
     /// <inheritdoc />
-    public bool Equals(ColorABGR other) => (_a == other._a) && (_b == other._b) && (_g == other._g)&& (_r== other._r);
+    public bool Equals(ColorABGR other) => Unsafe.BitCast<ColorABGR, uint>(this) == Unsafe.BitCast<ColorABGR, uint>(other);
     
     /// <inheritdoc />
-    public override bool Equals(object? obj) => obj is ColorABGR other && Equals(other);
+    public override bool Equals(object? obj) => obj switch
+    {
+        ColorABGR other => Equals(other),
+        IColor other => Equals(other),
+        _ => false
+    };
     
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(_a, _b, _g, _r);
+    public override int GetHashCode() => R | (G << 8) | (B << 16) | (A << 24);
 
     /// <inheritdoc />
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
 
     /// <inheritdoc />
-    public static IColor Create(byte r, byte g, byte b, byte a) => new ColorABGR(a, b, g, r);
+    public static ColorABGR Create(byte r, byte g, byte b, byte a) => new ColorABGR(a, b, g, r);
 
     #endregion
 }

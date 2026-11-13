@@ -22,12 +22,12 @@ public class SumTests
     }
 
     private static void SumRefImage<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor<T>
     {
         RefImage<T> data = ImageHelper.GetImage<T>(image).AsRefImage<T>();
 
-        ISum reference = ReferencePixelHelper.Sum(data);
-        ISum test = data.Sum();
+        ColorSum reference = ReferencePixelHelper.Sum(data);
+        ColorSum test = data.Sum();
 
         Assert.AreEqual(reference.R, test.R, $"R differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.G, test.G, $"G differs in type '{T.ColorFormat.Name}'");
@@ -50,12 +50,12 @@ public class SumTests
     }
 
     private static void SumGenericImage<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor<T>
     {
         Image<T> data = ImageHelper.GetImage<T>(image);
 
-        ISum reference = ReferencePixelHelper.Sum(data);
-        ISum test = data.Sum();
+        ColorSum reference = ReferencePixelHelper.Sum(data);
+        ColorSum test = data.Sum();
 
         Assert.AreEqual(reference.R, test.R, $"R differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.G, test.G, $"G differs in type '{T.ColorFormat.Name}'");
@@ -78,12 +78,12 @@ public class SumTests
     }
 
     private static void SumImage<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor<T>
     {
         IImage data = ImageHelper.GetImage<T>(image);
 
-        ISum reference = ReferencePixelHelper.Sum(data);
-        ISum test = data.Sum();
+        ColorSum reference = ReferencePixelHelper.Sum(data);
+        ColorSum test = data.Sum();
 
         Assert.AreEqual(reference.R, test.R, $"R differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.G, test.G, $"G differs in type '{T.ColorFormat.Name}'");
@@ -106,13 +106,13 @@ public class SumTests
     }
 
     private static void SumSpan<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         Span<T> span = data;
 
-        ISum reference = ReferencePixelHelper.Sum(span);
-        ISum test = span.Sum();
+        ColorSum reference = ReferencePixelHelper.Sum(span);
+        ColorSum test = span.Sum();
 
         Assert.AreEqual(reference.R, test.R, $"R differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.G, test.G, $"G differs in type '{T.ColorFormat.Name}'");
@@ -135,17 +135,24 @@ public class SumTests
     }
 
     private static void SumReadOnlySpan<T>(string image)
-        where T : struct, IColor
+        where T : unmanaged, IColor<T>
     {
         T[] data = ImageHelper.GetColorsFromImage<T>(image);
         ReadOnlySpan<T> span = data;
 
-        ISum reference = ReferencePixelHelper.Sum(span);
-        ISum test = span.Sum();
+        ColorSum reference = ReferencePixelHelper.Sum(span);
+        ColorSum test = span.Sum();
 
         Assert.AreEqual(reference.R, test.R, $"R differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.G, test.G, $"G differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.B, test.B, $"B differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.A, test.A, $"A differs in type '{T.ColorFormat.Name}'");
+    }
+
+    [TestMethod]
+    public void ThreeByteSumAlphaOverflowTest()
+    {
+        ColorRGB[] colors = new ColorRGB[4096 * 2160];
+        Assert.AreEqual(2_256_076_800L, new ReadOnlySpan<ColorRGB>(colors).Sum().A);
     }
 }

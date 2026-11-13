@@ -60,6 +60,19 @@ internal readonly record struct ColorFormatData
 
     #region Methods
 
+    /// <summary>
+    /// Gets the 1-based byte position of a channel ("r", "g", "b" or "a") in a pixel, or 0 if the format doesn't contain it.
+    /// </summary>
+    public int GetBytePosition(string entry)
+    {
+        string[] entries = [FirstEntry, SecondEntry, ThirdEntry, FourthEntry];
+        for (int i = 0; i < Bpp; i++)
+            if (entries[i] == entry)
+                return i + 1;
+
+        return 0;
+    }
+
     private string CreateByteMapping()
     {
         string[] mapping = new string[Bpp];

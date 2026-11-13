@@ -14,7 +14,7 @@ namespace HPPH;
 /// Represents a color in 24 bit BGR-format.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ColorBGR"/> class.
+/// Initializes a new instance of the <see cref="ColorBGR"/> struct.
 /// </remarks>
 /// <param name="b">The Blue-component of the color.</param>
 /// <param name="g">The Green-component of the color.</param>
@@ -22,7 +22,7 @@ namespace HPPH;
 [DebuggerDisplay("[A: {A}, R: {R}, G: {G}, B: {B}]")]
 [SkipLocalsInit]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct ColorBGR(byte b, byte g, byte r): IColor, IEquatable<ColorBGR>
+public readonly partial struct ColorBGR(byte b, byte g, byte r) : IColor<ColorBGR>, IEquatable<ColorBGR>
 {
     #region Properties & Fields
 
@@ -49,7 +49,20 @@ public readonly partial struct ColorBGR(byte b, byte g, byte r): IColor, IEquata
 
     #region Operators
     
+    /// <summary>
+    /// Checks if two colors are equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are equal; otherwise <see langword="false"/>.</returns>
     public static bool operator ==(ColorBGR left, ColorBGR right) => left.Equals(right);
+
+    /// <summary>
+    /// Checks if two colors are not equal.
+    /// </summary>
+    /// <param name="left">The first color.</param>
+    /// <param name="right">The second color.</param>
+    /// <returns><see langword="true"/> if both colors are not equal; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(ColorBGR left, ColorBGR right) => !left.Equals(right);
     
     #endregion
@@ -63,16 +76,21 @@ public readonly partial struct ColorBGR(byte b, byte g, byte r): IColor, IEquata
     public bool Equals(ColorBGR other) => (_b == other._b) && (_g == other._g) && (_r == other._r);
     
     /// <inheritdoc />
-    public override bool Equals(object? obj) => obj is ColorBGR other && Equals(other);
+    public override bool Equals(object? obj) => obj switch
+    {
+        ColorBGR other => Equals(other),
+        IColor other => Equals(other),
+        _ => false
+    };
     
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(_b, _g, _r);
+    public override int GetHashCode() => R | (G << 8) | (B << 16) | (byte.MaxValue << 24);
 
     /// <inheritdoc />
     public override string ToString() => $"[A: {A}, R: {R}, G: {G}, B: {B}]";
 
     /// <inheritdoc />
-    public static IColor Create(byte r, byte g, byte b, byte a) => new ColorBGR(b, g, r);
+    public static ColorBGR Create(byte r, byte g, byte b, byte a) => new ColorBGR(b, g, r);
 
     #endregion
 }

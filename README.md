@@ -1,107 +1,210 @@
 ﻿# HPPH
 
-C# High Performance Pixel Handling 
-
+C# High Performance Pixel Handling
 
 ## Summary
 
-This library contains helpers to work with color data (currently only 24 and 32 bit byte data) in a somewhat performance-optimized fully in C#.   
+Helpers to work with 24 and 32 bit color data, optimized for performance and written fully in C#.   
+Most operations are allocation free and use SIMD (up to AVX-512) where available.
 
-It consists of the following packages:
+| Package                                                                   | Description                                                                          |
+|---------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [HPPH](https://www.nuget.org/packages/HPPH)                               | Core package, contains everything described below                                    |
+| [HPPH.SkiaSharp](https://www.nuget.org/packages/HPPH.SkiaSharp)           | Loading of images and conversion from and to SkiaSharp images and bitmaps            |
+| [HPPH.System.Drawing](https://www.nuget.org/packages/HPPH.System.Drawing) | Loading of images and conversion from and to System.Drawing bitmaps (Windows only)  |
 
-| Package                                                                   | Description                                                                    |
-|---------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [HPPH](https://www.nuget.org/packages/HPPH)                               | Core-package, containg all the features described below                        |
-| [HPPH.System.Drawing](https://www.nuget.org/packages/HPPH.System.Drawing) | Contains extensions to convert Images from and to System.Drawing.Bitmaps       |
-| [HPPH.SkiaSharp](https://www.nuget.org/packages/HPPH.SkiaSharp)           | Contains extensions to convert Images from and to SkiaSharp images and bitmaps |
+Supports .NET 10 and .NET 11.
 
-## Supported Operations
+## Colors
 
-All of the currently supported operations are briefly described below. More are to come.   
+| Type                                                 | Size   |
+|------------------------------------------------------|--------|
+| `ColorRGB`, `ColorBGR`                               | 24 bit |
+| `ColorARGB`, `ColorABGR`, `ColorRGBA`, `ColorBGRA`   | 32 bit |
 
-Benchmarks are all run on an Ryzen 9 5900X. Reference is always a simple approach like looping over the data performing the operation.    
-The data used is always the full set of sample_data to cover a variaty of images.    
+All colors implement `IColor<T>` and expose `R`, `G`, `B` and `A`. 24 bit colors always return 255 for `A`.   
+The format of a color type is available through `T.ColorFormat` or the instances on `IColorFormat`.
 
+```csharp
+ColorRGBA color = new(255, 128, 0, 255);
+IColorFormat format = ColorRGBA.ColorFormat; // same as IColorFormat.RGBA
+```
 
-### Image
-An abstraction layer for handling pixel-grids.   
+## Images
 
-Supports all of the operations below and things like allocation-free region selection, iteration and copying of rows, colums or whole images/regions.
+`Image<T>` is a class holding its pixels in a byte array.   
+`RefImage<T>` is a ref struct that works on top of any span (arrays, `stackalloc`, native memory).   
+Both can be a view on a region of a bigger buffer, so `Stride` (bytes per row) is not always `Width * BytesPerPixel`.
 
+`IImage` is used where the color format is only known at runtime. `Image<T>` is the only implementation.
+
+### Creating
+
+```csharp
+// copies the data
+Image<ColorRGB> image = Image<ColorRGB>.Create(colors, width, height);
+Image<ColorBGRA> image2 = Image<ColorBGRA>.Create(bytes, width, height, stride);
+
+// uses the buffer without copying, changes to it show up in the image
+Image<ColorBGRA> wrapped = Image<ColorBGRA>.Wrap(bytes, width, height, stride);
+RefImage<ColorBGRA> refImage = RefImage<ColorBGRA>.Wrap(span, width, height, stride);
+
+// color format only known at runtime
+IImage image3 = format.CreateImage(bytes, width, height, stride);
+IImage wrapped2 = format.WrapImage(bytes, width, height, stride);
+```
+
+### Accessing pixels
+
+```csharp
+ColorRGB pixel = image[x, y];
+
+foreach (ColorRGB color in image) { }                       // row by row
+foreach (ImageRow<ColorRGB> row in image.Rows) { }          // row.AsSpan() for a ReadOnlySpan<ColorRGB>
+foreach (ImageColumn<ColorRGB> column in image.Columns) { }
+
+ColorRGB[] firstRow = image.Rows[0].ToArray();
+```
+
+### Regions
+
+Regions share the data of the image, nothing is copied.   
+A slice keeps the whole buffer of its image alive. Use `ToImage` to get an independent copy, for example before storing a small region of a big image.
+
+```csharp
+RefImage<ColorRGB> region = image[10, 10, 100, 50];   // allocation free
+Image<ColorRGB> slice = image.Slice(10, 10, 100, 50); // can be stored in a field
+Image<ColorRGB> copy = region.ToImage();              // independent copy
+Image<ColorRGB> copy2 = slice.ToImage();              // same for slices
+```
+
+### Copying and converting
+
+```csharp
+ColorRGB[] pixels = image.ToArray();
+byte[] raw = image.ToRawArray();      // rows without padding
+image.CopyTo(buffer);
+image.CopyTo(buffer, stride);         // rows are written stride bytes apart
+
+Image<ColorBGRA> bgra = image.ConvertTo<ColorBGRA>();
+image.ConvertTo<ColorBGRA>(buffer, stride);
+```
+
+### Comparing
+
+`Equals` checks for reference equality. Use `ContentEquals` to compare format, size and pixels. Row padding is ignored.
+
+```csharp
+bool equal = image.ContentEquals(other);
+```
+
+### Custom operations
+
+To work with an `IImage` without knowing its color format, implement `IImageOperation<TResult>` and pass it to `Execute`.
+
+```csharp
+readonly struct MaxRed : IImageOperation<byte>
+{
+    public byte Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T>
+    {
+        byte max = 0;
+        foreach (T color in image)
+            max = Math.Max(max, color.R);
+
+        return max;
+    }
+}
+
+byte maxRed = image.Execute<MaxRed, byte>(default); // no allocations
+byte maxRed2 = image.Execute(new MaxRed());         // shorter, but boxes struct operations
+```
+
+`Image<T>` and `RefImage<T>` offer the same `Execute` methods.
+
+## Operations
+
+All operations are extension methods in `PixelHelper`.   
+Sum, average, min-max and palettes work on `Image<T>`, `RefImage<T>`, `IImage` and `ReadOnlySpan<T>`. Sorting and conversion work on spans.
 
 ### Sum
 
-Optimized summarization of colors into 4 longs (one for each channel).
+Sums up each channel into a `long`.
 
-| Method           | Mean       | Error    | StdDev   | Allocated |
-|----------------- |-----------:|---------:|---------:|----------:|
-| PixelHelper_3BPP |   107.3 μs |  0.21 μs |  0.20 μs |     528 B |
-| PixelHelper_4BPP |   167.7 μs |  0.85 μs |  0.71 μs |     528 B |
-| Reference_3BPP   | 1,683.3 μs | 18.87 μs | 17.65 μs |     529 B |
-| Reference_4BPP   | 1,619.5 μs |  9.08 μs |  7.58 μs |     529 B |
-
+```csharp
+ColorSum sum = image.Sum();
+long red = sum.R;
+```
 
 ### Average
 
-Averages some colors into a single color of the same format.
-
-| Method           | Mean       | Error    | StdDev   | Allocated |
-|----------------- |-----------:|---------:|---------:|----------:|
-| PixelHelper_3BPP |   108.2 μs |  0.41 μs |  0.34 μs |      56 B |
-| PixelHelper_4BPP |   169.0 μs |  2.29 μs |  2.14 μs |      64 B |
-| Reference_3BPP   | 1,654.9 μs | 12.06 μs | 11.28 μs |     705 B |
-| Reference_4BPP   | 1,613.4 μs | 21.11 μs | 18.71 μs |     713 B |
-
+```csharp
+ColorRGB average = image.Average();
+IColor average2 = someIImage.Average();
+```
 
 ### Min-Max
 
-Gets the minimum and maximum value for each channel of the given color data.
+Gets the minimum and maximum of each channel.
 
-| Method           | Mean       | Error    | StdDev   | Allocated |
-|----------------- |-----------:|---------:|---------:|----------:|
-| PixelHelper_3BPP |   106.2 μs |  0.38 μs |  0.35 μs |     312 B |
-| PixelHelper_4BPP |   139.2 μs |  1.94 μs |  1.82 μs |     312 B |
-| Reference_3BPP   | 3,838.1 μs | 35.40 μs | 31.38 μs |     314 B |
-| Reference_4BPP   | 4,456.9 μs | 21.06 μs | 19.70 μs |     315 B |
-
+```csharp
+ColorMinMax minMax = image.MinMax();
+byte redRange = minMax.RedRange; // RedMax - RedMin
+```
 
 ### Sort
 
-Sorts color data by a single channel (Red, Green, Blue or Alpha).   
-The algorithm is stable.
+Sorts in place by a single channel. The sort is stable.
 
-> This benchmark is somewhat flawed as it's effectivly running on pre-sorted data, which does not affect the PixelHelper, but might affect the Reference.   
->
-> It's also using Linq.OrderBy which is not ideal performance-wise and requires some unneccessary allocations to fit the API, but Array/Span.Sort is not stable, which the PixelHelper is so that wouldn't be a fair comparison.)
+```csharp
+Span<ColorRGB> colors = image.ToArray();
+colors.SortByRed();
+colors.SortByGreen();
+colors.SortByBlue();
+colors.SortByAlpha();
+```
 
-| Method           | Mean      | Error     | StdDev    | Allocated  |
-|----------------- |----------:|----------:|----------:|-----------:|
-| PixelHelper_3BPP |  4.084 ms | 0.0084 ms | 0.0075 ms |        6 B |
-| PixelHelper_4BPP |  2.687 ms | 0.0102 ms | 0.0091 ms |        3 B |
-| Reference_3BPP   | 59.883 ms | 0.5693 ms | 0.5325 ms | 43118222 B |
-| Reference_4BPP   | 59.599 ms | 0.4866 ms | 0.4551 ms | 52355952 B |
+### Color palettes
 
+Reduces the colors to a palette of the given size.
 
-### Quantization
+```csharp
+ColorRGB[] palette = image.CreateColorPalette(16);
 
-Creates a color-palette of a given size for some color-data.   
-Currently only a simple but fast variation using the median-cut algorithm is implemented. It's also limited to sizes being a power of 2.   
+// pixelCounts[i] is the number of pixels represented by palette[i]
+Span<long> pixelCounts = stackalloc long[16];
+ColorRGB[] palette2 = image.CreateColorPalette(16, pixelCounts);
+```
 
-A more quality focused implementation without the size limitation is planned.
+`CreateColorPalette` uses Wu's algorithm. It's higher quality and in most cases faster than median cut.   
+To pick one explicitly use `CreateWuColorPalette` or `CreateMedianCutColorPalette` (palette size has to be a power of 2).
 
+- Splits are only done on red, green and blue, alpha is averaged.
+- Palettes are ordered by the number of pixels each color represents (most common first).
+- Palettes never contain duplicates. If there aren't enough distinct colors, the palette is smaller than requested.
 
 ### Conversion
 
-Converts from one color format to another.   
-All of the included formats can freely be converted between each other.   
+All formats can be converted into each other.
 
-Allocation-free in-place conversion is only supported for formats of same size (both 24 or 32 bit).
+```csharp
+Span<ColorRGB> rgb = image.ToArray();
 
-| Method             | Mean     | Error     | StdDev    | Allocated   |
-|------------------- |---------:|----------:|----------:|------------:|
-| RGBToBGR           | 1.487 ms | 0.0221 ms | 0.0196 ms |  9073.58 KB |
-| RGBToBGRA          | 1.676 ms | 0.0330 ms | 0.0353 ms | 12064.76 KB |
-| RGBAToABGR         | 1.766 ms | 0.0348 ms | 0.0476 ms | 12084.93 KB |
-| ARGBToBGR          | 1.533 ms | 0.0072 ms | 0.0064 ms |  9085.36 KB |
-| RGBToBGR_InPlace   | 1.025 ms | 0.0021 ms | 0.0017 ms |    34.47 KB |
-| RGBAToABGR_InPlace | 1.054 ms | 0.0023 ms | 0.0020 ms |    34.16 KB |
+ColorBGRA[] bgra = rgb.Convert<ColorRGB, ColorBGRA>();
+rgb.Convert(bgraBuffer);
+
+// only for formats of the same size
+Span<ColorBGR> bgr = rgb.ConvertInPlace<ColorRGB, ColorBGR>();
+```
+
+Conversion is mostly limited by memory bandwidth. Writing to freshly allocated memory often costs more than the conversion itself, so reuse buffers where possible.
+
+## SkiaSharp and System.Drawing
+
+Loading files and converting from and to their image types:
+
+```csharp
+Image<ColorBGRA> image = ImageHelper.LoadImage("image.png");
+using SKImage skImage = image.ToSKImage();
+```
+
+See [HPPH.SkiaSharp](https://github.com/DarthAffe/HPPH/blob/master/HPPH.SkiaSharp/README.md) and [HPPH.System.Drawing](https://github.com/DarthAffe/HPPH/blob/master/HPPH.System.Drawing/README.md) for details.

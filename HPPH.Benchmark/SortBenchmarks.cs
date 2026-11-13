@@ -4,29 +4,45 @@ using HPPH.Reference;
 
 namespace HPPH.Benchmark;
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net10_0)]
 [HtmlExporter]
 [MemoryDiagnoser]
 public class SortBenchmarks
 {
     #region Properties & Fields
 
-    private readonly List<ColorRGB[]> _colors3bpp;
-    private readonly List<ColorRGBA[]> _colors4bpp;
+    [Params(DataSet.Samples, DataSet.FullHD, DataSet.UHD)]
+    public DataSet Data { get; set; }
 
-    #endregion
-
-    #region Constructors
-
-    public SortBenchmarks()
-    {
-        _colors3bpp = BenchmarkHelper.GetSampleData<ColorRGB>();
-        _colors4bpp = BenchmarkHelper.GetSampleData<ColorRGBA>();
-    }
+    private List<ColorRGB[]> _source3bpp = [];
+    private List<ColorRGBA[]> _source4bpp = [];
+    private List<ColorRGB[]> _colors3bpp = [];
+    private List<ColorRGBA[]> _colors4bpp = [];
 
     #endregion
 
     #region Methods
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        _source3bpp = BenchmarkHelper.GetSampleData<ColorRGB>(Data);
+        _source4bpp = BenchmarkHelper.GetSampleData<ColorRGBA>(Data);
+
+        _colors3bpp = [.. _source3bpp.Select(colors => (ColorRGB[])colors.Clone())];
+        _colors4bpp = [.. _source4bpp.Select(colors => (ColorRGBA[])colors.Clone())];
+    }
+
+    // Sorting works in place, so every iteration has to start from the unsorted data again.
+    [IterationSetup]
+    public void RestoreData()
+    {
+        for (int i = 0; i < _source3bpp.Count; i++)
+            _source3bpp[i].CopyTo(_colors3bpp[i], 0);
+
+        for (int i = 0; i < _source4bpp.Count; i++)
+            _source4bpp[i].CopyTo(_colors4bpp[i], 0);
+    }
 
     [Benchmark]
     public void PixelHelper_3BPP()

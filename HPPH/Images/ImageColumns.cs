@@ -1,11 +1,14 @@
-﻿using System.Collections;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace HPPH;
 
+/// <summary>
+/// Represents the list of all columns of an image.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
 public readonly ref struct ImageColumns<T>
-    where T : struct, IColor
+    where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
 
@@ -17,18 +20,26 @@ public readonly ref struct ImageColumns<T>
     private readonly int _stride;
     private readonly int _bpp;
 
+    /// <summary>
+    /// Gets the number of columns.
+    /// </summary>
     public int Count => _width;
 
     #endregion
 
     #region Indexer
 
+    /// <summary>
+    /// Gets the column at the specified index.
+    /// </summary>
+    /// <param name="column">The index of the column.</param>
+    /// <returns>The column at the specified index.</returns>
     public ImageColumn<T> this[int column]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((column < 0) || (column >= _width)) throw new ArgumentOutOfRangeException(nameof(column));
+            if ((column < 0) || (column >= _width)) ImageValidation.ThrowColumnOutOfRange(column, _width);
 
             return new ImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
         }
@@ -61,6 +72,9 @@ public readonly ref struct ImageColumns<T>
 
     #endregion
 
+    /// <summary>
+    /// Enumerates the columns of an <see cref="ImageColumns{T}"/>.
+    /// </summary>
     public ref struct ImageColumnsEnumerator
     {
         #region Properties & Fields
@@ -96,72 +110,4 @@ public readonly ref struct ImageColumns<T>
 
         #endregion
     }
-}
-
-//HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
-[SkipLocalsInit]
-internal sealed class IColorImageColumns<T> : IImageColumns
-    where T : struct, IColor
-{
-    #region Properties & Fields
-
-    private readonly byte[] _data;
-    private readonly int _x;
-    private readonly int _y;
-    private readonly int _width;
-    private readonly int _height;
-    private readonly int _stride;
-    private readonly int _bpp;
-
-    /// <inheritdoc />
-    public int Count => _width;
-
-    #endregion
-
-    #region Indexer
-
-    /// <inheritdoc />
-    public IImageColumn this[int column]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            if ((column < 0) || (column >= _width)) throw new ArgumentOutOfRangeException(nameof(column));
-
-            return new IColorImageColumn<T>(_data, (_y * _stride) + ((column + _x) * _bpp), _height, _stride);
-        }
-    }
-
-    #endregion
-
-    #region Constructors
-
-    // ReSharper disable once ConvertToPrimaryConstructor - Not possible with ref types
-    internal IColorImageColumns(byte[] data, int x, int y, int width, int height, int stride)
-    {
-        this._data = data;
-        this._x = x;
-        this._y = y;
-        this._width = width;
-        this._height = height;
-        this._stride = stride;
-
-        _bpp = T.ColorFormat.BytesPerPixel;
-    }
-
-    #endregion
-
-    #region Methods
-
-    /// <inheritdoc />
-    public IEnumerator<IImageColumn> GetEnumerator()
-    {
-        for (int i = 0; i < _width; i++)
-            yield return this[i];
-    }
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    #endregion
 }

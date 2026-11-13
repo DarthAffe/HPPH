@@ -4,10 +4,13 @@ using System.Runtime.InteropServices;
 
 namespace HPPH;
 
-/// <inheritdoc cref="IImage{T}" />
+/// <summary>
+/// Represents an image with the color type <typeparamref name="T"/>.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
-public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
-    where T : struct, IColor
+public sealed class Image<T> : IImage, IEnumerable<T>
+    where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
 
@@ -33,6 +36,9 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     public int SizeInBytes => Width * Height * ColorFormat.BytesPerPixel;
 
+    /// <inheritdoc />
+    public int Stride => _stride;
+
     #endregion
 
     #region Indexer
@@ -40,58 +46,57 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
     /// <inheritdoc />
     IColor IImage.this[int x, int y] => this[x, y];
 
-#pragma warning disable CA2208 // Not ideal, but splitting up all the checks introduces quite some overhead :(
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the color at the specified location.
+    /// </summary>
+    /// <param name="x">The X-location to read.</param>
+    /// <param name="y">The Y-location to read.</param>
+    /// <returns>The color at the specified location.</returns>
     public ref readonly T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) throw new ArgumentOutOfRangeException();
+            if ((x < 0) || (y < 0) || (x >= Width) || (y >= Height)) ImageValidation.ThrowLocationOutOfRange(x, y, Width, Height);
 
             return ref Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (nint)(uint)((_y + y) * _stride))), (nint)(uint)(_x + x));
         }
     }
 
-    /// <inheritdoc />
-    IImage IImage.this[int x, int y, int width, int height]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
-
-            return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
-        }
-    }
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a <see cref="RefImage{T}"/> representing the specified region of this image.
+    /// </summary>
+    /// <remarks>
+    /// Use <see cref="RefImage{T}.ToImage"/> on the result to get an independent copy of the region.
+    /// </remarks>
+    /// <param name="x">The X-location of the region.</param>
+    /// <param name="y">The Y-location of the region.</param>
+    /// <param name="width">The width of the region.</param>
+    /// <param name="height">The height of the region.</param>
+    /// <returns>A view on the data of this image.</returns>
     public RefImage<T> this[int x, int y, int width, int height]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if ((x < 0) || (y < 0) || (width <= 0) || (height <= 0) || ((x + width) > Width) || ((y + height) > Height)) throw new ArgumentOutOfRangeException();
+            ImageValidation.ValidateRegion(x, y, width, height, Width, Height);
 
             return new RefImage<T>(_buffer, _x + x, _y + y, width, height, _stride);
         }
     }
 
-#pragma warning restore CA2208
-
-    /// <inheritdoc />
-    IImageRows IImage.Rows => new IColorImageRows<T>(_buffer, _x, _y, Width, Height, _stride);
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a list of all rows of this image.
+    /// </summary>
     public ImageRows<T> Rows
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => new(_buffer, _x, _y, Width, Height, _stride);
     }
 
-    IImageColumns IImage.Columns => new IColorImageColumns<T>(_buffer, _x, _y, Width, Height, _stride);
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a list of all columns of this image.
+    /// </summary>
     public ImageColumns<T> Columns
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -116,66 +121,78 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
 
     #region Methods
 
+    /// <summary>
+    /// Creates an image from a copy of <paramref name="buffer"/>.
+    /// </summary>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
     public static Image<T> Create(ReadOnlySpan<T> buffer, int width, int height)
         => Create(MemoryMarshal.AsBytes(buffer), width, height, width * T.ColorFormat.BytesPerPixel);
 
+    /// <summary>
+    /// Creates an image from a copy of <paramref name="buffer"/>.
+    /// </summary>
+    /// <remarks>
+    /// Only the pixels are copied. Row padding and data after the last row are dropped.
+    /// After creation its <see cref="Stride"/> is <c>width * BytesPerPixel</c>.
+    /// </remarks>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
+    /// <param name="stride">The distance between the starts of two rows in <paramref name="buffer"/>, in bytes. The last row needs no padding.</param>
     public static Image<T> Create(ReadOnlySpan<byte> buffer, int width, int height, int stride)
-    {
-        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
-        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+        => RefImage<T>.Wrap(buffer, width, height, stride).ToImage();
 
-        byte[] data = GC.AllocateUninitializedArray<byte>(buffer.Length);
-        buffer.CopyTo(data);
-        return new Image<T>(data, 0, 0, width, height, stride);
-    }
-
+    /// <summary>
+    /// Creates an image on top of <paramref name="buffer"/> without copying it. Changes to the buffer show up in the image.
+    /// </summary>
+    /// <param name="buffer">The pixel data.</param>
+    /// <param name="width">The width of the image in pixels.</param>
+    /// <param name="height">The height of the image in pixels.</param>
+    /// <param name="stride">The distance between the starts of two rows, in bytes. The last row needs no padding.</param>
     public static Image<T> Wrap(byte[] buffer, int width, int height, int stride)
     {
-        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
-        if (stride < width) throw new ArgumentException("Stride can't be smaller than width.");
-        if (buffer.Length < (height * stride)) throw new ArgumentException("Not enough data in the buffer.");
+        ArgumentNullException.ThrowIfNull(buffer);
+        ImageValidation.ValidateLayout(buffer.Length, width, height, stride, T.ColorFormat.BytesPerPixel);
 
         return new Image<T>(buffer, 0, 0, width, height, stride);
     }
 
-    /// <inheritdoc />
-    public IImage<TColor> ConvertTo<TColor>()
-        where TColor : struct, IColor
+    /// <inheritdoc cref="IImage.Slice" />
+    public Image<T> Slice(int x, int y, int width, int height)
     {
-        int targetBpp = TColor.ColorFormat.BytesPerPixel;
-        if (targetBpp == ColorFormat.BytesPerPixel)
-        {
-            byte[] data = ToRawArray();
-            MemoryMarshal.Cast<byte, T>(data.AsSpan()).ConvertInPlace<T, TColor>();
-            return new Image<TColor>(data, 0, 0, Width, Height, Width * targetBpp);
-        }
-        else
-        {
-            byte[] data = ToRawArray();
-            byte[] target = GC.AllocateUninitializedArray<byte>(Width * Height * targetBpp);
-            MemoryMarshal.Cast<byte, T>(data.AsSpan()).Convert(MemoryMarshal.Cast<byte, TColor>(target));
-            return new Image<TColor>(target, 0, 0, Width, Height, Width * targetBpp);
-        }
+        ImageValidation.ValidateRegion(x, y, width, height, Width, Height);
+
+        return new Image<T>(_buffer, _x + x, _y + y, width, height, _stride);
     }
 
     /// <inheritdoc />
-    public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
+    IImage IImage.Slice(int x, int y, int width, int height) => Slice(x, y, width, height);
 
     /// <inheritdoc />
-    public void CopyTo(Span<byte> destination)
-    {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
-        if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
+    public Image<TColor> ConvertTo<TColor>()
+        where TColor : unmanaged, IColor<TColor>
+        => AsRefImage().ConvertTo<TColor>();
 
-        int targetStride = Width * ColorFormat.BytesPerPixel;
-        ImageRows<T> rows = Rows;
-        Span<byte> target = destination;
-        foreach (ImageRow<T> row in rows)
-        {
-            row.CopyTo(target);
-            target = target[targetStride..];
-        }
-    }
+    /// <inheritdoc />
+    public void ConvertTo<TColor>(Span<TColor> destination)
+        where TColor : unmanaged, IColor<TColor>
+        => AsRefImage().ConvertTo(destination);
+
+    /// <inheritdoc />
+    public void ConvertTo<TColor>(Span<byte> destination, int stride)
+        where TColor : unmanaged, IColor<TColor>
+        => AsRefImage().ConvertTo<TColor>(destination, stride);
+
+    /// <inheritdoc cref="RefImage{T}.CopyTo(Span{T})" />
+    public void CopyTo(Span<T> destination) => AsRefImage().CopyTo(destination);
+
+    /// <inheritdoc />
+    public void CopyTo(Span<byte> destination) => AsRefImage().CopyTo(destination);
+
+    /// <inheritdoc />
+    public void CopyTo(Span<byte> destination, int stride) => AsRefImage().CopyTo(destination, stride);
 
     /// <inheritdoc />
     public byte[] ToRawArray()
@@ -185,7 +202,10 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return array;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Allocates a new array and copies the pixels of this image into it, row after row.
+    /// </summary>
+    /// <returns>The new array containing the pixels of this image.</returns>
     public T[] ToArray()
     {
         T[] colors = GC.AllocateUninitializedArray<T>(Width * Height);
@@ -193,30 +213,42 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return colors;
     }
 
-    //TODO DarthAffe 11.07.2024: This has some potential for optimization
-    /// <inheritdoc />
-    IColor[] IImage.ToArray()
-    {
-        IColor[] colors = new IColor[Width * Height];
-
-        int counter = 0;
-        foreach (ImageRow<T> row in Rows)
-            foreach (T color in row)
-                colors[counter++] = color;
-
-        return colors;
-    }
+    /// <inheritdoc cref="IImage.ToImage" />
+    public Image<T> ToImage() => AsRefImage().ToImage();
 
     /// <inheritdoc />
+    IImage IImage.ToImage() => ToImage();
+
+    /// <summary>
+    /// Gets a <see cref="RefImage{T}"/> representing this image.
+    /// </summary>
+    /// <returns>A view on the data of this image.</returns>
     public RefImage<T> AsRefImage() => new(_buffer, _x, _y, Width, Height, _stride);
 
     /// <inheritdoc />
     public RefImage<TColor> AsRefImage<TColor>()
-        where TColor : struct, IColor
+        where TColor : unmanaged, IColor<TColor>
     {
         if (typeof(TColor) != typeof(T)) throw new ArgumentException("The requested color format does not fit this image.", nameof(TColor));
 
         return new RefImage<TColor>(_buffer, _x, _y, Width, Height, _stride);
+    }
+
+    /// <inheritdoc />
+    public TResult Execute<TOperation, TResult>(TOperation operation)
+        where TOperation : IImageOperation<TResult>, allows ref struct
+    {
+        if (operation is null) throw new ArgumentNullException(nameof(operation));
+
+        return operation.Execute(AsRefImage());
+    }
+
+    /// <inheritdoc />
+    public TResult Execute<TResult>(IImageOperation<TResult> operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        return operation.Execute(AsRefImage());
     }
 
     /// <summary>
@@ -230,69 +262,46 @@ public sealed class Image<T> : IImage<T>, IEquatable<Image<T>>
         return ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (_y * _stride) + (_x * ColorFormat.BytesPerPixel));
     }
 
+    /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public RefImage<T>.ImageEnumerator GetEnumerator() => AsRefImage().GetEnumerator();
+
     /// <inheritdoc />
-    public IEnumerator<T> GetEnumerator()
+    IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
+        int bpp = T.ColorFormat.BytesPerPixel;
         for (int y = 0; y < Height; y++)
+        {
+            int rowOffset = ((_y + y) * _stride) + (_x * bpp);
             for (int x = 0; x < Width; x++)
-                yield return this[x, y];
+                yield return Unsafe.Add(ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_buffer), (nint)(uint)rowOffset)), (nint)(uint)x);
+        }
     }
 
     /// <inheritdoc />
-    IEnumerator<IColor> IEnumerable<IColor>.GetEnumerator()
-    {
-        for (int y = 0; y < Height; y++)
-            for (int x = 0; x < Width; x++)
-                yield return this[x, y];
-    }
-
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
+    
     /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    /// <inheritdoc />
-    public bool Equals(IImage? other)
+    public bool ContentEquals(IImage? other)
     {
-        if (other == null) return false;
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
         if (other.ColorFormat != ColorFormat) return false;
 
-        return Equals(other.AsRefImage<T>());
+        return ContentEquals(other.AsRefImage<T>());
     }
 
-    /// <inheritdoc />
-    public bool Equals(IImage<T>? other)
+    /// <inheritdoc cref="ContentEquals(IImage)" />
+    public bool ContentEquals(Image<T>? other)
     {
-        if (other == null) return false;
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
 
-        return Equals(other.AsRefImage());
+        return ContentEquals(other.AsRefImage());
     }
 
-    /// <inheritdoc />
-    public bool Equals(Image<T>? other)
-    {
-        if (other == null) return false;
-
-        return Equals(other.AsRefImage());
-    }
-
-    public bool Equals(RefImage<T> other)
-    {
-        if (other.Width != Width) return false;
-        if (other.Height != Height) return false;
-
-        RefImage<T> thisRef = AsRefImage();
-
-        for (int y = 0; y < Height; y++)
-            if (!thisRef.Rows[y].AsByteSpan().SequenceEqual(other.Rows[y].AsByteSpan()))
-                return false;
-
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override bool Equals(object? obj) => Equals(obj as Image<T>);
-
-    /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(ColorFormat, Width, Height, _buffer.GetHashCode());
+    /// <inheritdoc cref="RefImage{T}.ContentEquals(RefImage{T})" />
+    public bool ContentEquals(RefImage<T> other) => AsRefImage().ContentEquals(other);
 
     #endregion
 }

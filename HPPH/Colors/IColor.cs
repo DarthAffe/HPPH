@@ -24,11 +24,28 @@ public interface IColor : IEquatable<IColor>
     /// Gets the alpha-component of this color.
     /// </summary>
     byte A { get; }
+}
 
+/// <summary>
+/// Represents a color of the concrete type <typeparamref name="TSelf"/>.
+/// </summary>
+/// <typeparam name="TSelf">The implementing color type itself.</typeparam>
+public partial interface IColor<out TSelf> : IColor
+    where TSelf : unmanaged, IColor<TSelf>
+{
     /// <summary>
     /// Gets the color-format of this color.
     /// </summary>
-    public static virtual IColorFormat ColorFormat => throw new NotSupportedException();
+    static abstract IColorFormat ColorFormat { get; }
 
-    public static virtual IColor Create(byte r, byte g, byte b, byte a) => throw new NotSupportedException();
+    /// <summary>
+    /// Creates a color of this type from the given components.
+    /// Components this type doesn't contain are ignored.
+    /// </summary>
+    /// <param name="r">The red-component of the color.</param>
+    /// <param name="g">The green-component of the color.</param>
+    /// <param name="b">The blue-component of the color.</param>
+    /// <param name="a">The alpha-component of the color.</param>
+    /// <returns>The created color.</returns>
+    static abstract TSelf Create(byte r, byte g, byte b, byte a);
 }

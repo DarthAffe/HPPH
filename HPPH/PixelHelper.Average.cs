@@ -7,58 +7,48 @@ public static partial class PixelHelper
 {
     #region Methods
 
+    /// <summary>
+    /// Calculates the average color of the pixels of <paramref name="image"/>.
+    /// </summary>
+    /// <param name="image">The image to calculate the average for.</param>
+    /// <returns>The average color.</returns>
     public static IColor Average(this IImage image)
     {
         ArgumentNullException.ThrowIfNull(image);
 
-        float count = image.Width * image.Height;
-
-        ISum sum = Sum(image);
-
-        return image.ColorFormat.CreateColor((byte)MathF.Round(sum.R / count),
-                                             (byte)MathF.Round(sum.G / count),
-                                             (byte)MathF.Round(sum.B / count),
-                                             (byte)MathF.Round(sum.A / count));
+        return image.Execute<AverageOperation, IColor>(default);
     }
 
-    public static T Average<T>(this IImage<T> image)
-        where T : struct, IColor
+    /// <inheritdoc cref="Average(IImage)"/>
+    public static T Average<T>(this Image<T> image)
+        where T : unmanaged, IColor<T>
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        ArgumentNullException.ThrowIfNull(image);
 
         return image.AsRefImage().Average();
     }
 
+    /// <inheritdoc cref="Average(IImage)"/>
     public static T Average<T>(this RefImage<T> image)
-        where T : struct, IColor
+        where T : unmanaged, IColor<T>
     {
         float count = image.Width * image.Height;
 
-        ISum sum = Sum(image);
-        return (T)T.Create((byte)MathF.Round(sum.R / count),
-                           (byte)MathF.Round(sum.G / count),
-                           (byte)MathF.Round(sum.B / count),
-                           (byte)MathF.Round(sum.A / count));
+        ColorSum sum = image.Sum();
+        return T.Create((byte)MathF.Round(sum.R / count),
+                        (byte)MathF.Round(sum.G / count),
+                        (byte)MathF.Round(sum.B / count),
+                        (byte)MathF.Round(sum.A / count));
     }
 
-    public static T Average<T>(this Span<T> colors)
-        where T : struct, IColor
-    {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
-        return T.ColorFormat.BytesPerPixel switch
-        {
-            3 => Unsafe.BitCast<Generic3ByteData, T>(Average(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
-            4 => Unsafe.BitCast<Generic4ByteData, T>(Average(MemoryMarshal.Cast<T, Generic4ByteData>(colors))),
-            _ => throw new NotSupportedException("Data is not of a supported valid color-type.")
-        };
-    }
-
+    /// <summary>
+    /// Calculates the average color of <paramref name="colors"/>.
+    /// </summary>
+    /// <param name="colors">The colors to calculate the average for.</param>
+    /// <returns>The average color.</returns>
     public static T Average<T>(this ReadOnlySpan<T> colors)
-        where T : struct, IColor
+        where T : unmanaged, IColor<T>
     {
-        if (colors == null) throw new ArgumentNullException(nameof(colors));
-
         return T.ColorFormat.BytesPerPixel switch
         {
             3 => Unsafe.BitCast<Generic3ByteData, T>(Average(MemoryMarshal.Cast<T, Generic3ByteData>(colors))),
@@ -69,7 +59,6 @@ public static partial class PixelHelper
 
     private static Generic3ByteData Average(ReadOnlySpan<Generic3ByteData> data)
     {
-        if (data == null) throw new ArgumentNullException(nameof(data));
         if (data.Length == 0) return default;
         if (data.Length == 1) return data[0];
 
@@ -83,7 +72,6 @@ public static partial class PixelHelper
 
     private static Generic4ByteData Average(ReadOnlySpan<Generic4ByteData> data)
     {
-        if (data == null) throw new ArgumentNullException(nameof(data));
         if (data.Length == 0) return default;
         if (data.Length == 1) return data[0];
 
@@ -97,4 +85,9 @@ public static partial class PixelHelper
     }
 
     #endregion
+
+    private readonly struct AverageOperation : IImageOperation<IColor>
+    {
+        public IColor Execute<T>(RefImage<T> image) where T : unmanaged, IColor<T> => image.Average();
+    }
 }

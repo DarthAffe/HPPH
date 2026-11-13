@@ -37,31 +37,11 @@ public class ImageTest
         foreach ((int width, int height) in SIZES)
         {
             IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-            image = image[0, 0, image.Width, image.Height];
+            image = image.Slice(0, 0, image.Width, image.Height);
 
             for (int y = 0; y < image.Height; y++)
                 for (int x = 0; x < image.Width; x++)
                     Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), image[x, y]);
-        }
-    }
-
-    [TestMethod]
-    public void ImageEnumerator()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-
-            int counter = 0;
-            foreach (IColor color in image)
-            {
-                int x = counter % image.Width;
-                int y = counter / image.Width;
-
-                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), color);
-
-                counter++;
-            }
         }
     }
 
@@ -71,7 +51,7 @@ public class ImageTest
         (int width, int height) = SIZES[0];
 
         IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
+        image = image.Slice(163, 280, 720, 13);
 
         Assert.AreEqual(720, image.Width);
         Assert.AreEqual(13, image.Height);
@@ -87,8 +67,8 @@ public class ImageTest
         (int width, int height) = SIZES[0];
 
         IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
-        image = image[15, 2, 47, 8];
+        image = image.Slice(163, 280, 720, 13);
+        image = image.Slice(15, 2, 47, 8);
 
         Assert.AreEqual(47, image.Width);
         Assert.AreEqual(8, image.Height);
@@ -103,13 +83,13 @@ public class ImageTest
     {
         foreach ((int width, int height) in SIZES)
         {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+            Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
 
             Assert.AreEqual(image.Height, image.Rows.Count);
 
             for (int y = 0; y < image.Height; y++)
             {
-                IImageRow row = image.Rows[y];
+                ImageRow<ColorARGB> row = image.Rows[y];
                 Assert.AreEqual(image.Width, row.Length);
                 for (int x = 0; x < row.Length; x++)
                     Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), row[x]);
@@ -122,14 +102,14 @@ public class ImageTest
     {
         (int width, int height) = SIZES[0];
 
-        IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
+        Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+        image = image.Slice(163, 280, 720, 13);
 
         Assert.AreEqual(image.Height, image.Rows.Count);
 
         for (int y = 0; y < image.Height; y++)
         {
-            IImageRow row = image.Rows[y];
+            ImageRow<ColorARGB> row = image.Rows[y];
             Assert.AreEqual(image.Width, row.Length);
             for (int x = 0; x < row.Length; x++)
                 Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(163 + x, 280 + y), row[x]);
@@ -141,10 +121,10 @@ public class ImageTest
     {
         foreach ((int width, int height) in SIZES)
         {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+            Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
 
             int y = 0;
-            foreach (IImageRow row in image.Rows)
+            foreach (ImageRow<ColorARGB> row in image.Rows)
             {
                 for (int x = 0; x < row.Length; x++)
                     Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), row[x]);
@@ -159,13 +139,13 @@ public class ImageTest
     {
         foreach ((int width, int height) in SIZES)
         {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+            Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
 
             Assert.AreEqual(image.Width, image.Columns.Count);
 
             for (int x = 0; x < image.Width; x++)
             {
-                IImageColumn column = image.Columns[x];
+                ImageColumn<ColorARGB> column = image.Columns[x];
                 Assert.AreEqual(image.Height, column.Length);
                 for (int y = 0; y < column.Length; y++)
                     Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), column[y]);
@@ -178,14 +158,14 @@ public class ImageTest
     {
         (int width, int height) = SIZES[0];
 
-        IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-        image = image[163, 280, 720, 13];
+        Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+        image = image.Slice(163, 280, 720, 13);
 
         Assert.AreEqual(image.Width, image.Columns.Count);
 
         for (int x = 0; x < image.Width; x++)
         {
-            IImageColumn column = image.Columns[x];
+            ImageColumn<ColorARGB> column = image.Columns[x];
             Assert.AreEqual(image.Height, column.Length);
             for (int y = 0; y < column.Length; y++)
                 Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(163 + x, 280 + y), column[y]);
@@ -197,10 +177,10 @@ public class ImageTest
     {
         foreach ((int width, int height) in SIZES)
         {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+            Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
 
             int x = 0;
-            foreach (IImageColumn column in image.Columns)
+            foreach (ImageColumn<ColorARGB> column in image.Columns)
             {
                 for (int y = 0; y < column.Length; y++)
                     Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), column[y]);
@@ -230,12 +210,12 @@ public class ImageTest
     {
         foreach ((int width, int height) in SIZES)
         {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+            Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
 
-            IColor[] referenceData = image.ToArray();
+            ColorARGB[] referenceData = image.ToArray();
 
             image.ConvertTo<ColorBGRA>();
-            IColor[] testData = image.ToArray();
+            ColorARGB[] testData = image.ToArray();
 
             Assert.AreEqual(referenceData.Length, testData.Length);
             for (int i = 0; i < referenceData.Length; i++)
@@ -256,12 +236,12 @@ public class ImageTest
     {
         foreach ((int width, int height) in SIZES)
         {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+            Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
 
-            IColor[] referenceData = image.ToArray();
+            ColorARGB[] referenceData = image.ToArray();
 
             image.ConvertTo<ColorBGR>();
-            IColor[] testData = image.ToArray();
+            ColorARGB[] testData = image.ToArray();
 
             Assert.AreEqual(referenceData.Length, testData.Length);
             for (int i = 0; i < referenceData.Length; i++)
@@ -317,6 +297,207 @@ public class ImageTest
         for (int y = 0; y < 200; y++)
             for (int x = 0; x < 100; x++)
                 Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(10 + x, 20 + y), subImage[x, y]);
+    }
+
+    [TestMethod]
+    public void Slice()
+    {
+        (int width, int height) = SIZES[0];
+
+        Image<ColorARGB> image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
+        Image<ColorARGB> slice = image.Slice(163, 280, 720, 13).Slice(15, 2, 47, 8);
+
+        Assert.AreEqual(47, slice.Width);
+        Assert.AreEqual(8, slice.Height);
+        Assert.AreEqual(image.Stride, slice.Stride);
+
+        for (int y = 0; y < slice.Height; y++)
+            for (int x = 0; x < slice.Width; x++)
+                Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(178 + x, 282 + y), slice[x, y]);
+
+        Assert.AreSequenceEqual(image.AsRefImage()[178, 282, 47, 8].ToArray(), slice.ToArray());
+    }
+
+    [TestMethod]
+    public void SliceSharesData()
+    {
+        byte[] buffer = new byte[4 * 4 * 3];
+        Image<ColorRGB> image = Image<ColorRGB>.Wrap(buffer, 4, 4, 4 * 3);
+        Image<ColorRGB> slice = image.Slice(1, 2, 2, 2);
+
+        buffer[(2 * 4 * 3) + (1 * 3)] = 42;
+
+        Assert.AreEqual(42, slice[0, 0].R);
+    }
+
+    [TestMethod]
+    public void ToImage()
+    {
+        foreach ((int width, int height) in SIZES)
+        {
+            Image<ColorRGB> source = TestDataHelper.CreateTestImage<ColorRGB>(width, height);
+            Image<ColorRGB> slice = source.Slice(width / 4, height / 4, Math.Max(1, width / 2), Math.Max(1, height / 2));
+
+            Image<ColorRGB> image = slice.ToImage();
+
+            Assert.AreNotSame(slice, image);
+            Assert.AreEqual(slice.Width, image.Width);
+            Assert.AreEqual(slice.Height, image.Height);
+            Assert.AreEqual(slice.Width * 3, image.Stride);
+            Assert.IsTrue(image.ContentEquals(slice));
+        }
+    }
+
+    [TestMethod]
+    public void ToImageOfCompactImage()
+    {
+        Image<ColorBGRA> source = TestDataHelper.CreateTestImage<ColorBGRA>(10, 20);
+
+        Image<ColorBGRA> image = source.ToImage();
+
+        Assert.AreNotSame(source, image);
+        Assert.AreEqual(source.Stride, image.Stride);
+        Assert.IsTrue(image.ContentEquals(source));
+    }
+
+    [TestMethod]
+    public void ToImageIsIndependentOfSource()
+    {
+        const int WIDTH = 4;
+        const int HEIGHT = 3;
+        const int STRIDE = (WIDTH * 4) + 8;
+
+        byte[] buffer = new byte[STRIDE * HEIGHT];
+        for (int i = 0; i < buffer.Length; i++)
+            buffer[i] = (byte)i;
+
+        Image<ColorRGBA> slice = Image<ColorRGBA>.Wrap(buffer, WIDTH, HEIGHT, STRIDE).Slice(1, 1, 2, 2);
+        Image<ColorRGBA> copy = slice.ToImage();
+        ColorRGBA[] expected = copy.ToArray();
+
+        buffer.AsSpan().Clear();
+
+        Assert.AreSequenceEqual(expected, copy.ToArray());
+        Assert.IsFalse(copy.ContentEquals(slice));
+    }
+
+    [TestMethod]
+    public void ToImageEmpty()
+    {
+        Image<ColorRGB> image = Image<ColorRGB>.Create([], 0, 0).ToImage();
+
+        Assert.AreEqual(0, image.Width);
+        Assert.AreEqual(0, image.Height);
+        Assert.AreEqual(0, image.SizeInBytes);
+    }
+
+    [TestMethod]
+    public void IImageToImage()
+    {
+        IImage source = TestDataHelper.CreateTestImage<ColorARGB>(30, 20);
+        IImage slice = source.Slice(3, 4, 15, 10);
+
+        IImage image = slice.ToImage();
+
+        Assert.IsInstanceOfType<Image<ColorARGB>>(image);
+        Assert.AreNotSame(slice, image);
+        Assert.AreEqual(15 * 4, image.Stride);
+        Assert.IsTrue(image.ContentEquals(slice));
+    }
+
+    [TestMethod]
+    public void SliceOutOfRange()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
+
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(-1, 0, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, -1, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 0, 0, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 0, 5, 0));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(6, 0, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 6, 5, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(5, 0, int.MaxValue, 5));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(0, 5, 5, int.MaxValue));
+    }
+
+    [TestMethod]
+    public void SliceOutOfRangeDescribesTheProblem()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+
+        AssertParameter(-1, 0, 5, 5, "x", -1);
+        AssertParameter(0, -1, 5, 5, "y", -1);
+        AssertParameter(0, 0, 0, 5, "width", 0);
+        AssertParameter(0, 0, 5, -1, "height", -1);
+        AssertParameter(6, 0, 5, 5, "width", 5);
+        AssertParameter(0, 16, 5, 5, "height", 5);
+        AssertParameter(5, 0, int.MaxValue, 5, "width", int.MaxValue);
+
+        void AssertParameter(int x, int y, int width, int height, string expectedParamName, int expectedValue)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Slice(x, y, width, height));
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"Slice({x}, {y}, {width}, {height})");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"Slice({x}, {y}, {width}, {height})");
+
+            ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[x, y, width, height]);
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"[{x}, {y}, {width}, {height}]");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"[{x}, {y}, {width}, {height}]");
+        }
+    }
+
+    [TestMethod]
+    public void IndexerOutOfRangeDescribesTheProblem()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+
+        AssertParameter(-1, 0, "x", -1);
+        AssertParameter(10, 0, "x", 10);
+        AssertParameter(0, -1, "y", -1);
+        AssertParameter(0, 20, "y", 20);
+        AssertParameter(10, 20, "x", 10);
+
+        void AssertParameter(int x, int y, string expectedParamName, int expectedValue)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[x, y]);
+            Assert.AreEqual(expectedParamName, ex.ParamName, $"[{x}, {y}]");
+            Assert.AreEqual(expectedValue, ex.ActualValue, $"[{x}, {y}]");
+        }
+    }
+
+    [TestMethod]
+    public void RowAndColumnIndexerOutOfRangeDescribesTheProblem()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+
+        AssertParameter(() => _ = image.Rows[-1], "row", -1, "Rows[-1]");
+        AssertParameter(() => _ = image.Rows[20], "row", 20, "Rows[20]");
+        AssertParameter(() => _ = image.Columns[-1], "column", -1, "Columns[-1]");
+        AssertParameter(() => _ = image.Columns[10], "column", 10, "Columns[10]");
+        AssertParameter(() => _ = image.Rows[0][-1], "x", -1, "Rows[0][-1]");
+        AssertParameter(() => _ = image.Rows[0][10], "x", 10, "Rows[0][10]");
+        AssertParameter(() => _ = image.Columns[0][-1], "y", -1, "Columns[0][-1]");
+        AssertParameter(() => _ = image.Columns[0][20], "y", 20, "Columns[0][20]");
+
+        static void AssertParameter(Action action, string expectedParamName, int expectedValue, string access)
+        {
+            ArgumentOutOfRangeException ex = Assert.ThrowsExactly<ArgumentOutOfRangeException>(action);
+            Assert.AreEqual(expectedParamName, ex.ParamName, access);
+            Assert.AreEqual(expectedValue, ex.ActualValue, access);
+        }
+    }
+
+    [TestMethod]
+    public void Stride()
+    {
+        const int STRIDE = (10 * 4) + 12;
+
+        Image<ColorBGRA> image = Image<ColorBGRA>.Wrap(new byte[STRIDE * 5], 10, 5, STRIDE);
+
+        Assert.AreEqual(STRIDE, image.Stride);
+        Assert.AreEqual(STRIDE, ((IImage)image).Stride);
+        Assert.AreEqual(STRIDE, image.Slice(2, 1, 3, 3).Stride);
+        Assert.AreEqual(STRIDE, image.AsRefImage().Stride);
+        Assert.AreEqual(10 * 3, TestDataHelper.CreateTestImage<ColorRGB>(10, 5).Stride);
     }
 
     [TestMethod]
@@ -506,238 +687,93 @@ public class ImageTest
     }
 
     [TestMethod]
-    public void InterfaceRowsIterate()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-
-            int y = 0;
-            foreach (IImageRow row in image.Rows)
-            {
-                int x = 0;
-                foreach (IColor color in row)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x++, y), color);
-
-                y++;
-            }
-
-            y = 0;
-            foreach (IImageRow row in (IEnumerable)image.Rows)
-            {
-                int x = 0;
-                foreach (IColor color in (IEnumerable)row)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x++, y), color);
-
-                y++;
-            }
-        }
-    }
-
-    [TestMethod]
-    public void InterfaceColumnsIterate()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-
-            int x = 0;
-            foreach (IImageColumn column in image.Columns)
-            {
-                int y = 0;
-                foreach (IColor color in column)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y++), color);
-
-                x++;
-            }
-
-            x = 0;
-            foreach (IImageColumn column in (IEnumerable)image.Columns)
-            {
-                int y = 0;
-                foreach (IColor color in (IEnumerable)column)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y++), color);
-
-                x++;
-            }
-        }
-    }
-
-    [TestMethod]
-    public void InterfaceEnumerate()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-            ColorARGB[] reference = TestDataHelper.GetPixelData<ColorARGB>(width, height);
-
-            int i = 0;
-            foreach (IColor color in image)
-                Assert.AreEqual(reference[i++], color);
-
-            IEnumerable enumerable = image;
-            i = 0;
-            foreach (IColor color in enumerable)
-                Assert.AreEqual(reference[i++], color);
-        }
-    }
-
-    [TestMethod]
-    public void InterfaceColumnsCopyTo()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-
-            int x = 0;
-            foreach (IImageColumn column in image.Columns)
-            {
-                IColor[] colors = new IColor[height];
-                byte[] bytes = new byte[height * 4];
-                column.CopyTo(colors);
-                column.CopyTo(bytes);
-
-                int y = 0;
-                foreach (IColor color in colors)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y++), color);
-
-                for (y = 0; y < height; y++)
-                {
-                    IColor reference = TestDataHelper.GetColorFromLocation<ColorARGB>(x, y);
-
-                    Assert.AreEqual(reference.A, bytes[(y * 4) + 0]);
-                    Assert.AreEqual(reference.R, bytes[(y * 4) + 1]);
-                    Assert.AreEqual(reference.G, bytes[(y * 4) + 2]);
-                    Assert.AreEqual(reference.B, bytes[(y * 4) + 3]);
-                }
-
-                x++;
-            }
-        }
-    }
-
-    [TestMethod]
-    public void InterfaceColumnsToArray()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-
-            int x = 0;
-            foreach (IImageColumn column in image.Columns)
-            {
-                IColor[] data = column.ToArray();
-
-                for (int y = 0; y < height; y++)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), data[y]);
-
-                x++;
-            }
-        }
-    }
-
-    [TestMethod]
-    public void InterfaceRowsCopyTo()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-
-            int y = 0;
-            foreach (IImageRow row in image.Rows)
-            {
-                IColor[] colors = new IColor[width];
-                byte[] bytes = new byte[width * 4];
-                row.CopyTo(colors);
-                row.CopyTo(bytes);
-
-                int x = 0;
-                foreach (IColor color in colors)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x++, y), color);
-
-                for (x = 0; x < width; x++)
-                {
-                    IColor reference = TestDataHelper.GetColorFromLocation<ColorARGB>(x, y);
-
-                    Assert.AreEqual(reference.A, bytes[(x * 4) + 0]);
-                    Assert.AreEqual(reference.R, bytes[(x * 4) + 1]);
-                    Assert.AreEqual(reference.G, bytes[(x * 4) + 2]);
-                    Assert.AreEqual(reference.B, bytes[(x * 4) + 3]);
-                }
-
-                y++;
-            }
-        }
-    }
-
-    [TestMethod]
-    public void InterfaceRowsToArray()
-    {
-        foreach ((int width, int height) in SIZES)
-        {
-            IImage image = TestDataHelper.CreateTestImage<ColorARGB>(width, height);
-
-            int y = 0;
-            foreach (IImageRow row in image.Rows)
-            {
-                IColor[] data = row.ToArray();
-
-                for (int x = 0; x < width; x++)
-                    Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorARGB>(x, y), data[x]);
-
-                y++;
-            }
-        }
-    }
-
-    [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void CreateWrongStride()
     {
-        Image<ColorRGB>.Create([], 10, 20, 9);
+        Assert.ThrowsExactly<ArgumentException>(() => Image<ColorRGB>.Create([], 10, 20, 9));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void CreateWrongBufferSize()
     {
-        Image<ColorRGB>.Create(new byte[299], 10, 10, 30);
+        Assert.ThrowsExactly<ArgumentException>(() => Image<ColorRGB>.Create(new byte[299], 10, 10, 30));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void CopyToByteNull()
+    public void CreateDropsPadding()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<byte>)null);
+        const int WIDTH = 10;
+        const int HEIGHT = 5;
+        const int STRIDE = (WIDTH * 3) + 7;
+
+        // Padding and trailing bytes are filled with garbage that must not end up in the image.
+        byte[] buffer = new byte[(STRIDE * HEIGHT) + 100];
+        buffer.AsSpan().Fill(0xAB);
+
+        Image<ColorRGB> expected = TestDataHelper.CreateTestImage<ColorRGB>(WIDTH, HEIGHT);
+        for (int y = 0; y < HEIGHT; y++)
+            expected.Rows[y].CopyTo(buffer.AsSpan(y * STRIDE));
+
+        Image<ColorRGB> image = Image<ColorRGB>.Create(buffer, WIDTH, HEIGHT, STRIDE);
+
+        Assert.AreEqual(WIDTH * 3, image.Stride);
+        Assert.AreEqual(WIDTH * HEIGHT * 3, image.SizeInBytes);
+        Assert.IsTrue(image.ContentEquals(expected));
+        Assert.AreSequenceEqual(expected.ToRawArray(), image.ToRawArray());
+        Assert.AreEqual(expected.Sum(), image.Sum());
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void CopyToColorNull()
+    public void CreateCopiesData()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<ColorRGB>)null);
+        byte[] buffer = new byte[4 * 4 * 3];
+        Image<ColorRGB> image = Image<ColorRGB>.Create(buffer, 4, 4, 4 * 3);
+
+        buffer[0] = 42;
+
+        Assert.AreEqual(0, image[0, 0].R);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
+    public void CreateEmpty()
+    {
+        Image<ColorRGB> zeroHeight = Image<ColorRGB>.Create(new byte[10], 3, 0, 10);
+        Assert.AreEqual(0, zeroHeight.SizeInBytes);
+        Assert.AreEqual(3 * 3, zeroHeight.Stride);
+
+        Image<ColorRGB> zeroWidth = Image<ColorRGB>.Create(new byte[100], 0, 5, 10);
+        Assert.AreEqual(0, zeroWidth.SizeInBytes);
+        Assert.AreEqual(0, zeroWidth.Stride);
+    }
+
+    [TestMethod]
+    public void CopyToByteEmpty()
+    {
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<byte>)default));
+    }
+
+    [TestMethod]
+    public void CopyToColorEmpty()
+    {
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo((Span<ColorRGB>)default));
+    }
+
+    [TestMethod]
     public void CopyToByteWrongSize()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new byte[(10 * 10 * 3) - 1]);
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new byte[(10 * 10 * 3) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void CopyToColorWrongSize()
     {
-        TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new ColorRGB[(10 * 10) - 1]);
+        Assert.ThrowsExactly<ArgumentException>(() => TestDataHelper.CreateTestImage<ColorRGB>(10, 10).CopyTo(new ColorRGB[(10 * 10) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void AsRefImageWrongType()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
-        RefImage<ColorBGR> refImage = image.AsRefImage<ColorBGR>();
+        Assert.ThrowsExactly<ArgumentException>(() => _ = image.AsRefImage<ColorBGR>());
     }
 
     [TestMethod]
@@ -748,332 +784,293 @@ public class ImageTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongXBig()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[10, 19];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[10, 19]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongYBig()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[9, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[9, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongXSmall()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[-1, 19];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[-1, 19]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void IndexerWrongYSmall()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        ColorRGB test = image[9, -1];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[9, -1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongX()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[-1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[-1, 0, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongY()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, -1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, -1, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongWidth()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, 0, 0, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 0, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageWrongHeight()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, 0, 10, 0];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 0, 10, 0]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInvalidSizeWidth()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[1, 0, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInvalidSizeHeight()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        RefImage<ColorRGB> test = image[0, 1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image[0, 1, 10, 20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongX()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[-1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(-1, 0, 10, 20));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongY()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, -1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, -1, 10, 20));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, 0, 0, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, 0, 0, 20));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceWrongHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, 0, 10, 0];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, 0, 10, 0));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceInvalidSizeWidth()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[1, 0, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(1, 0, 10, 20));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void SubImageInterfaceInvalidSizeHeight()
     {
         IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImage test = image[0, 1, 10, 20];
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Slice(0, 1, 10, 20));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnsIndexerToBig()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageColumn test = image.Columns[20];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnsIndexerToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageColumn test = image.Columns[-1];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowsIndexerToBig()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageRow test = image.Rows[20];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowsIndexerToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IImageRow test = image.Rows[-1];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnIndexerToBig()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Columns[1][20];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[1][20]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void ColumnIndexerToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Columns[1][-1];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Columns[1][-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowIndexerToBig()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Rows[1][10];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[1][10]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void RowIndexerToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        IColor test = image.Rows[1][-1];
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = image.Rows[1][-1]);
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void ColumnCopyToByteNull()
+    public void ColumnCopyToByteEmpty()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo((Span<byte>)null);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo((Span<byte>)default));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void ColumnCopyToColorNull()
+    public void ColumnCopyToColorEmpty()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo((Span<IColor>)null);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo((Span<ColorRGB>)default));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void ColumnCopyToByteToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo(new byte[(20 * 3) - 1]);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo(new byte[(20 * 3) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void ColumnCopyToColorToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Columns[1].CopyTo(new IColor[19]);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Columns[1].CopyTo(new ColorRGB[19]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void RowCopyToByteNull()
+    public void RowCopyToByteEmpty()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo((Span<byte>)null);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo((Span<byte>)default));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
-    public void RowCopyToColorNull()
+    public void RowCopyToColorEmpty()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo((Span<IColor>)null);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo((Span<ColorRGB>)default));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void RowCopyToByteToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo(new byte[(10 * 3) - 1]);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo(new byte[(10 * 3) - 1]));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void RowCopyToColorToSmall()
     {
-        IImage image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        image.Rows[1].CopyTo(new IColor[9]);
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Assert.ThrowsExactly<ArgumentException>(() => image.Rows[1].CopyTo(new ColorRGB[9]));
     }
 
     [TestMethod]
-    public void EqualsIImage()
+    public void ContentEqualsIImage()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         IImage image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.AreEqual(image, image2);
+        Assert.IsTrue(image.ContentEquals(image2));
+        Assert.IsTrue(image2.ContentEquals(image));
 
-        Assert.IsFalse(image.Equals((IImage?)null));
+        Assert.IsFalse(image.ContentEquals((IImage?)null));
     }
 
     [TestMethod]
-    public void EqualsGenericIImage()
-    {
-        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-
-        IImage<ColorRGB> image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.AreEqual(image, image2);
-
-        Assert.IsFalse(image.Equals((IImage<ColorRGB>?)null));
-    }
-
-    [TestMethod]
-    public void EqualsImage()
+    public void ContentEqualsImage()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         Image<ColorRGB> image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-        Assert.AreEqual(image, image2);
+        Assert.IsTrue(image.ContentEquals(image2));
 
-        Assert.IsFalse(image.Equals((Image<ColorRGB>?)null));
+        Assert.IsFalse(image.ContentEquals((Image<ColorRGB>?)null));
     }
 
     [TestMethod]
-    public void EqualsIImageWrongSize()
+    public void ContentEqualsIgnoresPadding()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
+        Image<ColorRGB> slice = image.Slice(2, 3, 5, 7);
+        Image<ColorRGB> compact = Image<ColorRGB>.Create(slice.ToArray(), 5, 7);
+
+        Assert.AreNotEqual(slice.Stride, compact.Stride);
+        Assert.IsTrue(slice.ContentEquals(compact));
+        Assert.IsTrue(compact.ContentEquals(slice));
+        Assert.IsTrue(compact.ContentEquals(image[2, 3, 5, 7]));
+        Assert.IsTrue(image[2, 3, 5, 7].ContentEquals(compact.AsRefImage()));
+        Assert.IsFalse(image[2, 3, 5, 7].ContentEquals(image[3, 3, 5, 7]));
+    }
+
+    [TestMethod]
+    public void ContentEqualsIImageWrongSize()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         IImage image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
 
         IImage image3 = TestDataHelper.CreateTestImage<ColorRGB>(20, 20);
-        Assert.AreNotEqual(image, image3);
+        Assert.IsFalse(image.ContentEquals(image3));
     }
 
     [TestMethod]
-    public void EqualsGenericIImageWrongSize()
-    {
-        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-
-        IImage<ColorRGB> image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
-        Assert.AreNotEqual(image, image2);
-
-        IImage<ColorRGB> image3 = TestDataHelper.CreateTestImage<ColorRGB>(20, 20);
-        Assert.AreNotEqual(image, image3);
-    }
-
-    [TestMethod]
-    public void EqualsImageWrongSize()
+    public void ContentEqualsImageWrongSize()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
         Image<ColorRGB> image2 = TestDataHelper.CreateTestImage<ColorRGB>(10, 10);
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
 
         Image<ColorRGB> image3 = TestDataHelper.CreateTestImage<ColorRGB>(20, 20);
-        Assert.AreNotEqual(image, image3);
+        Assert.IsFalse(image.ContentEquals(image3));
     }
 
     [TestMethod]
-    public void EqualsIImageWrongPixel()
+    public void ContentEqualsIImageWrongPixel()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
@@ -1081,23 +1078,11 @@ public class ImageTest
         array[1] = new ColorRGB(255, 255, 255);
         IImage image2 = Image<ColorRGB>.Create(array, 10, 20);
 
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
     }
 
     [TestMethod]
-    public void EqualsGenericIImageWrongPixel()
-    {
-        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
-
-        ColorRGB[] array = image.ToArray();
-        array[1] = new ColorRGB(255, 255, 255);
-        IImage<ColorRGB> image2 = Image<ColorRGB>.Create(array, 10, 20);
-
-        Assert.AreNotEqual(image, image2);
-    }
-
-    [TestMethod]
-    public void EqualsImageWrongPixel()
+    public void ContentEqualsImageWrongPixel()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
 
@@ -1105,16 +1090,34 @@ public class ImageTest
         array[1] = new ColorRGB(255, 255, 255);
         Image<ColorRGB> image2 = Image<ColorRGB>.Create(array, 10, 20);
 
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
     }
 
     [TestMethod]
-    public void EqualsIImageWrongFormat()
+    public void ContentEqualsIImageWrongFormat()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);
         IImage image2 = TestDataHelper.CreateTestImage<ColorBGR>(10, 20);
 
-        Assert.AreNotEqual(image, image2);
+        Assert.IsFalse(image.ContentEquals(image2));
+    }
+
+    [TestMethod]
+    public void EqualsIsReferenceEquality()
+    {
+        ColorRGBA[] pixels = [new(1, 2, 3, 4), new(5, 6, 7, 8), new(9, 10, 11, 12), new(13, 14, 15, 16)];
+        Image<ColorRGBA> a = Image<ColorRGBA>.Create(pixels, 2, 2);
+        Image<ColorRGBA> b = Image<ColorRGBA>.Create(pixels, 2, 2);
+
+        Assert.IsTrue(a.ContentEquals(b));
+        Assert.IsFalse(a.Equals(b));
+        Assert.IsTrue(a.Equals(a));
+
+        // Instances with the same content stay distinct in collections.
+        List<Image<ColorRGBA>> list = [a, b];
+        list.Remove(b);
+        Assert.AreSame(a, list[0]);
+        Assert.HasCount(2, new HashSet<Image<ColorRGBA>> { a, b });
     }
 
     #endregion

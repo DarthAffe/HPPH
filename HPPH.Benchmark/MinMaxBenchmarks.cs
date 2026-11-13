@@ -4,39 +4,40 @@ using HPPH.Reference;
 
 namespace HPPH.Benchmark;
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net10_0)]
 [HtmlExporter]
 [MemoryDiagnoser]
 public class MinMaxBenchmarks
 {
     #region Properties & Fields
 
-    private readonly List<ColorRGB[]> _colors3bpp;
-    private readonly List<ColorRGBA[]> _colors4bpp;
-    private readonly List<IImage<ColorRGB>> _images3bpp;
-    private readonly List<IImage<ColorRGBA>> _images4bpp;
+    [Params(DataSet.Samples, DataSet.FullHD, DataSet.UHD)]
+    public DataSet Data { get; set; }
 
-    #endregion
-
-    #region Constructors
-
-    public MinMaxBenchmarks()
-    {
-        _colors3bpp = BenchmarkHelper.GetSampleData<ColorRGB>();
-        _colors4bpp = BenchmarkHelper.GetSampleData<ColorRGBA>();
-
-        _images3bpp = BenchmarkHelper.GetSampleDataImages<ColorRGB>();
-        _images4bpp = BenchmarkHelper.GetSampleDataImages<ColorRGBA>();
-    }
+    private List<ColorRGB[]> _colors3bpp = [];
+    private List<ColorRGBA[]> _colors4bpp = [];
+    private List<Image<ColorRGB>> _images3bpp = [];
+    private List<Image<ColorRGBA>> _images4bpp = [];
 
     #endregion
 
     #region Methods
 
-    [Benchmark]
-    public IMinMax[] PixelHelper_3BPP()
+    [GlobalSetup]
+    public void Setup()
     {
-        IMinMax[] minMax = new IMinMax[_colors3bpp.Count];
+        _colors3bpp = BenchmarkHelper.GetSampleData<ColorRGB>(Data);
+        _colors4bpp = BenchmarkHelper.GetSampleData<ColorRGBA>(Data);
+
+        _images3bpp = BenchmarkHelper.GetSampleDataImages<ColorRGB>(Data);
+        _images4bpp = BenchmarkHelper.GetSampleDataImages<ColorRGBA>(Data);
+    }
+
+
+    [Benchmark]
+    public ColorMinMax[] PixelHelper_3BPP()
+    {
+        ColorMinMax[] minMax = new ColorMinMax[_colors3bpp.Count];
         for (int i = 0; i < _colors3bpp.Count; i++)
             minMax[i] = new ReadOnlySpan<ColorRGB>(_colors3bpp[i]).MinMax();
 
@@ -44,9 +45,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] PixelHelper_4BPP()
+    public ColorMinMax[] PixelHelper_4BPP()
     {
-        IMinMax[] minMax = new IMinMax[_colors4bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_colors4bpp.Count];
         for (int i = 0; i < _colors4bpp.Count; i++)
             minMax[i] = new ReadOnlySpan<ColorRGBA>(_colors4bpp[i]).MinMax();
 
@@ -54,9 +55,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] PixelHelper_3BPP_Image()
+    public ColorMinMax[] PixelHelper_3BPP_Image()
     {
-        IMinMax[] minMax = new IMinMax[_images3bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_images3bpp.Count];
         for (int i = 0; i < _images3bpp.Count; i++)
             minMax[i] = _images3bpp[i].MinMax();
 
@@ -64,9 +65,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] PixelHelper_4BPP_Image()
+    public ColorMinMax[] PixelHelper_4BPP_Image()
     {
-        IMinMax[] minMax = new IMinMax[_images4bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_images4bpp.Count];
         for (int i = 0; i < _images4bpp.Count; i++)
             minMax[i] = _images4bpp[i].MinMax();
 
@@ -74,9 +75,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] Reference_3BPP()
+    public ColorMinMax[] Reference_3BPP()
     {
-        IMinMax[] minMax = new IMinMax[_colors3bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_colors3bpp.Count];
         for (int i = 0; i < _colors3bpp.Count; i++)
             minMax[i] = ReferencePixelHelper.MinMax(new ReadOnlySpan<ColorRGB>(_colors3bpp[i]));
 
@@ -84,9 +85,9 @@ public class MinMaxBenchmarks
     }
 
     [Benchmark]
-    public IMinMax[] Reference_4BPP()
+    public ColorMinMax[] Reference_4BPP()
     {
-        IMinMax[] minMax = new IMinMax[_colors4bpp.Count];
+        ColorMinMax[] minMax = new ColorMinMax[_colors4bpp.Count];
         for (int i = 0; i < _colors4bpp.Count; i++)
             minMax[i] = ReferencePixelHelper.MinMax(new ReadOnlySpan<ColorRGBA>(_colors4bpp[i]));
 
