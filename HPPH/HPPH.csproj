@@ -20,7 +20,10 @@
     <AssemblyTitle>HPPH</AssemblyTitle>
     <PackageId>HPPH</PackageId>
     <RootNamespace>HPPH</RootNamespace>
-    <Description>Some optimized things to perform on color-data</Description>
+    <Description>
+      Helpers to work with 24 and 32 bit color data, optimized for performance.
+      Most operations are allocation free and use SIMD (up to AVX-512) where available.
+    </Description>
     <Summary>High Performance Pixel Handling</Summary>
     <Copyright>Copyright © Darth Affe 2026</Copyright>
     <PackageCopyright>Copyright © Darth Affe 2026</PackageCopyright>
