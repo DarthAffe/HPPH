@@ -195,10 +195,10 @@ internal static unsafe class WuQuantizer
         for (int i = 0; i < count; i++)
         {
             WuMoment moment = GetVolume(moments, boxes[i]);
-            colors[i] = T.Create(Average(moment.R, moment.Weight),
-                                 Average(moment.G, moment.Weight),
-                                 Average(moment.B, moment.Weight),
-                                 Average(moment.A, moment.Weight));
+            colors[i] = T.Create(PixelHelper.RoundedAverage(moment.R, moment.Weight),
+                                 PixelHelper.RoundedAverage(moment.G, moment.Weight),
+                                 PixelHelper.RoundedAverage(moment.B, moment.Weight),
+                                 PixelHelper.RoundedAverage(moment.A, moment.Weight));
             populations[i] = moment.Weight;
         }
 
@@ -361,9 +361,6 @@ internal static unsafe class WuQuantizer
              + Unsafe.Add(ref table, r0 + g0 + box.B1)
              - Unsafe.Add(ref table, r0 + g0 + box.B0);
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static byte Average(long sum, long weight) => (byte)MathF.Round(sum / (float)weight);
 
     #endregion
 }

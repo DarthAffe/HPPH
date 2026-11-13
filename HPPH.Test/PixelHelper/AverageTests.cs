@@ -148,4 +148,50 @@ public class AverageTests
         Assert.AreEqual(reference.B, test.B, $"B differs in type '{T.ColorFormat.Name}'");
         Assert.AreEqual(reference.A, test.A, $"A differs in type '{T.ColorFormat.Name}'");
     }
+
+    [TestMethod]
+    public void AverageRoundsExactly()
+    {
+        AverageRoundsExactly<ColorRGB>();
+        AverageRoundsExactly<ColorBGR>();
+        AverageRoundsExactly<ColorRGBA>();
+        AverageRoundsExactly<ColorBGRA>();
+        AverageRoundsExactly<ColorARGB>();
+        AverageRoundsExactly<ColorABGR>();
+    }
+
+    private static void AverageRoundsExactly<T>()
+        where T : unmanaged, IColor<T>
+    {
+        // 32769 pixels of k + 1 and 32768 of k average to k + 0.5000076, which rounds to k + 1.
+        // Dividing in float gave exactly k + 0.5 there, which rounded to k for even k.
+        foreach (byte k in (byte[])[200, 254])
+            AssertAverage<T>([.. Enumerable.Repeat((byte)(k + 1), 32769), .. Enumerable.Repeat(k, 32768)], (byte)(k + 1));
+
+        // Exact ties go to the even value.
+        AssertAverage<T>([0, 1], 0);
+        AssertAverage<T>([1, 2], 2);
+        AssertAverage<T>([0, 0, 1, 1], 0);
+        AssertAverage<T>([1, 1, 2, 2], 2);
+    }
+
+    private static void AssertAverage<T>(byte[] values, byte expected)
+        where T : unmanaged, IColor<T>
+    {
+        T[] colors = [.. values.Select(value => T.Create(value, value, value, value))];
+        T expectedColor = T.Create(expected, expected, expected, expected);
+        Image<T> image = Image<T>.Create(colors, colors.Length, 1);
+        string name = $"{T.ColorFormat.Name}, {values.Length} px";
+
+        Assert.AreEqual(expectedColor, new ReadOnlySpan<T>(colors).Average(), $"{name}: ReadOnlySpan");
+        Assert.AreEqual(expectedColor, image.Average(), $"{name}: Image");
+        Assert.AreEqual(expectedColor, image.AsRefImage().Average(), $"{name}: RefImage");
+        Assert.AreEqual(expectedColor, ReferencePixelHelper.Average(image.AsRefImage()), $"{name}: Reference");
+
+        IColor fromInterface = ((IImage)image).Average();
+        Assert.AreEqual(expectedColor.R, fromInterface.R, $"{name}: IImage R");
+        Assert.AreEqual(expectedColor.G, fromInterface.G, $"{name}: IImage G");
+        Assert.AreEqual(expectedColor.B, fromInterface.B, $"{name}: IImage B");
+        Assert.AreEqual(expectedColor.A, fromInterface.A, $"{name}: IImage A");
+    }
 }

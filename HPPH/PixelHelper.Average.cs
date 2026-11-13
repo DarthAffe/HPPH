@@ -32,13 +32,13 @@ public static partial class PixelHelper
     public static T Average<T>(this RefImage<T> image)
         where T : unmanaged, IColor<T>
     {
-        float count = image.Width * image.Height;
+        long count = (long)image.Width * image.Height;
 
         ColorSum sum = image.Sum();
-        return T.Create((byte)MathF.Round(sum.R / count),
-                        (byte)MathF.Round(sum.G / count),
-                        (byte)MathF.Round(sum.B / count),
-                        (byte)MathF.Round(sum.A / count));
+        return T.Create(RoundedAverage(sum.R, count),
+                        RoundedAverage(sum.G, count),
+                        RoundedAverage(sum.B, count),
+                        RoundedAverage(sum.A, count));
     }
 
     /// <summary>
@@ -64,10 +64,10 @@ public static partial class PixelHelper
 
         Generic4LongData sum = Sum(data);
 
-        float count = data.Length;
-        return new Generic3ByteData((byte)MathF.Round(sum.L1 / count),
-                                    (byte)MathF.Round(sum.L2 / count),
-                                    (byte)MathF.Round(sum.L3 / count));
+        long count = data.Length;
+        return new Generic3ByteData(RoundedAverage(sum.L1, count),
+                                    RoundedAverage(sum.L2, count),
+                                    RoundedAverage(sum.L3, count));
     }
 
     private static Generic4ByteData Average(ReadOnlySpan<Generic4ByteData> data)
@@ -77,12 +77,16 @@ public static partial class PixelHelper
 
         Generic4LongData sum = Sum(data);
 
-        float count = data.Length;
-        return new Generic4ByteData((byte)MathF.Round(sum.L1 / count),
-                                    (byte)MathF.Round(sum.L2 / count),
-                                    (byte)MathF.Round(sum.L3 / count),
-                                    (byte)MathF.Round(sum.L4 / count));
+        long count = data.Length;
+        return new Generic4ByteData(RoundedAverage(sum.L1, count),
+                                    RoundedAverage(sum.L2, count),
+                                    RoundedAverage(sum.L3, count),
+                                    RoundedAverage(sum.L4, count));
     }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static byte RoundedAverage(long sum, long count) => (byte)Math.Round(sum / (double)count, MidpointRounding.ToEven);
 
     #endregion
 

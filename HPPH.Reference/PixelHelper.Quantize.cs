@@ -105,10 +105,10 @@ public static partial class ReferencePixelHelper
             int b = _colors.Sum(x => x.B);
             int a = _colors.Sum(x => x.A);
 
-            return T.Create((byte)MathF.Round(r / (float)_colors.Count),
-                (byte)MathF.Round(g / (float)_colors.Count),
-                (byte)MathF.Round(b / (float)_colors.Count),
-                (byte)MathF.Round(a / (float)_colors.Count));
+            return T.Create(Round(r, _colors.Count),
+                            Round(g, _colors.Count),
+                            Round(b, _colors.Count),
+                            Round(a, _colors.Count));
         }
 
         #endregion
@@ -151,10 +151,10 @@ public static partial class ReferencePixelHelper
             boxes.Add(new WuBox([.. box.Cells.Where(cell => cell.Index[axis] >= position)]));
         }
 
-        return ToPalette(boxes.Select(box => (T.Create((byte)MathF.Round(box.Stats.R / (float)box.Stats.Count),
-                                                       (byte)MathF.Round(box.Stats.G / (float)box.Stats.Count),
-                                                       (byte)MathF.Round(box.Stats.B / (float)box.Stats.Count),
-                                                       (byte)MathF.Round(box.Stats.A / (float)box.Stats.Count)),
+        return ToPalette(boxes.Select(box => (T.Create(Round(box.Stats.R, box.Stats.Count),
+                                                       Round(box.Stats.G, box.Stats.Count),
+                                                       Round(box.Stats.B, box.Stats.Count),
+                                                       Round(box.Stats.A, box.Stats.Count)),
                                               box.Stats.Count)));
     }
 
