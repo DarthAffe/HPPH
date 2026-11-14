@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>net11.0-windows;net10.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>HPPHExample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HPPH.SkiaSharp\HPPH.SkiaSharp.csproj" />
+    <ProjectReference Include="..\HPPH.System.Drawing\HPPH.System.Drawing.csproj" />
+    <ProjectReference Include="..\HPPH.WPF\HPPH.WPF.csproj" />
+    <ProjectReference Include="..\HPPH\HPPH.csproj" />
+  </ItemGroup>
+
+</Project>

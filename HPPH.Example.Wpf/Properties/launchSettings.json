@@ -1,0 +1,28 @@
+{
+  "profiles": {
+    "Default": {
+      "commandName": "Project"
+    },
+    "No AVX-512": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_EnableAVX512": "0",
+        "DOTNET_EnableAVX512F": "0"
+      }
+    },
+    "No AVX2 (Vector128 only)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_EnableAVX512": "0",
+        "DOTNET_EnableAVX512F": "0",
+        "DOTNET_EnableAVX2": "0"
+      }
+    },
+    "Scalar": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_EnableHWIntrinsic": "0"
+      }
+    }
+  }
+}
