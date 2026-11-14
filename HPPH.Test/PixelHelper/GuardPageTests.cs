@@ -139,6 +139,45 @@ public class GuardPageTests
     }
 
     [TestMethod]
+    public void RotateStaysInBounds()
+    {
+        RotateStaysInBounds<ColorRGB>();
+        RotateStaysInBounds<ColorBGRA>();
+    }
+
+    private static void RotateStaysInBounds<T>()
+        where T : unmanaged, IColor<T>
+    {
+        int bpp = T.ColorFormat.BytesPerPixel;
+
+        // Rotations by 90 and 270 degrees work on blocks of 8x8 or 16x16 pixels, the rest is copied pixel by pixel.
+        foreach (int width in (int[])[1, 2, 3, 7, 8, 9, 15, 16, 17, 33])
+            foreach (int height in (int[])[1, 2, 5, 8, 9, 16, 17, 31])
+                foreach (int padding in (int[])[0, 5])
+                    foreach (bool sourceAtEnd in (bool[])[true, false])
+                        foreach (ImageRotation rotation in (ImageRotation[])[ImageRotation.None, ImageRotation.Rotate90, ImageRotation.Rotate180, ImageRotation.Rotate270])
+                        {
+                            int stride = (width * bpp) + padding;
+                            int length = ((height - 1) * stride) + (width * bpp);
+
+                            using GuardedBuffer source = sourceAtEnd ? GuardedBuffer.AtEnd(length) : GuardedBuffer.AtStart(length);
+                            source.Fill(width * height);
+
+                            RefImage<T> image = RefImage<T>.Wrap(source.Bytes, width, height, stride);
+                            Image<T> expected = ReferencePixelHelper.Rotate(image, rotation);
+
+                            int targetStride = (expected.Width * bpp) + padding;
+                            int targetLength = ((expected.Height - 1) * targetStride) + (expected.Width * bpp);
+                            using GuardedBuffer destination = sourceAtEnd ? GuardedBuffer.AtStart(targetLength) : GuardedBuffer.AtEnd(targetLength);
+
+                            image.Rotate(rotation, destination.Bytes, targetStride);
+
+                            Assert.IsTrue(expected.ContentEquals(RefImage<T>.Wrap(destination.Bytes, expected.Width, expected.Height, targetStride)),
+                                          $"{T.ColorFormat.Name} {width}x{height}, stride {stride}, {rotation}, source at {(sourceAtEnd ? "end" : "start")}");
+                        }
+    }
+
+    [TestMethod]
     public void ConvertInPlaceStaysInBounds()
     {
         ConvertInPlaceStaysInBounds<ColorRGB, ColorBGR>();

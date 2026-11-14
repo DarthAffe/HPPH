@@ -35,6 +35,35 @@ public class TransformFuzzTests
         }
     }
 
+    [TestMethod]
+    public void RotateOfRandomImages()
+    {
+        Random random = new(4712);
+
+        CheckRotate<ColorRGB>(random);
+        CheckRotate<ColorBGR>(random);
+        CheckRotate<ColorRGBA>(random);
+        CheckRotate<ColorARGB>(random);
+    }
+
+    private static void CheckRotate<T>(Random random)
+        where T : unmanaged, IColor<T>
+    {
+        ImageRotation[] rotations = [ImageRotation.None, ImageRotation.Rotate90, ImageRotation.Rotate180, ImageRotation.Rotate270];
+
+        for (int iteration = 0; iteration < ITERATIONS; iteration++)
+        {
+            Image<T> image = CreateRandomImage<T>(random, out string name);
+            ImageRotation rotation = rotations[random.Next(rotations.Length)];
+
+            Image<T> expected = ReferencePixelHelper.Rotate(image.AsRefImage(), rotation);
+            byte[] destination = CreateRandomDestination<T>(random, expected.Width, expected.Height, out int stride);
+            image.Rotate(rotation, destination, stride);
+
+            TestImages.AssertStrided(expected, destination, stride, $"{name}, {rotation}, destination stride {stride}");
+        }
+    }
+
     private static Image<T> CreateRandomImage<T>(Random random, out string name)
         where T : unmanaged, IColor<T>
     {

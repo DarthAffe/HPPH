@@ -128,7 +128,7 @@ byte maxRed2 = image.Execute(new MaxRed());         // shorter, but boxes struct
 
 All operations are extension methods in `PixelHelper`.   
 Sum, average, min-max and palettes work on `Image<T>`, `RefImage<T>`, `IImage` and `ReadOnlySpan<T>`. Sorting and conversion work on spans.   
-Flip works on `Image<T>`, `RefImage<T>` and `IImage`. It returns a new image or writes into a buffer you provide.
+Flip and rotate work on `Image<T>`, `RefImage<T>` and `IImage`. They return a new image or write into a buffer you provide.
 
 ### Sum
 
@@ -212,6 +212,19 @@ Image<ColorRGB> upsideDown = image.Flip(ImageFlip.Horizontal | ImageFlip.Vertica
 
 image.Flip(ImageFlip.Vertical, buffer);         // Span<ColorRGB>, rows without padding
 image.Flip(ImageFlip.Vertical, bytes, stride);  // rows are written stride bytes apart
+```
+
+The destination can't overlap the memory of the image.
+
+### Rotate
+
+Rotates an image clockwise by 90, 180 or 270 degrees. For 90 and 270 degrees width and height are swapped.
+
+```csharp
+Image<ColorRGB> rotated = image.Rotate(ImageRotation.Rotate90); // image.Height x image.Width
+
+image.Rotate(ImageRotation.Rotate270, buffer);                  // Span<ColorRGB>, rows without padding
+image.Rotate(ImageRotation.Rotate270, bytes, image.Height * 3); // the stride is for the rotated rows
 ```
 
 The destination can't overlap the memory of the image.
