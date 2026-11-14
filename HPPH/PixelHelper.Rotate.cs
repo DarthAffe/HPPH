@@ -129,6 +129,22 @@ public static partial class PixelHelper
         RotateUnchecked(image, rotation, destination, stride);
     }
 
+    /// <summary>
+    /// Gets the size of an image of <paramref name="width"/> x <paramref name="height"/> pixels after rotation.
+    /// </summary>
+    /// <param name="width">The width of the image.</param>
+    /// <param name="height">The height of the image.</param>
+    /// <param name="rotation">The rotation.</param>
+    /// <returns>Width and height of the image after rotation.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="rotation"/> is not one of the values of <see cref="ImageRotation"/>.</exception>
+    public static (int Width, int Height) GetRotatedSize(int width, int height, ImageRotation rotation)
+        => rotation switch
+        {
+            ImageRotation.None or ImageRotation.Rotate180 => (width, height),
+            ImageRotation.Rotate90 or ImageRotation.Rotate270 => (height, width),
+            _ => throw new ArgumentOutOfRangeException(nameof(rotation), rotation, "The rotation has to be one of the values of ImageRotation.")
+        };
+
     private static void RotateUnchecked<T>(RefImage<T> image, ImageRotation rotation, Span<byte> destination, int stride)
         where T : unmanaged, IColor<T>
     {
@@ -475,14 +491,6 @@ public static partial class PixelHelper
         Avx512F.Shuffle4x128(v0, v2, 0b11_01_11_01).StoreUnsafe(ref Unsafe.As<byte, uint>(ref Unsafe.Add(ref target, 8 * targetStep)));
         Avx512F.Shuffle4x128(v1, v3, 0b11_01_11_01).StoreUnsafe(ref Unsafe.As<byte, uint>(ref Unsafe.Add(ref target, 12 * targetStep)));
     }
-
-    private static (int Width, int Height) GetRotatedSize(int width, int height, ImageRotation rotation)
-        => rotation switch
-        {
-            ImageRotation.None or ImageRotation.Rotate180 => (width, height),
-            ImageRotation.Rotate90 or ImageRotation.Rotate270 => (height, width),
-            _ => throw new ArgumentOutOfRangeException(nameof(rotation), rotation, "The rotation has to be one of the values of ImageRotation.")
-        };
 
     #endregion
 
