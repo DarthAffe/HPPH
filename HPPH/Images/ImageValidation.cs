@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace HPPH;
 
@@ -19,6 +20,47 @@ internal static class ImageValidation
 
         long required = height == 0 ? 0 : ((long)(height - 1) * stride) + rowSize;
         if (bufferLength < required) throw new ArgumentException($"Not enough data in the buffer. {bufferLength} < {required} bytes.");
+    }
+
+    /// <summary>
+    /// Validates a destination for a result of <paramref name="width"/> x <paramref name="height"/> pixels without row padding,
+    /// and that it doesn't overlap <paramref name="source"/>.
+    /// </summary>
+    /// <returns>The bytes of <paramref name="destination"/> the result is written to.</returns>
+    public static Span<byte> ValidateDestination<T>(RefImage<T> source, Span<T> destination, int width, int height)
+        where T : unmanaged, IColor<T>
+    {
+        int pixels = width * height;
+        if (destination.Length < pixels) throw new ArgumentException($"The destination is too small to fit the result. {destination.Length} < {pixels} pixels.", nameof(destination));
+
+        Span<byte> written = MemoryMarshal.AsBytes(destination[..pixels]);
+        ValidateNoOverlap(source, written);
+
+        return written;
+    }
+
+    /// <summary>
+    /// Validates a destination for a result of <paramref name="width"/> x <paramref name="height"/> pixels whose rows are <paramref name="stride"/> bytes apart,
+    /// and that it doesn't overlap <paramref name="source"/>.
+    /// </summary>
+    public static void ValidateDestination<T>(RefImage<T> source, Span<byte> destination, int stride, int width, int height)
+        where T : unmanaged, IColor<T>
+    {
+        int bpp = T.ColorFormat.BytesPerPixel;
+        ValidateLayout(destination.Length, width, height, stride, bpp);
+
+        int length = height == 0 ? 0 : ((height - 1) * stride) + (width * bpp);
+        ValidateNoOverlap(source, destination[..length]);
+    }
+
+    /// <summary>
+    /// Validates that <paramref name="destination"/> doesn't share memory with <paramref name="source"/>, including the padding between its rows.
+    /// </summary>
+    public static void ValidateNoOverlap<T>(RefImage<T> source, ReadOnlySpan<byte> destination)
+        where T : unmanaged, IColor<T>
+    {
+        if (source.GetBytes().Overlaps(destination))
+            throw new ArgumentException("The destination can't overlap the memory of the image.", nameof(destination));
     }
 
     /// <summary>

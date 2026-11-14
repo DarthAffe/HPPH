@@ -47,6 +47,17 @@ public interface IImage
     IColor this[int x, int y] { get; }
 
     /// <summary>
+    /// Gets the memory of this image: the bytes from its first pixel to the end of its last row.
+    /// </summary>
+    /// <remarks>
+    /// Rows start <see cref="Stride"/> bytes apart. If <see cref="Stride"/> is bigger than <c>Width * BytesPerPixel</c>, the span contains the padding between the rows,
+    /// and for a region the parts of the bigger image left and right of it. If not, the span contains exactly the pixels, row after row.
+    /// The span is empty if <see cref="Width"/> or <see cref="Height"/> is 0.
+    /// </remarks>
+    /// <returns>The bytes of the image.</returns>
+    ReadOnlySpan<byte> GetBytes();
+
+    /// <summary>
     /// Gets an <see cref="RefImage{TColor}"/> representing this <see cref="IImage"/>.
     /// </summary>
     /// <typeparam name="TColor">The color-type of the image.</typeparam>

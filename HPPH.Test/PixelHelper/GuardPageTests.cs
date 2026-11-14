@@ -102,6 +102,43 @@ public class GuardPageTests
     }
 
     [TestMethod]
+    public void FlipStaysInBounds()
+    {
+        FlipStaysInBounds<ColorRGB>();
+        FlipStaysInBounds<ColorBGRA>();
+    }
+
+    private static void FlipStaysInBounds<T>()
+        where T : unmanaged, IColor<T>
+    {
+        int bpp = T.ColorFormat.BytesPerPixel;
+
+        // 3-byte rows use vectors of 5 and 21 pixels, which need 6 and 22 pixels to start. 4-byte rows use vectors of 4, 8 and 16 pixels.
+        foreach (int width in (int[])[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 17, 21, 22, 23, 32, 40, 43, 64])
+            foreach (int height in (int[])[1, 2, 5])
+                foreach (int padding in (int[])[0, 5])
+                    foreach (bool sourceAtEnd in (bool[])[true, false])
+                        foreach (ImageFlip flip in (ImageFlip[])[ImageFlip.None, ImageFlip.Horizontal, ImageFlip.Vertical, ImageFlip.Horizontal | ImageFlip.Vertical])
+                        {
+                            int stride = (width * bpp) + padding;
+                            int length = ((height - 1) * stride) + (width * bpp);
+
+                            // Source and destination sit against opposite guard pages.
+                            using GuardedBuffer source = sourceAtEnd ? GuardedBuffer.AtEnd(length) : GuardedBuffer.AtStart(length);
+                            using GuardedBuffer destination = sourceAtEnd ? GuardedBuffer.AtStart(length) : GuardedBuffer.AtEnd(length);
+                            source.Fill(width * height);
+
+                            RefImage<T> image = RefImage<T>.Wrap(source.Bytes, width, height, stride);
+                            Image<T> expected = ReferencePixelHelper.Flip(image, flip);
+
+                            image.Flip(flip, destination.Bytes, stride);
+
+                            Assert.IsTrue(expected.ContentEquals(RefImage<T>.Wrap(destination.Bytes, width, height, stride)),
+                                          $"{T.ColorFormat.Name} {width}x{height}, stride {stride}, {flip}, source at {(sourceAtEnd ? "end" : "start")}");
+                        }
+    }
+
+    [TestMethod]
     public void ConvertInPlaceStaysInBounds()
     {
         ConvertInPlaceStaysInBounds<ColorRGB, ColorBGR>();

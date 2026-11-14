@@ -784,6 +784,63 @@ public class ImageTest
     }
 
     [TestMethod]
+    public void GetBytesWithoutPadding()
+    {
+        Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(7, 5);
+        byte[] pixels = image.ToRawArray();
+
+        Assert.IsTrue(image.GetBytes().SequenceEqual(pixels), "Image");
+        Assert.IsTrue(image.AsRefImage().GetBytes().SequenceEqual(pixels), "RefImage");
+        Assert.IsTrue(((IImage)image).GetBytes().SequenceEqual(pixels), "IImage");
+    }
+
+    [TestMethod]
+    public void GetBytesWithPadding()
+    {
+        // 7 pixels of 3 bytes in rows 24 bytes apart: the image covers 4 * 24 + 21 bytes, the 3 bytes after it aren't part of it.
+        byte[] buffer = new byte[(5 * 24)];
+        Random.Shared.NextBytes(buffer);
+        Image<ColorRGB> image = Image<ColorRGB>.Wrap(buffer, 7, 5, 24);
+        ReadOnlySpan<byte> expected = buffer.AsSpan(0, (4 * 24) + 21);
+
+        Assert.IsTrue(image.GetBytes().SequenceEqual(expected), "Image");
+        Assert.IsTrue(image.AsRefImage().GetBytes().SequenceEqual(expected), "RefImage");
+        Assert.IsTrue(((IImage)image).GetBytes().SequenceEqual(expected), "IImage");
+    }
+
+    [TestMethod]
+    public void GetBytesOfRegion()
+    {
+        // A 7x4 region at (3, 5) of a 20x12 image with rows 67 bytes apart starts at 5 * 67 + 3 * 3 and ends after 3 rows plus 7 pixels.
+        byte[] buffer = new byte[(11 * 67) + 60];
+        Random.Shared.NextBytes(buffer);
+        Image<ColorRGB> image = Image<ColorRGB>.Wrap(buffer, 20, 12, 67);
+        ReadOnlySpan<byte> expected = buffer.AsSpan((5 * 67) + 9, (3 * 67) + 21);
+
+        Image<ColorRGB> slice = image.Slice(3, 5, 7, 4);
+        Assert.IsTrue(slice.GetBytes().SequenceEqual(expected), "Image");
+        Assert.IsTrue(Unsafe.AreSame(in slice.GetBytes()[0], in slice.GetPinnableReference()), "Image starts at the first pixel");
+
+        RefImage<ColorRGB> region = image[3, 5, 7, 4];
+        Assert.IsTrue(region.GetBytes().SequenceEqual(expected), "RefImage");
+        Assert.IsTrue(Unsafe.AreSame(in region.GetBytes()[0], in region.GetPinnableReference()), "RefImage starts at the first pixel");
+    }
+
+    [TestMethod]
+    public void GetBytesOfEmptyImages()
+    {
+        // With a stride, a 0x5 image still spans 4 * 16 bytes between its rows. They don't belong to it.
+        foreach ((int width, int height) in new[] { (0, 0), (0, 5), (5, 0) })
+        {
+            Image<ColorRGB> image = Image<ColorRGB>.Wrap(new byte[100], width, height, 16);
+
+            Assert.IsTrue(image.GetBytes().IsEmpty, $"{width}x{height}: Image");
+            Assert.IsTrue(image.AsRefImage().GetBytes().IsEmpty, $"{width}x{height}: RefImage");
+            Assert.IsTrue(((IImage)image).GetBytes().IsEmpty, $"{width}x{height}: IImage");
+        }
+    }
+
+    [TestMethod]
     public void IndexerWrongXBig()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(10, 20);

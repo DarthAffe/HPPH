@@ -64,6 +64,9 @@ foreach (ImageRow<ColorRGB> row in image.Rows) { }          // row.AsSpan() for 
 foreach (ImageColumn<ColorRGB> column in image.Columns) { }
 
 ColorRGB[] firstRow = image.Rows[0].ToArray();
+
+// the memory of the image, for example to pass it on with its stride
+ReadOnlySpan<byte> bytes = image.GetBytes(); // from the first pixel to the end of the last row, includes padding
 ```
 
 ### Regions
@@ -124,7 +127,8 @@ byte maxRed2 = image.Execute(new MaxRed());         // shorter, but boxes struct
 ## Operations
 
 All operations are extension methods in `PixelHelper`.   
-Sum, average, min-max and palettes work on `Image<T>`, `RefImage<T>`, `IImage` and `ReadOnlySpan<T>`. Sorting and conversion work on spans.
+Sum, average, min-max and palettes work on `Image<T>`, `RefImage<T>`, `IImage` and `ReadOnlySpan<T>`. Sorting and conversion work on spans.   
+Flip works on `Image<T>`, `RefImage<T>` and `IImage`. It returns a new image or writes into a buffer you provide.
 
 ### Sum
 
@@ -197,6 +201,20 @@ Span<ColorBGR> bgr = rgb.ConvertInPlace<ColorRGB, ColorBGR>();
 ```
 
 Conversion is mostly limited by memory bandwidth. Writing to freshly allocated memory often costs more than the conversion itself, so reuse buffers where possible.
+
+### Flip
+
+Mirrors an image. `Horizontal` swaps left and right, `Vertical` swaps top and bottom.
+
+```csharp
+Image<ColorRGB> mirrored = image.Flip(ImageFlip.Horizontal);
+Image<ColorRGB> upsideDown = image.Flip(ImageFlip.Horizontal | ImageFlip.Vertical);
+
+image.Flip(ImageFlip.Vertical, buffer);         // Span<ColorRGB>, rows without padding
+image.Flip(ImageFlip.Vertical, bytes, stride);  // rows are written stride bytes apart
+```
+
+The destination can't overlap the memory of the image.
 
 ## SkiaSharp and System.Drawing
 

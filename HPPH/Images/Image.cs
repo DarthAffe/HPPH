@@ -262,6 +262,9 @@ public sealed class Image<T> : IImage, IEnumerable<T>
         return ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), (_y * _stride) + (_x * ColorFormat.BytesPerPixel));
     }
 
+    /// <inheritdoc />
+    public ReadOnlySpan<byte> GetBytes() => AsRefImage().GetBytes();
+
     /// <inheritdoc cref="System.Collections.IEnumerable.GetEnumerator"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RefImage<T>.ImageEnumerator GetEnumerator() => AsRefImage().GetEnumerator();

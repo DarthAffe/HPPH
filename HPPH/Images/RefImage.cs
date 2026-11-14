@@ -358,21 +358,23 @@ public readonly ref struct RefImage<T>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ImageEnumerator GetEnumerator() => new(_data, _x, _y, Width, Height, Stride);
 
+    /// <inheritdoc cref="IImage.GetBytes"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ReadOnlySpan<byte> GetBytes()
+    public ReadOnlySpan<byte> GetBytes()
     {
-        if (Height == 0) return [];
+        if ((Width == 0) || (Height == 0)) return [];
 
-        return _data.Slice((_y * Stride) + (_x * T.ColorFormat.BytesPerPixel), SizeInBytes);
+        int bpp = T.ColorFormat.BytesPerPixel;
+        return _data.Slice((_y * Stride) + (_x * bpp), ((Height - 1) * Stride) + (Width * bpp));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ReadOnlySpan<byte> GetRowBytes(int y)
+    internal ReadOnlySpan<byte> GetRowBytes(int y)
     {
         int bpp = T.ColorFormat.BytesPerPixel;
         return _data.Slice(((_y + y) * Stride) + (_x * bpp), Width * bpp);
     }
-    
+
     #endregion
 
     /// <summary>
