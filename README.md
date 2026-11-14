@@ -12,6 +12,7 @@ Most operations are allocation free and use SIMD (up to AVX-512) where available
 | [HPPH](https://www.nuget.org/packages/HPPH)                               | Core package, contains everything described below                                    |
 | [HPPH.SkiaSharp](https://www.nuget.org/packages/HPPH.SkiaSharp)           | Loading of images and conversion from and to SkiaSharp images and bitmaps            |
 | [HPPH.System.Drawing](https://www.nuget.org/packages/HPPH.System.Drawing) | Loading of images and conversion from and to System.Drawing bitmaps (Windows only)  |
+| [HPPH.WPF](https://www.nuget.org/packages/HPPH.WPF)                       | Loading of images and conversion from and to WPF bitmaps (Windows only)             |
 
 Supports .NET 10 and .NET 11.
 
@@ -245,7 +246,7 @@ image.Downscale(2, bytes, width * 4);
 
 The destination can't overlap the memory of the image.
 
-## SkiaSharp and System.Drawing
+## SkiaSharp, System.Drawing and WPF
 
 Loading files and converting from and to their image types:
 
@@ -254,4 +255,4 @@ Image<ColorBGRA> image = ImageHelper.LoadImage("image.png");
 using SKImage skImage = image.ToSKImage();
 ```
 
-See [HPPH.SkiaSharp](https://github.com/DarthAffe/HPPH/blob/master/HPPH.SkiaSharp/README.md) and [HPPH.System.Drawing](https://github.com/DarthAffe/HPPH/blob/master/HPPH.System.Drawing/README.md) for details.
+See [HPPH.SkiaSharp](https://github.com/DarthAffe/HPPH/blob/master/HPPH.SkiaSharp/README.md), [HPPH.System.Drawing](https://github.com/DarthAffe/HPPH/blob/master/HPPH.System.Drawing/README.md) and [HPPH.WPF](https://github.com/DarthAffe/HPPH/blob/master/HPPH.WPF/README.md) for details.

@@ -46,8 +46,8 @@ jobs:
 
     - name: Pack Release Assets
       run: |
-        Compress-Archive -Path bin/net10.0/*.dll -DestinationPath HPPH-net10.0.zip
-        Compress-Archive -Path bin/net11.0/*.dll -DestinationPath HPPH-net11.0.zip
+        Compress-Archive -Path bin/net10.0/*.dll, bin/net10.0-windows/HPPH.WPF.dll -DestinationPath HPPH-net10.0.zip
+        Compress-Archive -Path bin/net11.0/*.dll, bin/net11.0-windows/HPPH.WPF.dll -DestinationPath HPPH-net11.0.zip
 
     - name: Release
       uses: softprops/action-gh-release@v3.0.4

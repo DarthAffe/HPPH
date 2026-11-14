@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HPPH.System.Drawing", "HPPH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HPPH.SkiaSharp", "HPPH.SkiaSharp\HPPH.SkiaSharp.csproj", "{E70CD72D-1A41-413E-B0C6-24958733A773}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HPPH.WPF", "HPPH.WPF\HPPH.WPF.csproj", "{B5E02D5C-C10C-4E55-8FFE-C0805C4A3005}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{E70CD72D-1A41-413E-B0C6-24958733A773}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E70CD72D-1A41-413E-B0C6-24958733A773}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E70CD72D-1A41-413E-B0C6-24958733A773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5E02D5C-C10C-4E55-8FFE-C0805C4A3005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5E02D5C-C10C-4E55-8FFE-C0805C4A3005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5E02D5C-C10C-4E55-8FFE-C0805C4A3005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5E02D5C-C10C-4E55-8FFE-C0805C4A3005}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
