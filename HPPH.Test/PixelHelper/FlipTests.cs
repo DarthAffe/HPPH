@@ -124,20 +124,13 @@ public class FlipTests
     }
 
     [TestMethod]
-    public void FlipRejectsInvalidFlips()
+    public void FlipIgnoresUnknownBits()
     {
         Image<ColorRGB> image = TestDataHelper.CreateTestImage<ColorRGB>(7, 5);
-        byte[] buffer = new byte[7 * 5 * 3];
 
-        foreach (ImageFlip flip in (ImageFlip[])[(ImageFlip)4, (ImageFlip)7, (ImageFlip)(-1)])
-        {
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Flip(flip), $"{flip}: Image");
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.AsRefImage().Flip(flip), $"{flip}: RefImage");
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ((IImage)image).Flip(flip), $"{flip}: IImage");
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Flip(flip, new ColorRGB[35].AsSpan()), $"{flip}: Span<T>");
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => image.Flip(flip, buffer, 21), $"{flip}: stride");
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ((IImage)image).Flip(flip, buffer, 21), $"{flip}: IImage stride");
-        }
+        TestImages.AssertEqual(image.Flip(ImageFlip.None), image.Flip((ImageFlip)4), "4");
+        TestImages.AssertEqual(image.Flip(ImageFlip.Horizontal | ImageFlip.Vertical), image.Flip((ImageFlip)7), "7");
+        TestImages.AssertEqual(image.Flip(ImageFlip.Horizontal | ImageFlip.Vertical), image.Flip((ImageFlip)(-1)), "-1");
     }
 
     [TestMethod]
