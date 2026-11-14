@@ -45,6 +45,17 @@ public class ColorFormatTests
         Assert.AreEqual("ABGR", ColorABGR.ColorFormat.Name);
     }
 
+    [TestMethod]
+    public void ColorFormatToStringIsName()
+    {
+        IColorFormat[] formats = [IColorFormat.RGB, IColorFormat.BGR, IColorFormat.RGBA, IColorFormat.BGRA, IColorFormat.ARGB, IColorFormat.ABGR];
+        foreach (IColorFormat format in formats)
+        {
+            Assert.AreEqual(format.Name, format.ToString());
+            Assert.AreEqual(format.Name, $"{format}");
+        }
+    }
+
 
     [TestMethod]
     public void ColorFormatRGBBPP()

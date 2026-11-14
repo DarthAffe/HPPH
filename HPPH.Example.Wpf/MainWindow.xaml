@@ -1,0 +1,221 @@
+<Window x:Class="HPPHExample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:HPPHExample"
+        Title="HPPH Inspector" Width="1600" Height="950"
+        AllowDrop="True" Drop="OnDrop">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </Window.Resources>
+
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Text="{Binding RuntimeInfo}" />
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock Text="working..." Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+            </StatusBarItem>
+        </StatusBar>
+
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Error}" Foreground="White" Background="DarkRed" Padding="6,3" TextWrapping="Wrap">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="Text" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <ScrollViewer DockPanel.Dock="Left" Width="440" VerticalScrollBarVisibility="Auto" Padding="6">
+            <StackPanel>
+                <GroupBox Header="Source">
+                    <StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <TextBlock Text="Loader" Width="60" VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding Loaders}" SelectedItem="{Binding Loader}" Width="140" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <TextBlock Text="Sample" Width="60" VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding Samples}" SelectedItem="{Binding SelectedSample}" DisplayMemberPath="Name" Width="140" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <Button Content="Open..." Padding="8,2" Click="OnOpen" />
+                            <Button Content="Save result as PNG..." Padding="8,2" Margin="6,0,0,0" Click="OnSave" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding FilePath}" TextWrapping="Wrap" Foreground="Gray" />
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Pipeline">
+                    <StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <CheckBox Content="Convert to" IsChecked="{Binding Convert}" Width="100" VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding Format}" DisplayMemberPath="Name" Width="80" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <CheckBox Content="Pad rows by" IsChecked="{Binding Pad}" Width="100" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding Padding, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                            <TextBlock Text="bytes" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <CheckBox Content="Slice" IsChecked="{Binding Slice}" Width="100" VerticalAlignment="Center" />
+                            <TextBlock Text="x" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding SliceX, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                            <TextBlock Text="y" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding SliceY, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <TextBlock Width="100" />
+                            <TextBlock Text="w" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding SliceWidth, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                            <TextBlock Text="h" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding SliceHeight, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <TextBlock Text="Flip" Width="100" VerticalAlignment="Center" />
+                            <CheckBox Content="Horizontal" IsChecked="{Binding FlipHorizontal}" Margin="0,0,10,0" />
+                            <CheckBox Content="Vertical" IsChecked="{Binding FlipVertical}" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <TextBlock Text="Rotate" Width="100" VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding Rotations}" SelectedItem="{Binding Rotation}" Width="100" />
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <CheckBox Content="Downscale" IsChecked="{Binding Downscale}" Width="100" VerticalAlignment="Center" />
+                            <TextBlock Text="x" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding FactorX, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                            <TextBlock Text="y" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding FactorY, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                            <CheckBox Content="link" IsChecked="{Binding LinkFactors}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Separator Margin="0,4" />
+                        <CheckBox Content="Flip/Rotate/Downscale into destination buffer" IsChecked="{Binding UseDestination}" Margin="0,2" />
+                        <StackPanel Style="{StaticResource Row}" IsEnabled="{Binding UseDestination}">
+                            <TextBlock Text="Destination padding" Width="120" VerticalAlignment="Center" Margin="18,0,0,0" />
+                            <TextBox Text="{Binding DestinationPadding, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                            <TextBlock Text="bytes" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Steps">
+                    <ItemsControl ItemsSource="{Binding Result.Steps}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,1" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </GroupBox>
+
+                <GroupBox Header="Analysis">
+                    <StackPanel>
+                        <TextBlock Text="Sum" FontWeight="SemiBold" />
+                        <TextBox Text="{Binding Result.Sum, Mode=OneWay}" IsReadOnly="True" BorderThickness="0" TextWrapping="Wrap" />
+                        <TextBlock Text="Average" FontWeight="SemiBold" Margin="0,4,0,0" />
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="32" Height="16" Background="{StaticResource CheckerboardBrush}" BorderBrush="Gray" BorderThickness="1" Margin="0,0,6,0">
+                                <Rectangle Fill="{Binding Result.AverageBrush}" />
+                            </Border>
+                            <TextBox Text="{Binding Result.Average, Mode=OneWay}" IsReadOnly="True" BorderThickness="0" />
+                        </StackPanel>
+                        <TextBlock Text="MinMax" FontWeight="SemiBold" Margin="0,4,0,0" />
+                        <TextBox Text="{Binding Result.MinMax, Mode=OneWay}" IsReadOnly="True" BorderThickness="0" TextWrapping="Wrap" />
+                        <TextBlock Text="Timings" FontWeight="SemiBold" Margin="0,4,0,0" />
+                        <ItemsControl ItemsSource="{Binding Result.Timings}" />
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Palette">
+                    <StackPanel>
+                        <StackPanel Style="{StaticResource Row}">
+                            <ComboBox ItemsSource="{Binding PaletteAlgorithms}" SelectedItem="{Binding PaletteAlgorithm}" Width="100" />
+                            <TextBlock Text="size" VerticalAlignment="Center" Margin="8,0,0,0" />
+                            <TextBox Text="{Binding PaletteSize, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource NumberBox}" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding Result.PaletteInfo}" TextWrapping="Wrap" Foreground="Gray" />
+                        <ItemsControl ItemsSource="{Binding Result.Palette}" Margin="0,4,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="0,1">
+                                        <Border Width="32" Height="16" Background="{StaticResource CheckerboardBrush}" BorderBrush="Gray" BorderThickness="1" Margin="0,0,6,0">
+                                            <Rectangle Fill="{Binding Brush}" />
+                                        </Border>
+                                        <TextBlock Text="{Binding Text}" FontFamily="Consolas" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal" Margin="6">
+                <TextBlock Text="Zoom" VerticalAlignment="Center" />
+                <Slider Width="240" Minimum="-4" Maximum="5" Value="{Binding Zoom, Converter={x:Static local:LogScaleConverter.Instance}}" Margin="6,0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Zoom, StringFormat={}{0:0.##}x}" Width="50" VerticalAlignment="Center" />
+                <Button Content="1:1" Padding="8,2" Click="OnZoomOne" />
+                <Button Content="Fit" Padding="8,2" Margin="6,0,0,0" Click="OnZoomFit" />
+                <TextBlock Text="Result view" VerticalAlignment="Center" Margin="24,0,6,0" />
+                <ComboBox ItemsSource="{Binding ResultViews}" SelectedItem="{Binding ResultView}" Width="120" />
+                <TextBlock Text="Sort by" VerticalAlignment="Center" Margin="12,0,6,0" />
+                <ComboBox ItemsSource="{Binding SortChannels}" SelectedItem="{Binding SortChannel}" Width="80" />
+            </StackPanel>
+
+            <DockPanel Grid.Row="1" Grid.Column="0">
+                <StackPanel DockPanel.Dock="Top" Margin="6,0">
+                    <TextBlock Text="{Binding SourceInfo, StringFormat=Source - {0}}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding SourceHover}" FontFamily="Consolas" MinHeight="16" />
+                </StackPanel>
+                <ScrollViewer x:Name="SourceScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" ScrollChanged="OnScrollChanged">
+                    <Border Background="{StaticResource CheckerboardBrush}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <Image x:Name="SourceImage" Source="{Binding SourceBitmap}" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               MouseMove="OnImageMouseMove" MouseLeave="OnImageMouseLeave">
+                            <Image.LayoutTransform>
+                                <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
+                            </Image.LayoutTransform>
+                        </Image>
+                    </Border>
+                </ScrollViewer>
+            </DockPanel>
+
+            <GridSplitter Grid.Row="1" Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+            <DockPanel Grid.Row="1" Grid.Column="2">
+                <StackPanel DockPanel.Dock="Top" Margin="6,0">
+                    <TextBlock Text="{Binding ResultInfo, StringFormat=Result - {0}}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ResultHover}" FontFamily="Consolas" MinHeight="16" />
+                </StackPanel>
+                <ScrollViewer x:Name="ResultScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" ScrollChanged="OnScrollChanged">
+                    <Border Background="{StaticResource CheckerboardBrush}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <Image x:Name="ResultImage" Source="{Binding Result.Bitmap}" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               MouseMove="OnImageMouseMove" MouseLeave="OnImageMouseLeave">
+                            <Image.LayoutTransform>
+                                <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
+                            </Image.LayoutTransform>
+                        </Image>
+                    </Border>
+                </ScrollViewer>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

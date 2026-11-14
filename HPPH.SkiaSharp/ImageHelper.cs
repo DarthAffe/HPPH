@@ -2,17 +2,64 @@
 
 namespace HPPH.SkiaSharp;
 
+#pragma warning disable CA1508
+
+/// <summary>
+/// Contains methods to load images using SkiaSharp.
+/// </summary>
 public static class ImageHelper
 {
-    public static IImage LoadImage(string path)
+    /// <summary>
+    /// Loads the image file at <paramref name="path"/> as an <see cref="Image{T}"/> of the color format <see cref="ColorBGRA"/>.
+    /// </summary>
+    /// <param name="path">The path of the image file.</param>
+    /// <returns>The loaded image.</returns>
+    /// <exception cref="InvalidDataException">The file can't be decoded.</exception>
+    public static Image<ColorBGRA> LoadImage(string path) => LoadImage<ColorBGRA>(path);
+
+    /// <summary>
+    /// Loads the image file at <paramref name="path"/> as an <see cref="Image{T}"/> of the color format <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="path">The path of the image file.</param>
+    /// <typeparam name="T">The color format of the loaded image.</typeparam>
+    /// <returns>The loaded image.</returns>
+    /// <exception cref="InvalidDataException">The file can't be decoded.</exception>
+    public static Image<T> LoadImage<T>(string path)
+        where T : unmanaged, IColor<T>
     {
-        using SKImage image = SKImage.FromEncodedData(path);
-        return image.ToImage();
+        using SKCodec codec = SKCodec.Create(path) ?? throw new InvalidDataException($"'{path}' is not an image SkiaSharp can decode.");
+        return Decode<T>(codec);
     }
 
-    public static IImage LoadImage(Stream stream)
+    /// <summary>
+    /// Loads the image contained in <paramref name="stream"/> as an <see cref="Image{T}"/> of the color format <see cref="ColorBGRA"/>.
+    /// </summary>
+    /// <param name="stream">The stream containing the image.</param>
+    /// <returns>The loaded image.</returns>
+    /// <exception cref="InvalidDataException">The stream can't be decoded.</exception>
+    public static Image<ColorBGRA> LoadImage(Stream stream) => LoadImage<ColorBGRA>(stream);
+
+    /// <summary>
+    /// Loads the image contained in <paramref name="stream"/> as an <see cref="Image{T}"/> of the color format <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="stream">The stream containing the image.</param>
+    /// <typeparam name="T">The color format of the loaded image.</typeparam>
+    /// <returns>The loaded image.</returns>
+    /// <exception cref="InvalidDataException">The stream can't be decoded.</exception>
+    public static Image<T> LoadImage<T>(Stream stream)
+        where T : unmanaged, IColor<T>
     {
-        using SKImage image = SKImage.FromEncodedData(stream);
-        return image.ToImage();
+        using SKData data = SKData.Create(stream);
+        using SKCodec codec = SKCodec.Create(data) ?? throw new InvalidDataException("The stream does not contain an image SkiaSharp can decode.");
+        return Decode<T>(codec);
+    }
+
+    private static Image<T> Decode<T>(SKCodec codec)
+        where T : unmanaged, IColor<T>
+    {
+        SKImageInfo info = codec.Info;
+
+        return ImageExtension.ReadPixels<T>(info.Width, info.Height, info.AlphaType, (target, pixels) => codec.GetPixels(target, pixels) is SKCodecResult.Success or SKCodecResult.IncompleteInput)
+            ?? throw new InvalidDataException("The image could not be decoded.");
     }
 }

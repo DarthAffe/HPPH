@@ -20,8 +20,7 @@ public class ColorSourceGenerator : IIncrementalGenerator
     [
         new Colors(),
         new MinMax(),
-        new Sum(),
-        new Quantize()
+        new Sum()
     ];
 
     private const string COLOR_GENERATOR_ATTRIBUTE_SOURCE = """

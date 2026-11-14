@@ -1,12 +1,15 @@
-﻿using System.Collections;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace HPPH;
 
+/// <summary>
+/// Represents a single column of an image.
+/// </summary>
+/// <typeparam name="T">The color type of the pixels.</typeparam>
 [SkipLocalsInit]
 public readonly ref struct ImageColumn<T>
-    where T : struct, IColor
+    where T : unmanaged, IColor<T>
 {
     #region Properties & Fields
 
@@ -15,19 +18,30 @@ public readonly ref struct ImageColumn<T>
     private readonly int _length;
     private readonly int _step;
 
+    /// <summary>
+    /// Gets the number of pixels in this column.
+    /// </summary>
     public int Length => _length;
 
+    /// <summary>
+    /// Gets the size in bytes of the pixels of this column.
+    /// </summary>
     public int SizeInBytes => Length * T.ColorFormat.BytesPerPixel;
 
     #endregion
 
     #region Indexer
 
+    /// <summary>
+    /// Gets the color at the specified location.
+    /// </summary>
+    /// <param name="y">The Y-location to read.</param>
+    /// <returns>The color at the specified location.</returns>
     public ref readonly T this[int y]
     {
         get
         {
-            if ((y < 0) || (y >= _length)) throw new ArgumentOutOfRangeException(nameof(y));
+            if ((y < 0) || (y >= _length)) ImageValidation.ThrowColumnLocationOutOfRange(y, _length);
 
             return ref Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), (nint)(uint)(_start + (y * _step))));
         }
@@ -49,11 +63,24 @@ public readonly ref struct ImageColumn<T>
 
     #region Methods
 
+    /// <summary>
+    /// Copies the pixels of this column into a destination buffer.
+    /// </summary>
+    /// <param name="destination">The destination buffer.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="destination"/> is shorter than <see cref="Length"/>.
+    /// </exception>
     public void CopyTo(Span<T> destination) => CopyTo(MemoryMarshal.AsBytes(destination));
 
+    /// <summary>
+    /// Copies the pixels of this column into a destination buffer.
+    /// </summary>
+    /// <param name="destination">The destination buffer.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="destination"/> is shorter than <see cref="SizeInBytes"/>.
+    /// </exception>
     public void CopyTo(Span<byte> destination)
     {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
         if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
 
         ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer), _start);
@@ -62,6 +89,10 @@ public readonly ref struct ImageColumn<T>
             target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
     }
 
+    /// <summary>
+    /// Allocates a new array and copies the pixels of this column into it.
+    /// </summary>
+    /// <returns>The new array containing the pixels of this column.</returns>
     public T[] ToArray()
     {
         T[] array = GC.AllocateUninitializedArray<T>(Length);
@@ -75,6 +106,9 @@ public readonly ref struct ImageColumn<T>
 
     #endregion
 
+    /// <summary>
+    /// Enumerates the pixels of an <see cref="ImageColumn{T}"/>.
+    /// </summary>
     public ref struct ImageColumnEnumerator
     {
         #region Properties & Fields
@@ -110,96 +144,4 @@ public readonly ref struct ImageColumn<T>
 
         #endregion
     }
-}
-
-//HACK DarthAffe 14.07.2024: Not nice, should be removed once ref structs are able to implement interfaces (https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md)
-[SkipLocalsInit]
-internal sealed class IColorImageColumn<T> : IImageColumn
-    where T : struct, IColor
-{
-    #region Properties & Fields
-
-    private readonly byte[] _buffer;
-    private readonly int _start;
-    private readonly int _length;
-    private readonly int _step;
-
-    /// <inheritdoc />
-    public int Length => _length;
-
-    /// <inheritdoc />
-    public int SizeInBytes => Length * T.ColorFormat.BytesPerPixel;
-
-    #endregion
-
-    #region Indexer
-
-    /// <inheritdoc />
-    public IColor this[int y]
-    {
-        get
-        {
-            if ((y < 0) || (y >= _length)) throw new ArgumentOutOfRangeException(nameof(y));
-
-            return Unsafe.As<byte, T>(ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), _start + (y * _step)));
-        }
-    }
-
-    #endregion
-
-    #region Constructors
-
-    internal IColorImageColumn(byte[] buffer, int start, int length, int step)
-    {
-        this._buffer = buffer;
-        this._start = start;
-        this._length = length;
-        this._step = step;
-    }
-
-    #endregion
-
-    #region Methods
-
-    /// <inheritdoc />
-    public void CopyTo(Span<IColor> destination)
-    {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
-        if (destination.Length < _length) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
-
-        for (int i = 0; i < _length; i++)
-            destination[i] = this[i];
-    }
-
-    /// <inheritdoc />
-    public void CopyTo(Span<byte> destination)
-    {
-        if (destination == null) throw new ArgumentNullException(nameof(destination));
-        if (destination.Length < SizeInBytes) throw new ArgumentException("The destination is too small to fit this image.", nameof(destination));
-
-        ref byte dataRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(_buffer.AsSpan()), _start);
-        Span<T> target = MemoryMarshal.Cast<byte, T>(destination);
-        for (int i = 0; i < Length; i++)
-            target[i] = Unsafe.As<byte, T>(ref Unsafe.Add(ref dataRef, i * _step));
-    }
-
-    /// <inheritdoc />
-    public IColor[] ToArray()
-    {
-        IColor[] array = new IColor[Length];
-        CopyTo(array);
-        return array;
-    }
-
-    /// <inheritdoc />
-    public IEnumerator<IColor> GetEnumerator()
-    {
-        for (int i = 0; i < Length; i++)
-            yield return this[i];
-    }
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    #endregion
 }

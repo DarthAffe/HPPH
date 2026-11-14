@@ -34,7 +34,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
+        Image<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -70,7 +70,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorARGB>();
+        Image<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorARGB>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -106,7 +106,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGRA>();
+        Image<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGRA>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -142,7 +142,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorRGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorRGB>();
+        Image<ColorRGB> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorRGB>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -178,7 +178,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGR>();
+        Image<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGBA>(1920, 1080).ConvertTo<ColorBGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -214,7 +214,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorRGBA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorRGBA>();
+        Image<ColorRGBA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorRGBA>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -258,7 +258,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorARGB>();
+        Image<ColorARGB> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorARGB>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -302,7 +302,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGRA>();
+        Image<ColorBGRA> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGRA>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -346,7 +346,7 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorABGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorABGR>();
+        Image<ColorABGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorABGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
@@ -390,10 +390,59 @@ public class ConvertTests
             }
         }
 
-        IImage<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
+        Image<ColorBGR> converted = TestDataHelper.CreateTestImage<ColorRGB>(1920, 1080).ConvertTo<ColorBGR>();
 
         for (int y = 0; y < converted.Height; y++)
             for (int x = 0; x < converted.Width; x++)
                 Assert.AreEqual(TestDataHelper.GetColorFromLocation<ColorBGR>(x, y), converted[x, y], $"Wrong color at x: {x}, y: {y}");
+    }
+
+    [TestMethod]
+    public void ConvertBetweenAllFormatsKeepsChannels()
+    {
+        ConvertFrom<ColorRGB>();
+        ConvertFrom<ColorBGR>();
+        ConvertFrom<ColorRGBA>();
+        ConvertFrom<ColorBGRA>();
+        ConvertFrom<ColorARGB>();
+        ConvertFrom<ColorABGR>();
+    }
+
+    private static void ConvertFrom<TSource>()
+        where TSource : unmanaged, IColor<TSource>
+    {
+        ConvertBetween<TSource, ColorRGB>();
+        ConvertBetween<TSource, ColorBGR>();
+        ConvertBetween<TSource, ColorRGBA>();
+        ConvertBetween<TSource, ColorBGRA>();
+        ConvertBetween<TSource, ColorARGB>();
+        ConvertBetween<TSource, ColorABGR>();
+    }
+
+    private static void ConvertBetween<TSource, TTarget>()
+        where TSource : unmanaged, IColor<TSource>
+        where TTarget : unmanaged, IColor<TTarget>
+    {
+        TSource[] source = new TSource[40];
+        for (int i = 0; i < source.Length; i++)
+            source[i] = TSource.Create(10, 20, 30, 40);
+
+        TTarget[] converted = new ReadOnlySpan<TSource>(source).Convert<TSource, TTarget>();
+
+        byte expectedAlpha = (TSource.ColorFormat.BytesPerPixel == 3) || (TTarget.ColorFormat.BytesPerPixel == 3) ? byte.MaxValue : (byte)40;
+        foreach (TTarget color in converted)
+        {
+            string message = $"{TSource.ColorFormat.Name} -> {TTarget.ColorFormat.Name}";
+            Assert.AreEqual(10, color.R, message);
+            Assert.AreEqual(20, color.G, message);
+            Assert.AreEqual(30, color.B, message);
+            Assert.AreEqual(expectedAlpha, color.A, message);
+        }
+
+        if (TSource.ColorFormat.BytesPerPixel == TTarget.ColorFormat.BytesPerPixel)
+        {
+            Span<TTarget> inPlace = source.AsSpan().ConvertInPlace<TSource, TTarget>();
+            Assert.AreSequenceEqual(converted, inPlace.ToArray(), $"{TSource.ColorFormat.Name} -> {TTarget.ColorFormat.Name} in place");
+        }
     }
 }

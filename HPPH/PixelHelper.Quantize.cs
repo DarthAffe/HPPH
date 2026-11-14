@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-using System.Numerics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace HPPH;
 
@@ -8,269 +6,89 @@ public static partial class PixelHelper
 {
     #region Methods
 
-    public static IColor[] CreateColorPalette(this IImage image, int paletteSize)
+    /// <summary>
+    /// Creates a palette of up to <paramref name="paletteSize"/> colors using the default algorithm (currently <see cref="CreateWuColorPalette(IImage, int, Span{long})"/>).
+    /// </summary>
+    /// <remarks>
+    /// The palette is ordered by the number of pixels each color represents, most common first.
+    /// Fewer colors are returned if the image doesn't have enough distinct colors to fill the palette.
+    /// </remarks>
+    /// <param name="image">The image to create the palette for.</param>
+    /// <param name="paletteSize">The maximum number of colors in the palette.</param>
+    /// <param name="pixelCounts">
+    /// Optional. Receives the number of pixels each palette color represents, at the same index as the color.
+    /// Needs at least <paramref name="paletteSize"/> elements, only the first <c>palette.Length</c> are written.
+    /// </param>
+    /// <returns>The palette.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="paletteSize"/> is negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="pixelCounts"/> is not empty but shorter than <paramref name="paletteSize"/>.</exception>
+    public static IColor[] CreateColorPalette(this IImage image, int paletteSize, Span<long> pixelCounts = default)
+        => image.CreateWuColorPalette(paletteSize, pixelCounts);
+
+    /// <inheritdoc cref="CreateColorPalette(IImage, int, Span{long})"/>
+    public static T[] CreateColorPalette<T>(this Image<T> image, int paletteSize, Span<long> pixelCounts = default)
+        where T : unmanaged, IColor<T>
+        => image.CreateWuColorPalette(paletteSize, pixelCounts);
+
+    /// <inheritdoc cref="CreateColorPalette(IImage, int, Span{long})"/>
+    public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize, Span<long> pixelCounts = default)
+        where T : unmanaged, IColor<T>
+        => image.CreateWuColorPalette(paletteSize, pixelCounts);
+
+    /// <inheritdoc cref="CreateColorPalette(IImage, int, Span{long})"/>
+    public static T[] CreateColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize, Span<long> pixelCounts = default)
+        where T : unmanaged, IColor<T>
+        => colors.CreateWuColorPalette(paletteSize, pixelCounts);
+
+    private static void ValidatePaletteArguments(int paletteSize, Span<long> pixelCounts)
     {
-        ArgumentNullException.ThrowIfNull(image);
-
-        int dataLength = image.SizeInBytes;
-
-        if (dataLength <= 1024)
-        {
-            Span<byte> buffer = stackalloc byte[dataLength];
-
-            image.CopyTo(buffer);
-            return image.ColorFormat.CreateColorPalette(buffer, paletteSize);
-        }
-        else
-        {
-            byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
-            Span<byte> buffer = array.AsSpan()[..dataLength];
-            try
-            {
-                image.CopyTo(buffer);
-                return image.ColorFormat.CreateColorPalette(buffer, paletteSize);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(array);
-            }
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(paletteSize);
+        if (!pixelCounts.IsEmpty && (pixelCounts.Length < paletteSize)) throw new ArgumentException($"PixelCounts needs room for the whole palette. {pixelCounts.Length} < {paletteSize}", nameof(pixelCounts));
     }
 
-    public static T[] CreateColorPalette<T>(this IImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
+    private static T[] GetDistinctColors<T>(ReadOnlySpan<T> colors, Span<long> pixelCounts)
+        where T : unmanaged, IColor<T>
+        => ToPalette(colors, [], pixelCounts);
+
+    internal static T[] ToPalette<T>(ReadOnlySpan<T> colors, ReadOnlySpan<long> populations, Span<long> pixelCounts)
+        where T : unmanaged, IColor<T>
     {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
+        T[] distinct = new T[colors.Length];
+        long[] distinctPopulations = new long[colors.Length];
+        Dictionary<T, int> indices = new(colors.Length);
 
-        return image.AsRefImage().CreateColorPalette(paletteSize);
-    }
-
-    public static T[] CreateColorPalette<T>(this RefImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
-    {
-        int dataLength = image.Width * image.Height;
-        int sizeInBytes = dataLength * T.ColorFormat.BytesPerPixel;
-
-        if (sizeInBytes <= 1024)
+        int count = 0;
+        for (int i = 0; i < colors.Length; i++)
         {
-            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
-
-            image.CopyTo(buffer);
-            return CreateColorPalette(buffer, paletteSize);
-        }
-        else
-        {
-            T[] array = ArrayPool<T>.Shared.Rent(dataLength);
-            Span<T> buffer = array.AsSpan()[..(dataLength)];
-            try
+            ref int index = ref CollectionsMarshal.GetValueRefOrAddDefault(indices, colors[i], out bool exists);
+            if (!exists)
             {
-                image.CopyTo(buffer);
-                return CreateColorPalette(buffer, paletteSize);
+                index = count++;
+                distinct[index] = colors[i];
             }
-            finally
-            {
-                ArrayPool<T>.Shared.Return(array);
-            }
-        }
-    }
 
-    public static T[] CreateColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
-        where T : unmanaged, IColor
-    {
-        int sizeInBytes = colors.Length * T.ColorFormat.BytesPerPixel;
-
-        if (sizeInBytes <= 1024)
-        {
-            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
-
-            colors.CopyTo(buffer);
-            return CreateColorPalette(buffer, paletteSize);
-        }
-        else
-        {
-            T[] buffer = ArrayPool<T>.Shared.Rent(colors.Length);
-            try
-            {
-                Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
-                colors.CopyTo(colorBuffer);
-
-                return CreateColorPalette(colorBuffer, paletteSize);
-            }
-            finally
-            {
-                ArrayPool<T>.Shared.Return(buffer);
-            }
-        }
-    }
-
-    public static T[] CreateColorPalette<T>(this Span<T> colors, int paletteSize)
-        where T : unmanaged, IColor
-    {
-        throw new NotImplementedException("This requires some more research and will be implemented later");
-
-        //TODO DarthAffe 21.07.2024: Run some tests how the result to performance ratio is with the options described at http://blog.pkh.me/p/39-improving-color-quantization-heuristics.html
-
-        //if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
-        //if (paletteSize == 0) return [];
-
-        //Span<ColorCube<T>> cubes = new ColorCube<T>[paletteSize];
-        //cubes[0] = new ColorCube<T>(0, colors.Length, SortTarget.None);
-
-        //for (int i = 0; i < paletteSize; i++)
-        //{
-        //    int splitCubeIndex = 0;
-
-        //    for (int j = 0; j < paletteSize; j++)
-        //    {
-
-        //    }
-
-        //    cubes[splitCubeIndex].Split(colors, out ColorCube<T> a, out ColorCube<T> b);
-        //    cubes[splitCubeIndex] = a;
-        //    cubes[i + 1] = b;
-        //}
-
-        //T[] result = new T[cubes.Length];
-        //for (int i = 0; i < cubes.Length; i++)
-        //    result[i] = Average(cubes[i].Slice(colors));
-
-        //return result;
-    }
-
-    public static IColor[] CreateSimpleColorPalette(this IImage image, int paletteSize)
-    {
-        ArgumentNullException.ThrowIfNull(image);
-
-        int dataLength = image.SizeInBytes;
-
-        if (dataLength <= 1024)
-        {
-            Span<byte> buffer = stackalloc byte[dataLength];
-
-            image.CopyTo(buffer);
-            return image.ColorFormat.CreateSimpleColorPalette(buffer, paletteSize);
-        }
-        else
-        {
-            byte[] array = ArrayPool<byte>.Shared.Rent(dataLength);
-            Span<byte> buffer = array.AsSpan()[..dataLength];
-            try
-            {
-                image.CopyTo(buffer);
-                return image.ColorFormat.CreateSimpleColorPalette(buffer, paletteSize);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(array);
-            }
-        }
-    }
-
-    public static T[] CreateSimpleColorPalette<T>(this IImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
-    {
-        ArgumentNullException.ThrowIfNull(image, nameof(image));
-
-        return image.AsRefImage().CreateSimpleColorPalette(paletteSize);
-    }
-
-    public static T[] CreateSimpleColorPalette<T>(this RefImage<T> image, int paletteSize)
-        where T : unmanaged, IColor
-    {
-        int dataLength = image.Width * image.Height;
-        int sizeInBytes = dataLength * T.ColorFormat.BytesPerPixel;
-
-        if (sizeInBytes <= 1024)
-        {
-            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
-
-            image.CopyTo(buffer);
-            return CreateSimpleColorPalette(buffer, paletteSize);
-        }
-        else
-        {
-            T[] array = ArrayPool<T>.Shared.Rent(dataLength);
-            Span<T> buffer = array.AsSpan()[..(dataLength)];
-            try
-            {
-                image.CopyTo(buffer);
-                return CreateSimpleColorPalette(buffer, paletteSize);
-            }
-            finally
-            {
-                ArrayPool<T>.Shared.Return(array);
-            }
-        }
-    }
-
-    public static T[] CreateSimpleColorPalette<T>(this ReadOnlySpan<T> colors, int paletteSize)
-        where T : unmanaged, IColor
-    {
-        int sizeInBytes = colors.Length * T.ColorFormat.BytesPerPixel;
-
-        if (sizeInBytes <= 1024)
-        {
-            Span<T> buffer = MemoryMarshal.Cast<byte, T>(stackalloc byte[sizeInBytes]);
-
-            colors.CopyTo(buffer);
-            return CreateSimpleColorPalette(buffer, paletteSize);
-        }
-        else
-        {
-            T[] buffer = ArrayPool<T>.Shared.Rent(colors.Length);
-            try
-            {
-                Span<T> colorBuffer = buffer.AsSpan()[..colors.Length];
-                colors.CopyTo(colorBuffer);
-
-                return CreateSimpleColorPalette(colorBuffer, paletteSize);
-            }
-            finally
-            {
-                ArrayPool<T>.Shared.Return(buffer);
-            }
-        }
-    }
-
-    public static unsafe T[] CreateSimpleColorPalette<T>(this Span<T> colors, int paletteSize)
-        where T : unmanaged, IColor
-    {
-        if (paletteSize < 0) throw new ArgumentException("PaletteSize can't be < 0", nameof(paletteSize));
-        if (paletteSize == 0) return [];
-
-        if (!BitOperations.IsPow2(paletteSize)) throw new ArgumentException("PaletteSize has to be a power of 2", nameof(paletteSize));
-
-        int splits = BitOperations.Log2((uint)paletteSize);
-
-        ColorCube<T>[] cubes = new ColorCube<T>[1 << splits];
-        cubes[0] = new ColorCube<T>(0, colors.Length, SortTarget.None);
-
-        int colorsLength = colors.Length;
-        fixed (T* colorsPtr = colors)
-        {
-            //HACK DarthAffe 21.07.2024: This is dangerous and needs to be treated carefully! It's used in the anonymous method used to run the splits in parallel and absolutely can't be used outside this fixed block!
-            T* unsafeColorsPtr = colorsPtr;
-
-            for (int i = 0; i < splits; i++)
-            {
-                int currentCubeCount = 1 << i;
-
-                Parallel.For(0, currentCubeCount, PARALLEL_OPTIONS, CreateCubes);
-
-                void CreateCubes(int index)
-                {
-                    cubes[index].Split(new Span<T>(unsafeColorsPtr, colorsLength), out ColorCube<T> a, out ColorCube<T> b);
-                    cubes[index] = a;
-                    cubes[currentCubeCount + index] = b;
-                }
-            }
+            distinctPopulations[index] += populations.IsEmpty ? 1 : populations[i];
         }
 
-        T[] result = new T[cubes.Length];
-        for (int i = 0; i < cubes.Length; i++)
-            result[i] = Average(cubes[i].Slice(colors));
+        int[] order = new int[count];
+        for (int i = 0; i < order.Length; i++)
+            order[i] = i;
 
-        return result;
+        Array.Sort(order, (a, b) =>
+        {
+            int result = distinctPopulations[b].CompareTo(distinctPopulations[a]);
+            return result != 0 ? result : a.CompareTo(b);
+        });
+
+        T[] palette = new T[count];
+        for (int i = 0; i < palette.Length; i++)
+            palette[i] = distinct[order[i]];
+
+        if (!pixelCounts.IsEmpty)
+            for (int i = 0; i < palette.Length; i++)
+                pixelCounts[i] = distinctPopulations[order[i]];
+
+        return palette;
     }
 
     #endregion
