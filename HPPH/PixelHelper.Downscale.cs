@@ -786,7 +786,16 @@ public static partial class PixelHelper
         ref byte columns = ref Unsafe.As<ushort, byte>(ref MemoryMarshal.GetReference(columnSums));
         ref byte blocks = ref Unsafe.As<ushort, byte>(ref MemoryMarshal.GetReference(blockSums));
 
-        for (int pixel = 0; pixel < pixels; pixel++)
+        int pixel = 0;
+        if ((bpp == 4) && Vector128.IsHardwareAccelerated)
+        {
+            if (blockWidth == 2)
+                pixel = SumPairsOf4Bytes(ref Unsafe.As<byte, ulong>(ref columns), ref Unsafe.As<byte, ulong>(ref blocks), pixels);
+            else if (blockWidth == 4)
+                pixel = SumQuadsOf4Bytes(ref Unsafe.As<byte, ulong>(ref columns), ref Unsafe.As<byte, ulong>(ref blocks), pixels);
+        }
+
+        for (; pixel < pixels; pixel++)
         {
             ref byte block = ref Unsafe.Add(ref columns, pixel * blockWidth * pixelBytes);
 
@@ -796,6 +805,35 @@ public static partial class PixelHelper
 
             Unsafe.WriteUnaligned(ref Unsafe.Add(ref blocks, pixel * pixelBytes), sum);
         }
+    }
+
+    // Each ulong holds the 4 channel sums of a pixel. The low and high halves of two vectors are joined, so that one add sums up 2 blocks.
+    private static int SumPairsOf4Bytes(ref ulong columns, ref ulong blocks, int pixels)
+    {
+        int pixel = 0;
+        for (; pixel <= (pixels - 2); pixel += 2)
+        {
+            Vector128<ulong> first = Vector128.LoadUnsafe(ref columns, (nuint)pixel * 2);
+            Vector128<ulong> second = Vector128.LoadUnsafe(ref columns, ((nuint)pixel * 2) + 2);
+
+            (JoinLower(first, second).AsUInt16() + JoinUpper(first, second).AsUInt16()).AsUInt64().StoreUnsafe(ref blocks, (nuint)pixel);
+        }
+
+        return pixel;
+    }
+
+    private static int SumQuadsOf4Bytes(ref ulong columns, ref ulong blocks, int pixels)
+    {
+        int pixel = 0;
+        for (; pixel <= (pixels - 2); pixel += 2)
+        {
+            Vector128<ulong> first = (Vector128.LoadUnsafe(ref columns, (nuint)pixel * 4).AsUInt16() + Vector128.LoadUnsafe(ref columns, ((nuint)pixel * 4) + 2).AsUInt16()).AsUInt64();
+            Vector128<ulong> second = (Vector128.LoadUnsafe(ref columns, ((nuint)pixel * 4) + 4).AsUInt16() + Vector128.LoadUnsafe(ref columns, ((nuint)pixel * 4) + 6).AsUInt16()).AsUInt64();
+
+            (JoinLower(first, second).AsUInt16() + JoinUpper(first, second).AsUInt16()).AsUInt64().StoreUnsafe(ref blocks, (nuint)pixel);
+        }
+
+        return pixel;
     }
 
     private static void SumAndDivideBlocks(Span<ushort> columnSums, int bpp, int blockWidth, int pixels, int count, ref byte target)

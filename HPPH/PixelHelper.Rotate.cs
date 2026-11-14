@@ -178,6 +178,7 @@ public static partial class PixelHelper
         {
             4 when Vector512.IsHardwareAccelerated && Avx512F.IsSupported => 16,
             4 or 3 when Vector256.IsHardwareAccelerated && Avx2.IsSupported => 8,
+            4 when Vector128.IsHardwareAccelerated => 8,
             _ => 0
         };
 
@@ -217,7 +218,7 @@ public static partial class PixelHelper
                         aheadX = x + block;
                     }
 
-                    if ((ahead < bandEnd) && (aheadX < blocksWidth))
+                    if (Sse.IsSupported && (ahead < bandEnd) && (aheadX < blocksWidth))
                     {
                         int aheadY = clockwise ? ahead : blocksHeight - block - ahead;
                         PrefetchRows(ref Unsafe.Add(ref tar, (GetBlockTargetRow(aheadY, block, clockwise) * targetStride) + ((nint)aheadX * bpp)), targetStep, block);
@@ -227,8 +228,10 @@ public static partial class PixelHelper
                         Transpose8x8x3Bytes(ref s, sourceStep, ref t, targetStep);
                     else if (block == 16)
                         Transpose16x16x4Bytes(ref s, sourceStep, ref t, targetStep);
-                    else
+                    else if (Vector256.IsHardwareAccelerated && Avx2.IsSupported)
                         Transpose8x8x4Bytes(ref s, sourceStep, ref t, targetStep);
+                    else
+                        Transpose8x8x4BytesPortable(ref s, sourceStep, ref t, targetStep);
                 }
         }
     }
@@ -301,6 +304,36 @@ public static partial class PixelHelper
         r5.StoreUnsafe(ref Unsafe.As<byte, uint>(ref Unsafe.Add(ref target, 5 * targetStep)));
         r6.StoreUnsafe(ref Unsafe.As<byte, uint>(ref Unsafe.Add(ref target, 6 * targetStep)));
         r7.StoreUnsafe(ref Unsafe.As<byte, uint>(ref Unsafe.Add(ref target, 7 * targetStep)));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void Transpose8x8x4BytesPortable(ref byte source, nint sourceStep, ref byte target, nint targetStep)
+    {
+        Transpose4x4x4Bytes(ref source, sourceStep, ref target, targetStep);
+        Transpose4x4x4Bytes(ref Unsafe.Add(ref source, 16), sourceStep, ref Unsafe.Add(ref target, 4 * targetStep), targetStep);
+        Transpose4x4x4Bytes(ref Unsafe.Add(ref source, 4 * sourceStep), sourceStep, ref Unsafe.Add(ref target, 16), targetStep);
+        Transpose4x4x4Bytes(ref Unsafe.Add(ref source, (4 * sourceStep) + 16), sourceStep, ref Unsafe.Add(ref target, (4 * targetStep) + 16), targetStep);
+    }
+
+    // Joining the halves of two rows gives (a0, a1, b0, b1), the shuffle (a0, b0, a1, b1), and joining the halves of those again the columns.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void Transpose4x4x4Bytes(ref byte source, nint sourceStep, ref byte target, nint targetStep)
+    {
+        Vector128<ulong> r0 = Vector128.LoadUnsafe(ref Unsafe.As<byte, ulong>(ref source));
+        Vector128<ulong> r1 = Vector128.LoadUnsafe(ref Unsafe.As<byte, ulong>(ref Unsafe.Add(ref source, sourceStep)));
+        Vector128<ulong> r2 = Vector128.LoadUnsafe(ref Unsafe.As<byte, ulong>(ref Unsafe.Add(ref source, 2 * sourceStep)));
+        Vector128<ulong> r3 = Vector128.LoadUnsafe(ref Unsafe.As<byte, ulong>(ref Unsafe.Add(ref source, 3 * sourceStep)));
+
+        Vector128<uint> order = Vector128.Create(0u, 2, 1, 3);
+        Vector128<ulong> t0 = Vector128.Shuffle(JoinLower(r0, r1).AsUInt32(), order).AsUInt64();
+        Vector128<ulong> t1 = Vector128.Shuffle(JoinUpper(r0, r1).AsUInt32(), order).AsUInt64();
+        Vector128<ulong> t2 = Vector128.Shuffle(JoinLower(r2, r3).AsUInt32(), order).AsUInt64();
+        Vector128<ulong> t3 = Vector128.Shuffle(JoinUpper(r2, r3).AsUInt32(), order).AsUInt64();
+
+        JoinLower(t0, t2).StoreUnsafe(ref Unsafe.As<byte, ulong>(ref target));
+        JoinUpper(t0, t2).StoreUnsafe(ref Unsafe.As<byte, ulong>(ref Unsafe.Add(ref target, targetStep)));
+        JoinLower(t1, t3).StoreUnsafe(ref Unsafe.As<byte, ulong>(ref Unsafe.Add(ref target, 2 * targetStep)));
+        JoinUpper(t1, t3).StoreUnsafe(ref Unsafe.As<byte, ulong>(ref Unsafe.Add(ref target, 3 * targetStep)));
     }
 
     // Like Transpose8x8x4Bytes, but rows are 24 bytes: each is read with two overlapping 16-byte loads and widened to 4 bytes per pixel,
