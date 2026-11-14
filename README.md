@@ -128,7 +128,7 @@ byte maxRed2 = image.Execute(new MaxRed());         // shorter, but boxes struct
 
 All operations are extension methods in `PixelHelper`.   
 Sum, average, min-max and palettes work on `Image<T>`, `RefImage<T>`, `IImage` and `ReadOnlySpan<T>`. Sorting and conversion work on spans.   
-Flip and rotate work on `Image<T>`, `RefImage<T>` and `IImage`. They return a new image or write into a buffer you provide.
+Flip, rotate and downscale work on `Image<T>`, `RefImage<T>` and `IImage`. They return a new image or write into a buffer you provide.
 
 ### Sum
 
@@ -225,6 +225,22 @@ Image<ColorRGB> rotated = image.Rotate(ImageRotation.Rotate90); // image.Height 
 
 image.Rotate(ImageRotation.Rotate270, buffer);                  // Span<ColorRGB>, rows without padding
 image.Rotate(ImageRotation.Rotate270, bytes, image.Height * 3); // the stride is for the rotated rows
+```
+
+The destination can't overlap the memory of the image.
+
+### Downscale
+
+Shrinks an image by an integer factor: each pixel of the result is the average of a block of `factor` x `factor` pixels, rounded like `Average`.   
+Columns and rows at the edges that don't fill a whole block are left out. The result is at least 1 x 1 pixel.
+
+```csharp
+Image<ColorBGRA> half = image.Downscale(2);           // image.Width / 2 x image.Height / 2
+Image<ColorBGRA> wide = image.Downscale(4, 2);        // factors for x and y
+ColorBGRA average = image.Downscale(int.MaxValue)[0, 0]; // same as image.Average()
+
+(int width, int height) = PixelHelper.GetDownscaledSize(image.Width, image.Height, 2);
+image.Downscale(2, bytes, width * 4);
 ```
 
 The destination can't overlap the memory of the image.

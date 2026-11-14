@@ -178,6 +178,46 @@ public class GuardPageTests
     }
 
     [TestMethod]
+    public void DownscaleStaysInBounds()
+    {
+        DownscaleStaysInBounds<ColorRGB>();
+        DownscaleStaysInBounds<ColorBGRA>();
+    }
+
+    private static void DownscaleStaysInBounds<T>()
+        where T : unmanaged, IColor<T>
+    {
+        int bpp = T.ColorFormat.BytesPerPixel;
+
+        // Blocks are read in lanes of 16 bytes, rows of 8 or 16 output pixels at a time, and pixels left at the end of a block with lanes that end at the block.
+        // The other paths add up and divide rows in vectors of 16 and 32 bytes and read and write 3 byte pixels 8 bytes at a time.
+        foreach (int width in (int[])[1, 2, 3, 5, 8, 11, 15, 16, 17, 22, 31, 32, 33, 64, 65, 129, 143])
+            foreach (int height in (int[])[1, 2, 3, 5, 9])
+                foreach ((int factorX, int factorY) in (ReadOnlySpan<(int, int)>)[(1, 1), (2, 2), (3, 3), (4, 4), (2, 1), (1, 2), (5, 3), (6, 2), (7, 1), (9, 2), (11, 1), (13, 3), (20, 2)])
+                    foreach (int padding in (int[])[0, 5])
+                        foreach (bool sourceAtEnd in (bool[])[true, false])
+                        {
+                            int stride = (width * bpp) + padding;
+                            int length = ((height - 1) * stride) + (width * bpp);
+
+                            using GuardedBuffer source = sourceAtEnd ? GuardedBuffer.AtEnd(length) : GuardedBuffer.AtStart(length);
+                            source.Fill(width * height);
+
+                            RefImage<T> image = RefImage<T>.Wrap(source.Bytes, width, height, stride);
+                            Image<T> expected = ReferencePixelHelper.Downscale(image, factorX, factorY);
+
+                            int targetStride = (expected.Width * bpp) + padding;
+                            int targetLength = ((expected.Height - 1) * targetStride) + (expected.Width * bpp);
+                            using GuardedBuffer destination = sourceAtEnd ? GuardedBuffer.AtStart(targetLength) : GuardedBuffer.AtEnd(targetLength);
+
+                            image.Downscale(factorX, factorY, destination.Bytes, targetStride);
+
+                            Assert.IsTrue(expected.ContentEquals(RefImage<T>.Wrap(destination.Bytes, expected.Width, expected.Height, targetStride)),
+                                          $"{T.ColorFormat.Name} {width}x{height}, stride {stride}, {factorX}x{factorY}, source at {(sourceAtEnd ? "end" : "start")}");
+                        }
+    }
+
+    [TestMethod]
     public void ConvertInPlaceStaysInBounds()
     {
         ConvertInPlaceStaysInBounds<ColorRGB, ColorBGR>();

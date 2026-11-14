@@ -64,6 +64,34 @@ public class TransformFuzzTests
         }
     }
 
+    [TestMethod]
+    public void DownscaleOfRandomImages()
+    {
+        Random random = new(4713);
+
+        CheckDownscale<ColorRGB>(random);
+        CheckDownscale<ColorBGR>(random);
+        CheckDownscale<ColorRGBA>(random);
+        CheckDownscale<ColorARGB>(random);
+    }
+
+    private static void CheckDownscale<T>(Random random)
+        where T : unmanaged, IColor<T>
+    {
+        for (int iteration = 0; iteration < ITERATIONS; iteration++)
+        {
+            Image<T> image = CreateRandomImage<T>(random, out string name);
+            int factorX = random.Next(0, 5) == 0 ? random.Next(1, 301) : random.Next(1, 10);
+            int factorY = random.Next(0, 3) == 0 ? factorX : (random.Next(0, 5) == 0 ? random.Next(1, 301) : random.Next(1, 10));
+
+            Image<T> expected = ReferencePixelHelper.Downscale(image.AsRefImage(), factorX, factorY);
+            byte[] destination = CreateRandomDestination<T>(random, expected.Width, expected.Height, out int stride);
+            image.Downscale(factorX, factorY, destination, stride);
+
+            TestImages.AssertStrided(expected, destination, stride, $"{name}, {factorX}x{factorY}, destination stride {stride}");
+        }
+    }
+
     private static Image<T> CreateRandomImage<T>(Random random, out string name)
         where T : unmanaged, IColor<T>
     {
